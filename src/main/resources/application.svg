@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="166px" height="180px" viewBox="0 0 166 180" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.2 (67145) - http://www.bohemiancoding.com/sketch -->
+    <title>URLChecker_icon</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group" transform="translate(0.000000, -3.000000)">
+            <path d="M46.523968,36.8936221 C40.523968,33.5602888 34.523968,30.2269554 28.523968,26.8936221" id="Path" stroke="#C73838" stroke-width="4" stroke-linecap="round" transform="translate(37.523968, 31.893622) rotate(64.000000) translate(-37.523968, -31.893622) "></path>
+            <path d="M22.4714593,62.5412473 C16.4714593,59.207914 10.4714593,55.8745807 4.47145934,52.5412473" id="Path" stroke="#C73838" stroke-width="4" stroke-linecap="round" transform="translate(13.471459, 57.541247) scale(1, -1) rotate(-26.000000) translate(-13.471459, -57.541247) "></path>
+            <path d="M28.5764912,47.5764912 C25.9098246,44.9098246 23.2431579,42.2431579 20.5764912,39.5764912" id="Path" stroke="#C73838" stroke-width="4" stroke-linecap="round" transform="translate(24.576491, 43.576491) rotate(9.000000) translate(-24.576491, -43.576491) "></path>
+            <path d="M72.5090752,106 L5,106 C1.6862915,106 -1,103.313708 -1,100 C-1,96.6862915 1.6862915,94 5,94 L68.6504867,94 L65.2139195,99.4206112 L75,101.4557 L72.5090752,106 Z" id="Combined-Shape" fill="#333333" transform="translate(37.000000, 100.000000) rotate(-90.000000) translate(-37.000000, -100.000000) "></path>
+            <rect id="Rectangle" stroke="#333333" stroke-width="12" transform="translate(122.550864, 37.124317) rotate(-286.000000) translate(-122.550864, -37.124317) " x="103.550864" y="-4.3756832" width="38" height="83" rx="8"></rect>
+            <path d="M115.580656,54.6306787 L49.2580957,54.6306787 C45.9443872,54.6306787 43.2580957,51.9443872 43.2580957,48.6306787 C43.2580957,45.3169702 45.9443872,42.6306787 49.2580957,42.6306787 L111.4903,42.6306787 L109.342344,45.9744144 L119.258096,48.0095032 L115.580656,54.6306787 Z" id="Combined-Shape" fill="#333333" transform="translate(81.258096, 48.630679) rotate(-195.000000) translate(-81.258096, -48.630679) "></path>
+            <rect id="Rectangle" stroke="#333333" stroke-width="12" transform="translate(37.000000, 138.500000) rotate(-360.000000) translate(-37.000000, -138.500000) " x="18" y="97" width="38" height="83" rx="8"></rect>
+        </g>
+    </g>
+</svg>

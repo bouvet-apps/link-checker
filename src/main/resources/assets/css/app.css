@@ -1,0 +1,141 @@
+.link-checker.container {
+  text-align: center;
+  background: white;
+  box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
+}
+
+.text-linkchecker h2 {
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 10px;
+  background: white;
+}
+
+.text-linkchecker p {
+  max-width: 270px;
+  margin: auto;
+}
+
+
+.broke-links-error h3{
+  background-color: #d40000;
+  font-size: 1.1rem;
+  color: #fff;
+  padding: 0 10px;
+}
+
+.broke-links-error h4{
+  font-weight: 900;
+  margin-bottom: 0.3rem;
+  font-size: 1rem;
+}
+
+.broke-links-error__body {
+  padding: 10px;
+}
+
+
+p.title-linkchecker {
+  padding: 10px;
+  font-size: 15px
+}
+
+.show-status {
+  color: #d40000;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.2rem;
+}
+
+.show-status a {
+  color: #d40000;
+}
+
+#btn-link {
+  margin: 1rem 1rem;
+  color: #fff;
+  background-color: #2663b8;
+  border: none;
+  padding: 6px 20px;
+  border-radius: 22px;
+  font-size: 15px;
+  cursor: pointer;
+}
+#btn-download {
+  margin-bottom: 1rem;
+  border:none;
+  color: #fdfdfd;
+  background-color: rgb(24, 135, 50);
+  padding: 6px 20px;
+  border-radius: 22px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+#btn-stop {
+  margin: 1rem 0;
+  color: #fff;
+  background-color: #d40000;
+  border: none;
+  padding: 6px 20px;
+  border-radius: 22px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.progress-container {
+  height:100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position:relative;
+}
+.wrapper {
+  width: 100px; /* Set the size of the progress bar */
+  height: 100px;
+  position: absolute; /* Enable clipping */
+  left: 50%;
+  transform: translateX(-50%);
+
+  clip: rect(0px, 100px, 100px, 50px); /* Hide half of the progress bar */
+}
+.circle-background {
+  width: 80px;
+  height: 80px;
+  border: 10px solid #BFFFCA;
+  border-radius: 50px;
+  position: absolute;
+}
+/* Set the sizes of the elements that make up the progress bar */
+.circle {
+  width: 80px;
+  height: 80px;
+  border: 10px solid #16C020;
+  border-radius: 50px;
+  position: absolute;
+  transition: transform 0.2s, clip 0.2s cubic-bezier(.98,-1.1,1,-1.07);
+  clip: rect(0px, 50px, 100px, 0px);
+}
+
+.count{
+  font-size: 15px;
+}
+
+
+#link-result .widget-item-view.properties-widget-item-view {
+  padding: 0 !important;
+}
+
+.widget-view.internal-widget.success {
+  margin: 10px;
+  text-align: center;
+  background: white;
+  box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+}
+
+h5.success-text {
+  color: rgb(24, 135, 50);
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget>
+  <display-name>LinkChecker</display-name>
+  <interfaces>
+    <interface>contentstudio.detailpanel</interface>
+  </interfaces>
+   <allow>
+    <principal>role:system.admin</principal>
+  </allow>
+</widget>

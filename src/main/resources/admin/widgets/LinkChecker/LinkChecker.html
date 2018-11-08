@@ -1,0 +1,176 @@
+  <body>
+    <div style="min-height: 600px">
+      <link rel="stylesheet" href="../../assets/css/app.css"
+        data-th-href="${portal.assetUrl({'_path=css/app.css'})}"
+        type="text/css" media="all"/>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+      <style data-th-if="${css}" data-th-text="${css}"></style>
+      <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+      <div class="link-checker container">
+        <div class="text-linkchecker">
+          <h2>LinkChecker</h2>
+          <p>Check this content and its sub-content for broken links, both internal and external</p>
+        </div>
+        <form id="form-link-checker" data-th-if="${serviceUrl}" method="post" data-th-action="${serviceUrl}">
+            <input type="hidden" data-th-if="${key}" data-th-value="${key}" id="contentId"/>
+        </form>
+        <button id="btn-link" onclick="startCheck()" value="Check">Check</button>
+        <button id="btn-stop" style="display: none;" onclick="window.stopCheck()" value="STOP">STOP</button>
+        <button id="btn-download" onclick="window.downloadCSV()" style="display: none;" value="CSV"> <i class="fas fa-download"></i> Download Excel</button>
+        <div class="progress" style="display: none; width: 100%; position: relative;">
+          <!-- <div class="progress-bar-websocket">&nbsp;</div> -->
+          <div class="progress-container" style="height:100px">
+            <div class="count">Loading...</div>
+            <div class="circle-background"></div>
+            <div class="wrapper">
+              <div class="circle left"></div>
+              <div class="circle right"></div>
+            </div>
+          </div>
+          <div class="progress-status"></div>
+        </div>
+        <br>
+      </div>
+      <div id="link-result"></div>
+    </div>
+    <script data-th-inline="text">
+
+      /**
+       * Each function needs to select HTML content anew,
+       * in case the html has been rerended by switching content in content studio.
+       */
+      function getElements(selectors) {
+        var elements = {};
+        selectors.forEach(function(selector) {
+          elements[selector] = document.querySelector(selector);
+        });
+        return elements;
+      }
+
+
+      function createReport (results) {
+        window.downloadCSV = function () {
+
+          var ws = XLSX.utils.json_to_sheet([],
+          {header: ["displayName", "path", "broken link", "status"], skipHeader: false});
+          /* Write data starting at A2 */
+          results.forEach(function(result, index) {
+            var links = result.brokenLinks.map(function(link) {
+              link.link = link.link.indexOf("http") == -1 && link.link.indexOf("content://") == -1 ? "http://"+link.link : link.link;
+              return {C: link.link, D: link.status};
+            });
+            var data = [{ A: result.displayName, B: result.path, C: {v: links[0].C, l: {Target:links[0].C}}, D: links[0].D }].concat(links.slice(1));
+            XLSX.utils.sheet_add_json(ws, data, {skipHeader: true, origin: index === 0 ? "A2": -1});
+          })
+
+          var date = new Date();
+          var wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "WorksheetName");
+          XLSX.writeFile(wb, "report-linkchecker-"+date.toLocaleDateString() + "-"+date.toLocaleTimeString()+".xlsx", {});
+        }
+        var result = document.getElementById('link-result');
+        var report = "";
+        if (results.length > 0) {
+          document.getElementById('btn-download').style.display = "initial";
+          results.map(function (node) {
+            report += '<div class="widget-view internal-widget"><div class="widget-item-view properties-widget-item-view">';
+            report += '<div class="broke-links-error">';
+            report += "<h3>Found " + node.brokenLinks.length + " invalid link" + (node.brokenLinks.length > 1 ? "s":"") + "</h3>";
+            report += "<div class='broke-links-error__body'><h4>" + node.displayName + "</h4>";
+            report += "<p>" + node.path + "</p>";
+            node.brokenLinks.map(function (link) {
+              report += '<div class="show-status">';
+              report += "<div style='margin-right: 5px;'>&#10007;</div><div style='flex-grow:1;'><a  href=" + link.link + " target='_blank'>" + link.link + "</a>";
+              report += "</div><span style='margin-left: 5px'>" + (link.status == 408 ? "Timeout" : link.status) + "</span></div>"
+            });
+            report += "</div></div></div></div>";
+          });
+        } else {
+          report = '<div class="widget-view internal-widget success"><h5 class="success-text">&#10004; No broken links found!</h5></div>';
+        }
+        result.innerHTML = report;
+      }
+
+      function updateProgress(message) {
+        var key = document.querySelector('#contentId');
+        if (key.value == message.key) {
+          var elements = getElements([".progress", ".progress-status",
+            ".count", ".circle.left",".circle.right",".wrapper", "#btn-stop", "#btn-link"]);
+          elements[".progress"].style.display = "block";
+          var count = message.count;
+          var total = message.total;
+          var angle = parseInt(count / total * 360);
+          if (message.brokenCount) {
+            status.innerHTML = "Found " + message.brokenCount + " broken links";
+          }
+          elements[".count"].innerHTML = count + " / " + total;
+
+          elements[".circle.left"].style.transform  = "rotate("+angle+"deg)";
+          elements[".circle.right"].style.transform  = "rotate("+(angle <= 180 ? angle : 180) +"deg)";
+          if (angle > 175 && angle < 185) {
+            elements[".wrapper"].style  =  "display: inline; clip: rect(auto, auto, auto, auto);";
+          }
+
+          elements["#btn-link"].style.display = 'none';
+          elements["#btn-stop"].style.display = 'inline-block';
+        }
+      }
+
+      function setResult(message) {
+        var key = document.querySelector('#contentId');
+        if (key.value == message.key) {
+          var elements = getElements([".progress", ".progress-status", "#btn-stop", "#btn-link", ".wrapper"]);
+          elements[".progress"].style.display = 'none';
+          elements["#btn-link"].style.display = 'inline-block';
+          elements["#btn-stop"].style.display = 'none';
+          elements[".wrapper"].style.display = "none";
+          elements[".progress-status"].innerHTML = 'Loading...';
+          createReport(message.results)
+        }
+      }
+
+
+      function startCheck() {
+        var form = document.getElementById('form-link-checker');
+        var elements = getElements([".progress", ".progress-status",
+          ".count", ".wrapper", "#btn-stop", "#btn-link"]);
+        elements[".wrapper"].style = "display: inline";
+        elements["#btn-link"].style.display = 'none';
+        elements["#btn-stop"].style.display = 'inline-block';
+        // Show progress
+        elements[".progress"].style.display = 'inline';
+
+        var url = form.action;
+        var ws = new WebSocket(url)
+        ws.onopen = function (event) {
+          console.log('CONNECTED')
+
+          /**
+           * Need to attach function to window object to make it last between rendering of widget window.
+           * Clicking on new content in content studio will rerender the HTML and run the JS again
+           */
+          window.stopCheck = function() {
+            console.log("STOPPING")
+            ws.send("STOP");
+          }
+        }
+        ws.onmessage = function (event) {
+          //console.log('Message received', event.data);
+          // Receive JSON fra string
+          var message = JSON.parse(event.data);
+          if ("count" in message) {
+            updateProgress(message);
+            if (message.count <= message.total) {
+              ws.send("NEXT:"+message.count);
+            }
+          } else if (message.results) {
+            ws.close();
+            setResult(message);
+          }
+        }
+        ws.onerror = function (event) {
+          console.log('ERROR')
+        }
+      };
+    </script>
+  </body>
