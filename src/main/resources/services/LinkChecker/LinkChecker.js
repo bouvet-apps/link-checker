@@ -3,14 +3,15 @@ var contentLib = require("/lib/xp/content");
 var contextLib = require("/lib/xp/context");
 var httpClientLib = require("/lib/http-client");
 var cacheLib = require("/lib/xp/cache");
+var authLib = require("/lib/xp/auth");
 var thymeleaf = require("/lib/xp/thymeleaf");
 var view = resolve("LinkChecker.html");
 var webSocketLib = require("/lib/xp/websocket");
 
 exports.get = function(req) {
   // If web-socket request, then you will need to accept the web-socket.
-  //log.info("LinkeChecker got a request!");
-  //log.info(JSON.stringify(req, null, 2));
+  log.info("LinkeChecker got a request!");
+  log.info(JSON.stringify(req, null, 2));
   return {
     webSocket: {
       subProtocols: ["text"],
@@ -27,26 +28,33 @@ var cache = cacheLib.newCache({
 });
 
 var running = {};
+var PAGINATION_COUNT = 10;
 
 exports.webSocketEvent = function(event) {
   if (event.type == "open") {
-    //log.info("OPEN " + event.session.id);
+    log.info("OPEN " + event.session.id);
+    log.info(JSON.stringify(event, null, 2));
     startChecker(event);
-    //log.info(JSON.stringify(Object.keys(running), null, 2));
+    log.info(JSON.stringify(Object.keys(running), null, 2));
   } else if (event.type == "close") {
     delete running[event.session.id];
-    //log.info("CLOSE " + event.session.id);
+    log.info("CLOSE " + event.session.id);
   } else if (event.type == "error") {
     delete running[event.session.id];
     log.error("ERROR LinkChecker connection:" + event.session.id);
   } else if (event.type == "message") {
-    //log.info("MESSAGE %s", event.message);
+    log.info("MESSAGE %s", event.message);
 
     if (event.message.split(":")[0] == "NEXT") {
       if (running[event.session.id].isRunning == true) {
         next(event, event.message.split(":")[1]);
       } else {
-        webSocketLib.send(event.session.id, JSON.stringify({ results: running[event.session.id].results, key: running[event.session.id].key }));
+        var str = JSON.stringify({
+          results: running[event.session.id].results,
+          key: running[event.session.id].key,
+          brokenCount: running[event.session.id].brokenCount
+        });
+        webSocketLib.send(event.session.id, str);
       }
     }
     // Do something on message
@@ -59,89 +67,103 @@ exports.webSocketEvent = function(event) {
 };
 
 function startChecker(event) {
-  /*log.info("Sending Starting run to user");
+  log.info("Sending Starting run to:");
+  log.info(JSON.stringify(contextLib.get(), null, 2));
+  contextLib.run({ repository: "system-repo", principals: ["role:system.admin"] }, function() {
+    log.info(JSON.stringify(authLib.getUser(), null, 2));
+  });
   log.info("contentId is " + event.data.contentId);
-  log.info("branch is " + event.data.branch);*/
+  log.info("branch is " + event.data.branch);
 
   var key = event.data.contentId;
 
-  var content = contextLib.run({ branch: event.data.branch, principals: ["role:cms.admin"] }, function() {
+  var content = contextLib.run({ branch: event.data.branch, principals: ["role:system.admin"] }, function() {
     return contentLib.get({ key: key, branch: event.data.branch });
   }); //venstre, content type
   if (content) {
-    //log.info("Found content with id " + key);
+    log.info("Found content with id " + key);
 
-    var cacheKey = key;
-    /**
-     * Get the last modified child of the content to use in the cache key.
-     * This will ensure any changes to its children will trigger a new fresh link check.
-     */
-    var lastModifiedChild = contextLib.run({ branch: event.data.branch, principals: ["role:cms.admin"] }, function() {
-      return contentLib.getChildren({ key: key, count: 1, start: 0, sort: "modifiedTime DESC" }).hits;
-    });
-    if (lastModifiedChild[0] && lastModifiedChild[0].modifiedTime > content.modifiedTime) {
-      cacheKey += lastModifiedChild[0].modifiedTime;
-    } else {
-      cacheKey += content.modifiedTime;
-    }
+    var cacheKey = buildCacheKey(event, key, content);
 
     /**
      * We cannot give the cache a single function to populate with,
      * since generating a result happens over time.
      * Thus, we give it a false value and at the end of the link checks,
      * when we have a result, we put that in.
-     //  */
-    var results = cache.get(cacheKey, function() {
+     */
+    var cached = cache.get(cacheKey, function() {
       return false;
     });
-    if (results) {
-      webSocketLib.send(event.session.id, JSON.stringify({ results: results, key: key }));
+    if (cached) {
+      webSocketLib.send(event.session.id, JSON.stringify({ results: cached.results, brokenCount: cached.brokenCount, key: key }));
       return;
     }
 
-    var nodes = getNodes(content, event);
-    /**
-     * Pressing Check button on the widget starts a new websocket with its own session id.
-     */
+    var nodes = { count: 0, total: 0, hits: [] };
+    if (event.session.params.checkChildren == "true") {
+      nodes = getNodes(content, event, 0);
+    }
+
     running[event.session.id] = {
       key: key,
+      content: content,
       cacheKey: cacheKey,
-      count: 0,
+      index: 0,
       isRunning: true,
       nodes: nodes,
       results: [],
       brokenCount: 0
     };
-    webSocketLib.send(event.session.id, JSON.stringify({ count: 0, total: nodes.length, key: key }));
+
+    // Check selected content first outside the "loop" as to not mess with starts and counts.
+    webSocketLib.send(event.session.id, JSON.stringify({ total: nodes.total, key: key, mainContent: true }));
+    checkNode(event, content);
+
+    webSocketLib.send(event.session.id, JSON.stringify({ index: 0, count: nodes.count, total: nodes.total, key: key }));
   }
 }
 
-function next(event, start) {
+function next(event, index) {
   var nodes = running[event.session.id].nodes;
-  var start = parseInt(start);
-  if (start >= nodes.length) {
+  var index = parseInt(index);
+  if (index >= nodes.total) {
     /**
      * Need to put finished result into cache.
      * If the code has reached this point, we know that the cache contains no results
      */
     cache.remove(running[event.session.id].cacheKey);
     var results = cache.get(running[event.session.id].cacheKey, function() {
-      return running[event.session.id].results;
+      return { results: running[event.session.id].results, brokenCount: running[event.session.id].brokenCount };
     });
-
-    webSocketLib.send(event.session.id, JSON.stringify({ results: running[event.session.id].results, key: running[event.session.id].key }));
+    var str = JSON.stringify({
+      results: running[event.session.id].results,
+      key: running[event.session.id].key,
+      brokenCount: running[event.session.id].brokenCount
+    });
+    webSocketLib.send(event.session.id, str);
     return;
+  } else if (index >= nodes.start + nodes.count) {
+    var nodes = getNodes(running[event.session.id].content, event, index);
+    running[event.session.id].nodes = nodes;
   }
+  log.info("INDEX:" + index + "  START: " + nodes.start + "  COUNT: " + nodes.count + "  TOTAL: " + nodes.total);
 
-  checkNode(event, start);
+  var node = nodes.hits[index % PAGINATION_COUNT];
+
+  log.info((index % PAGINATION_COUNT) + " : " + nodes.hits.length);
+  checkNode(event, node);
+  running[event.session.id].index++;
+  var str = JSON.stringify({
+    index: index + 1,
+    count: nodes.count,
+    total: nodes.total,
+    key: running[event.session.id].key,
+    brokenCount: running[event.session.id].brokenCount
+  });
+  webSocketLib.send(event.session.id, str);
 }
 
-function checkNode(event, start) {
-  var nodes = running[event.session.id].nodes;
-  var start = parseInt(start);
-  var node = nodes[start];
-  //log.info(start + 1 + "/" + nodes.length);
-  var results = [];
+function checkNode(event, node) {
   var brokenLinks = [];
 
   var urls = getLinks(JSON.stringify(node));
@@ -161,35 +183,46 @@ function checkNode(event, start) {
     }
   });
   if (brokenLinks.length > 0) {
-    results.push({ displayName: node.displayName, path: node._path, brokenLinks: brokenLinks });
-    running[event.session.id].results = running[event.session.id].results.concat(results);
+    var data = { displayName: node.displayName, path: node._path, brokenLinks: brokenLinks };
+    running[event.session.id].results.push(data);
   }
-
-  running[event.session.id].count++;
-
-  var str = JSON.stringify({
-    count: start + 1,
-    total: nodes.length,
-    key: running[event.session.id].key,
-    brokenCount: running[event.session.id].brokenCount
-  });
-  webSocketLib.send(event.session.id, str);
 }
 
-function getNodes(content, event) {
-  /*log.info("Display Name = " + content.displayName);
-  log.info("Path = " + content._path);*/
-  var nodes = [content];
-  var hits = contextLib.run({ branch: event.data.branch, principals: ["role:cms.admin"] }, function() {
+function buildCacheKey(event, key, content) {
+  /**
+   * Get the last modified child of the content to use in the cache key.
+   * This will ensure any changes to its children will trigger a new fresh link check.
+   */
+  var cacheKey = key;
+  var lastModifiedChild = contextLib.run({ branch: event.data.branch, principals: ["role:system.admin"] }, function() {
+    return contentLib.getChildren({ key: key, count: 1, start: 0, sort: "modifiedTime DESC" }).hits;
+  });
+  if (lastModifiedChild[0] && lastModifiedChild[0].modifiedTime > content.modifiedTime) {
+    cacheKey += lastModifiedChild[0].modifiedTime;
+  } else {
+    cacheKey += content.modifiedTime;
+  }
+  if (event.session.params.checkChildren == "true") {
+    cacheKey += "checkChildren";
+  }
+  return cacheKey;
+}
+
+function getNodes(content, event, start) {
+  log.info("Display Name = " + content.displayName);
+  log.info("Path = " + content._path);
+
+  var results = contextLib.run({ branch: event.data.branch, principals: ["role:system.admin"] }, function() {
     return contentLib.query({
       query: "_path LIKE '/content" + content._path + "/*'",
       branch: event.data.branch,
-      start: 0,
-      count: 10000
-    }).hits;
+      start: start,
+      count: PAGINATION_COUNT
+    });
   });
-  nodes = nodes.concat(hits);
-  return nodes;
+  results.start = start;
+
+  return results;
 }
 
 function getLinks(text) {
@@ -203,7 +236,7 @@ function getLinks(text) {
 }
 
 function checkExternalUrl(url) {
-  //log.info(url);
+  log.info(url);
   try {
     if (url.indexOf("http://") == -1 && url.indexOf("https://") == -1) {
       url = "http://" + url;
@@ -228,13 +261,13 @@ function checkExternalUrl(url) {
     } else if (error.toString().match(/javax\.net\.ssl\.SSLPeerUnverifiedException/)) {
       return 526;
     }
-    //log.info(error);
+    log.info(error);
     return 500;
   }
 }
 
 function checkInternalLink(link, branch) {
-  var result = contextLib.run({ branch: branch, principals: ["role:cms.admin"] }, function() {
+  var result = contextLib.run({ branch: branch, principals: ["role:system.admin"] }, function() {
     return contentLib.get({
       key: link.split("//")[1]
     });
