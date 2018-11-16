@@ -1,70 +1,37 @@
-.link-checker.container {
+.link-checker {
   text-align: center;
   background: white;
   box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
+  padding-top: 1rem;
 }
 
-.text-linkchecker h2 {
-  padding: 10px 0;
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 10px;
-  background: white;
-}
-
-.text-linkchecker p {
+.link-checker__info p {
   max-width: 270px;
   margin: auto;
 }
 
 
-.broke-links-error h3{
-  background-color: #d40000;
-  font-size: 1.1rem;
-  color: #fff;
-  padding: 0 10px;
+.link-checker__progress {
+  display: none; 
+  width: 100%; 
+  position: relative;
 }
 
-.broke-links-error h4{
-  font-weight: 900;
-  margin-bottom: 0.3rem;
-  font-size: 1rem;
+.link-checker__status {
+  margin-top: 0.5rem;
+  font-size: 14px;
 }
 
-.broke-links-error__body {
-  padding: 10px;
-}
-
-
-p.title-linkchecker {
-  padding: 10px;
-  font-size: 15px
-}
-
-.show-status {
-  color: #d40000;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 0.2rem;
-}
-
-.show-status a {
+.broken-count {
   color: #d40000;
 }
 
-#btn-link {
-  margin: 1rem 1rem;
-  color: #fff;
-  background-color: #2663b8;
-  border: none;
-  padding: 6px 20px;
-  border-radius: 22px;
-  font-size: 15px;
-  cursor: pointer;
+h5.success-text {
+  color: rgb(24, 135, 50);
 }
+
 #btn-download {
-  margin-bottom: 1rem;
+  margin: 1rem 0;
   border:none;
   color: #fdfdfd;
   background-color: rgb(24, 135, 50);
@@ -85,46 +52,81 @@ p.title-linkchecker {
   cursor: pointer;
 }
 
-.progress-container {
-  height:100px;
+
+.link-checker__start {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin: 0.5rem 0;
+}
+
+
+#btn-start {
+  color: #fff;
+  background-color: #2663b8;
+  border: none;
+  padding: 6px 20px;
+  border-radius: 22px;
+  font-size: 15px;
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+
+
+/* ------------- Radio buttons ------------- */
+
+.selection-radios {
+  text-align: left;
+  margin-left: 0.5rem;
+}
+
+.selection-radios legend {
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid #2663b8;
+  padding-bottom: 0.2rem;
+}
+
+.selection-radios fieldset div {
+  margin: 0.4rem 0;
+}
+
+ /* ------------- Circle progress bar ------------- */
+
+ .progress-indicator__container {
+  height:120px;
   display: flex;
   justify-content: center;
   align-items: center;
   position:relative;
 }
-.wrapper {
-  width: 100px; /* Set the size of the progress bar */
-  height: 100px;
-  position: absolute; /* Enable clipping */
+
+#progress-indicator__svg circle {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.2s linear;
+  stroke: #BFFFCA;
+  stroke-width: 1em;
+}
+circle#progress-indicator__bar {
+  stroke-dashoffset: 339.29;
+  stroke: #16C020; 
+}
+
+.progress-indicator__wrapper {
+  position: absolute;
   left: 50%;
-  transform: translateX(-50%);
-
-  clip: rect(0px, 100px, 100px, 50px); /* Hide half of the progress bar */
-}
-.circle-background {
-  width: 80px;
-  height: 80px;
-  border: 10px solid #BFFFCA;
-  border-radius: 50px;
-  position: absolute;
-}
-/* Set the sizes of the elements that make up the progress bar */
-.circle {
-  width: 80px;
-  height: 80px;
-  border: 10px solid #16C020;
-  border-radius: 50px;
-  position: absolute;
-  transition: transform 0.2s, clip 0.2s cubic-bezier(.98,-1.1,1,-1.07);
-  clip: rect(0px, 50px, 100px, 0px);
+  transform: translateX(-50%) rotate(-90deg);
 }
 
-.count{
+
+.progress-indicator__counter {
   font-size: 15px;
 }
 
+/* ------------- Result Box styling ------------- */
 
-#link-result .widget-item-view.properties-widget-item-view {
+#link-checker__result .widget-item-view.properties-widget-item-view {
   padding: 0 !important;
 }
 
@@ -136,6 +138,41 @@ p.title-linkchecker {
   padding: 10px;
 }
 
-h5.success-text {
-  color: rgb(24, 135, 50);
+
+.broken-links-error h3{
+  background-color: #d40000;
+  font-size: 1.1rem;
+  color: #fff;
+  padding: 0 10px;
+}
+
+.broken-links-error h4{
+  font-weight: 900;
+  margin-bottom: 0.3rem;
+  font-size: 1rem;
+}
+
+.broken-links-error__body {
+  padding: 10px;
+}
+
+
+.broken-links-error__body__status {
+  color: #d40000;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.2rem;
+}
+
+.broken-links-error__body__status a {
+  color: #d40000;
+}
+
+
+.download-more {
+  color: #d40000;
+  margin-top: 0.2rem;
+  font-size: 16px;
 }

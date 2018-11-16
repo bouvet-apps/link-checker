@@ -1,6 +1,6 @@
 # Link checker app for Enonic XP
 
-This Enonic XP application adds a widget to your [Enonic XP](https://github.com/enonic/xp) site. This widget lets you check all your content for broken links, both internal (content selector) and external (URL).
+This Enonic XP application adds a widget to your [Enonic XP](https://github.com/enonic/xp) site. This widget lets you check all your content for broken links, both internal (selecting content in a rich text editor) and external (URL).
 
 ## Installation
 
@@ -10,19 +10,17 @@ The **Link checker** app will then be available in the widget panel in the conte
 
 ## How to use this app
 
-After adding this app you should see a new LinkChecker option in detail panel to the top right in the content studio. Selecting a content and pressing the **Check** button will start the process. It will check the current content and all its children content for broken links. 
+After adding this app you should see a new LinkChecker option in detail panel to the top right in the content studio. Selecting a content and pressing the **Start** button will start the process. It will check the current content and all its children content for broken links. You can choose to only check the selected content, only the sub-content of that content or both. 
 
-**NB!** The app checks a maximum of 10000 nodes per run. If you have more than 10000 nodes, run the checker on the children instead.
+**NB!** The app only checks internal content links that are added through the rich text editor (HtmlArea). 
 
-**NB!** The app only checks internal content links that are added through the HtmlArea. 
+The result is cached, so if the content and its children have not been modified since last check it will return the cached result immediatly.
 
-The result is cached, so if the content and its children have not been modified since last check it will return the cache immediatly.
+The checking process can be stopped anytime while checking and return the result found so far. This will however not cache any results. 
 
-The check prosess can be stopped anytime while checking and return the result found so far. This will however not cache any result. 
+If you select another content while the checker is running, it will continue in the background. If you go back to the content you started on the widget will try to reestablish connection. 
 
-If you select another content while the checker is running, it will continue in the background. If you go back to the content you started the check on it will try to reestablish connection. 
-
-Only system admins can run the app.
+A max of 10 broken links are show in the detail panel. If more are found they are detailed in the downloadable spreadsheet.
 
 ## Download report
 
