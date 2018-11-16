@@ -6,16 +6,13 @@ var authLib = require("/lib/xp/auth");
 var webSocketLib = require("/lib/xp/websocket");
 
 exports.get = function(req) {
-  // If web-socket request, then you will need to accept the web-socket.
-  // log.info("LinkeChecker got a request!");
-  // log.info(JSON.stringify(req, null, 2));
   return {
     webSocket: {
       subProtocols: ["text"],
       data: {
         contentId: req.params.contentId,
         branch: req.params.branch,
-        user: authLib.getUser().key // "user:userStore:userLogin",
+        user: authLib.getUser().key // Format: "user:userStore:userLogin",
       }
     }
   };
@@ -30,17 +27,13 @@ var PAGINATION_COUNT = 100;
 
 exports.webSocketEvent = function(event) {
   if (event.type == "open") {
-    //log.info("OPEN " + event.session.id);
     startChecker(event);
   } else if (event.type == "close") {
     delete running[event.session.id];
-    //log.info("CLOSE " + event.session.id);
   } else if (event.type == "error") {
     delete running[event.session.id];
     log.error("ERROR LinkChecker connection:" + event.session.id);
   } else if (event.type == "message") {
-    //log.info("MESSAGE %s", event.message);
-
     if (event.message.split(":")[0] == "NEXT") {
       if (running[event.session.id].isRunning == true) {
         next(event, event.message.split(":")[1]);
@@ -53,7 +46,6 @@ exports.webSocketEvent = function(event) {
         webSocketLib.send(event.session.id, str);
       }
     }
-    // Do something on message
     if (event.message == "STOP") {
       if (running[event.session.id]) {
         running[event.session.id].isRunning = false;
@@ -63,19 +55,12 @@ exports.webSocketEvent = function(event) {
 };
 
 function startChecker(event) {
-  /*log.info("Sending Starting run to:");
-  log.info(JSON.stringify(event.data.user, null, 2));
-  log.info("contentId is " + event.data.contentId);
-  log.info("branch is " + event.data.branch); */
-
   var key = event.data.contentId;
   var user = event.data.user.split(":");
   var content = contextLib.run({ branch: event.data.branch, user: { login: user[2], userStore: user[1] } }, function() {
     return contentLib.get({ key: key, branch: event.data.branch });
   });
   if (content) {
-    //log.info("Found content with id " + key);
-
     var cacheKey = buildCacheKey(event, key, content);
 
     /**
@@ -143,7 +128,6 @@ function next(event, index) {
     var nodes = getNodes(running[event.session.id].content, event, index);
     running[event.session.id].nodes = nodes;
   }
-  //log.info("INDEX:" + index + "  START: " + nodes.start + "  COUNT: " + nodes.count + "  TOTAL: " + nodes.total);
 
   var node = nodes.hits[index % PAGINATION_COUNT];
   checkNode(event, node);
@@ -204,8 +188,6 @@ function buildCacheKey(event, key, content) {
 }
 
 function getNodes(content, event, start) {
-  /*log.info("Display Name = " + content.displayName);
-  log.info("Path = " + content._path); */
   var user = event.data.user.split(":");
   var results = contextLib.run({ branch: event.data.branch, user: { login: user[2], userStore: user[1] } }, function() {
     return contentLib.query({

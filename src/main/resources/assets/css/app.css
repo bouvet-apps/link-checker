@@ -94,7 +94,7 @@ h5.success-text {
 
  /* ------------- Circle progress bar ------------- */
 
- .circle-container {
+ .progress-indicator__container {
   height:120px;
   display: flex;
   justify-content: center;
@@ -102,25 +102,25 @@ h5.success-text {
   position:relative;
 }
 
-#circle-svg circle {
+#progress-indicator__svg circle {
   stroke-dashoffset: 0;
   transition: stroke-dashoffset 0.2s linear;
   stroke: #BFFFCA;
   stroke-width: 1em;
 }
-circle#circle-progress {
+circle#progress-indicator__bar {
   stroke-dashoffset: 339.29;
   stroke: #16C020; 
 }
 
-.circle-wrapper {
+.progress-indicator__wrapper {
   position: absolute;
   left: 50%;
   transform: translateX(-50%) rotate(-90deg);
 }
 
 
-.circle-counter {
+.progress-indicator__counter {
   font-size: 15px;
 }
 

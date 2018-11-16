@@ -39,12 +39,12 @@
         <button id="btn-stop" style="display: none;" onclick="window.stopCheck()" value="STOP">STOP</button>
         <button id="btn-download" onclick="window.downloadCSV()" style="display: none;" value="CSV"> <i class="fas fa-download"></i> Download Excel</button>
         <div class="link-checker__progress">
-          <div class="circle-container">
-            <div class="circle-counter">Loading...</div>
-            <div class="circle-wrapper">
-              <svg id="circle-svg" width="120" height="120" viewPort="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg">
+          <div class="progress-indicator__container">
+            <div class="progress-indicator__counter">Loading...</div>
+            <div class="progress-indicator__wrapper">
+              <svg id="progress-indicator__svg" width="120" height="120" viewPort="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg">
                 <circle r="54" cx="60" cy="60" fill="transparent" stroke-dasharray="339.29" stroke-dashoffset="0"></circle>
-                <circle id="circle-progress" r="54" cx="60" cy="60" fill="transparent" stroke-dasharray="339.29" stroke-dashoffset="339.29" stroke-linecap="round"></circle>
+                <circle id="progress-indicator__bar" r="54" cx="60" cy="60" fill="transparent" stroke-dasharray="339.29" stroke-dashoffset="339.29" stroke-linecap="round"></circle>
               </svg>
             </div>
           </div>
@@ -92,7 +92,6 @@
           /* Write data starting at A2 */
           results.forEach(function(result, index) {
             var links = result.brokenLinks.map(function(link) {
-              // link.link = link.link.indexOf("http") == -1 && link.link.indexOf("content://") == -1 ? "http://"+link.link : link.link;
               return {C: link.link, D: link.status};
             });
             var data = [{ A: result.displayName, B: result.path, C: links[0].C, D: links[0].D }].concat(links.slice(1));
@@ -169,7 +168,7 @@
         var key = document.querySelector('#contentId');
         if (key && (key.value == message.key)) {
           var elements = getElements([".link-checker__progress", ".link-checker__status",
-            ".circle-counter", "#btn-stop", "#btn-start", ".selection-radios"]);
+            ".progress-indicator__counter", "#btn-stop", "#btn-start", ".selection-radios"]);
           elements[".link-checker__progress"].style.display = "block";
           var count = message.index;
           var total = message.total;
@@ -180,17 +179,17 @@
           if (selection == "both" || selection == "content") {
             total++;
           }
-          elements[".circle-counter"].innerHTML = count + " / " + total;
+          elements[".progress-indicator__counter"].innerHTML = count + " / " + total;
           var percent = parseInt(count / total * 100);
-          updateCircle(percent);
+          updateIndicator(percent);
           elements["#btn-start"].style.display = 'none';
           elements[".selection-radios"].style.display = 'none';
           elements["#btn-stop"].style.display = 'inline-block';
         }
       }
 
-      function updateCircle(percent) {
-        var circle = document.querySelector("#circle-progress");
+      function updateIndicator(percent) {
+        var circle = document.querySelector("#progress-indicator__bar");
         var circumference = 339.29;
         var offset = ((100-percent)/100)*circumference;
         circle.style["stroke-dashoffset"] = offset;
@@ -199,15 +198,15 @@
       function setResult(message) {
         var key = document.querySelector('#contentId');
         if (key && (key.value == message.key)) {
-          updateCircle(100);
+          updateIndicator(100);
           setTimeout(function() {
             var elements = getElements([".link-checker__progress", ".link-checker__status", 
-            "#btn-stop", "#btn-start", ".circle-wrapper", ".selection-radios"]);
+            "#btn-stop", "#btn-start", ".progress-indicator__wrapper", ".selection-radios"]);
             elements[".link-checker__progress"].style.display = 'none';
             elements["#btn-start"].style.display = 'inline-block';
             elements[".selection-radios"].style.display = 'inline-block';
             elements["#btn-stop"].style.display = 'none';
-            elements[".circle-wrapper"].style.display = "none";
+            elements[".progress-indicator__wrapper"].style.display = "none";
             elements[".link-checker__status"].innerHTML = 'Loading...';
             createReport(message)
           },400);
@@ -229,33 +228,28 @@
       function startCheck() {
         var form = document.getElementById('link-checker__form');
         var elements = getElements([".link-checker__progress", ".link-checker__status", 
-        ".circle-wrapper", "#btn-stop", "#btn-start", "#btn-download", ".selection-radios", "#checkChildren"]);
-        elements[".circle-wrapper"].style = "display: inline";
+        ".progress-indicator__wrapper", "#btn-stop", "#btn-start", "#btn-download", ".selection-radios", "#checkChildren"]);
+        elements[".progress-indicator__wrapper"].style = "display: inline";
         elements["#btn-start"].style.display = 'none';
         elements["#btn-download"].style.display = 'none';
         elements[".selection-radios"].style.display = 'none';
         elements["#btn-stop"].style.display = 'inline-block';
-        updateCircle(0);
+        updateIndicator(0);
         elements[".link-checker__progress"].style.display = 'inline';
 
         var selection = document.querySelector('input[name="selection"]:checked').value;
         var url = form.action + "&selection="+selection;
         var ws = new WebSocket(url)
         ws.onopen = function (event) {
-          //console.log('CONNECTED')
-
           /**
            * Need to attach function to window object to make it last between rendering of widget window.
            * Clicking on new content in content studio will rerender the HTML and run the JS again
            */
           window.stopCheck = function() {
-            //console.log("STOPPING")
             ws.send("STOP");
           }
         }
         ws.onmessage = function (event) {
-          //console.log('Message received', event.data);
-          // Receive JSON fra string
           var message = JSON.parse(event.data);
           if ("index" in message) {
             updateProgress(message);
@@ -272,7 +266,7 @@
           }
         }
         ws.onerror = function (event) {
-          console.log('ERROR in LinkChecker websocket')
+          console.error('ERROR in LinkChecker websocket')
         }
       };
     </script>
