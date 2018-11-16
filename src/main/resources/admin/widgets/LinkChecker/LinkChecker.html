@@ -6,36 +6,53 @@
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
       <style data-th-if="${css}" data-th-text="${css}"></style>
       <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-      <div class="link-checker container">
-        <div class="text-linkchecker">
+      <div class="link-checker">
+        <div class="link-checker__info">
           <p>Check this content and its sub-content for broken links, both internal and external</p>
         </div>
-        <form id="form-link-checker" data-th-if="${serviceUrl}" method="post" data-th-action="${serviceUrl}">
+        <form id="link-checker__form" data-th-if="${serviceUrl}" method="post" data-th-action="${serviceUrl}">
             <input type="hidden" data-th-if="${key}" data-th-value="${key}" id="contentId"/>
         </form>
-        <button id="btn-link" onclick="startCheck()" value="Check">Check</button>
-        <button id="btn-stop" style="display: none;" onclick="window.stopCheck()" value="STOP">STOP</button>
-        <div class="md-checkbox">
-          <input id="checkChildren" type="checkbox" checked>
-          <label for="checkChildren">Sub-content</label>
+        <div class="link-checker__start">
+          <button id="btn-start" onclick="startCheck()" value="Start">Start</button>
+          <div class="selection-radios">
+            <fieldset>
+              <legend>Check</legend>
+              <div>
+                <input type="radio" id="content"
+                name="selection" value="content" />
+                <label for="content">This content</label>
+              </div>
+              <div>
+                <input type="radio" id="children"
+                name="selection" value="children" />
+                <label for="children">Sub-content</label>
+              </div>
+              <div>
+                <input type="radio" id="both"
+                name="selection" value="both" checked/>
+                <label for="both">Both</label>
+              </div>
+            </fieldset>
+          </div>
         </div>
+        <button id="btn-stop" style="display: none;" onclick="window.stopCheck()" value="STOP">STOP</button>
         <button id="btn-download" onclick="window.downloadCSV()" style="display: none;" value="CSV"> <i class="fas fa-download"></i> Download Excel</button>
-        <div class="progress">
-          <!-- <div class="progress-bar-websocket">&nbsp;</div> -->
-          <div class="progress-container">
-            <div class="count">Loading...</div>
-            <div class="wrapper">
-              <svg id="progress-circle" width="120" height="120" viewPort="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <div class="link-checker__progress">
+          <div class="circle-container">
+            <div class="circle-counter">Loading...</div>
+            <div class="circle-wrapper">
+              <svg id="circle-svg" width="120" height="120" viewPort="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg">
                 <circle r="54" cx="60" cy="60" fill="transparent" stroke-dasharray="339.29" stroke-dashoffset="0"></circle>
-                <circle id="progress-circle-bar" r="54" cx="60" cy="60" fill="transparent" stroke-dasharray="339.29" stroke-dashoffset="339.29" stroke-linecap="round"></circle>
+                <circle id="circle-progress" r="54" cx="60" cy="60" fill="transparent" stroke-dasharray="339.29" stroke-dashoffset="339.29" stroke-linecap="round"></circle>
               </svg>
             </div>
           </div>
-          <div class="progress-status"></div>
+          <div class="link-checker__status"></div>
         </div>
         <br>
       </div>
-      <div id="link-result"></div>
+      <div id="link-checker__result"></div>
     </div>
     <script data-th-inline="text">
 
@@ -54,27 +71,11 @@
 
       function createReport (message) {
         window.downloadCSV = function () {
-
-          var ws = XLSX.utils.json_to_sheet([],
-          {header: ["displayName", "path", "broken link", "status"], skipHeader: false});
-          /* Write data starting at A2 */
-          message.results.forEach(function(result, index) {
-            var links = result.brokenLinks.map(function(link) {
-              link.link = link.link.indexOf("http") == -1 && link.link.indexOf("content://") == -1 ? "http://"+link.link : link.link;
-              return {C: link.link, D: link.status};
-            });
-            var data = [{ A: result.displayName, B: result.path, C: {v: links[0].C, l: {Target:links[0].C}}, D: links[0].D }].concat(links.slice(1));
-            XLSX.utils.sheet_add_json(ws, data, {skipHeader: true, origin: index === 0 ? "A2": -1});
-          })
-
-          var date = new Date();
-          var wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, "WorksheetName");
-          XLSX.writeFile(wb, "report-linkchecker-"+date.toLocaleDateString() + "-"+date.toLocaleTimeString()+".xlsx", {});
+          generateSpreadsheet(message.results);
         }
-        var result = document.getElementById('link-result');
+        var result = document.getElementById('link-checker__result');
         var report = "";
-        if (message.brokenCount > 10) {
+        if (message.brokenCount > 8) {
           report = generateShortReport(message);
         } else if (message.brokenCount > 0) {
           report = generateLongReport(message);
@@ -85,21 +86,49 @@
         result.innerHTML = report;
       }
 
+      function generateSpreadsheet(results) {
+        var ws = XLSX.utils.json_to_sheet([],
+          {header: ["displayName", "path", "broken link", "status"], skipHeader: false});
+          /* Write data starting at A2 */
+          results.forEach(function(result, index) {
+            var links = result.brokenLinks.map(function(link) {
+              // link.link = link.link.indexOf("http") == -1 && link.link.indexOf("content://") == -1 ? "http://"+link.link : link.link;
+              return {C: link.link, D: link.status};
+            });
+            var data = [{ A: result.displayName, B: result.path, C: links[0].C, D: links[0].D }].concat(links.slice(1));
+            XLSX.utils.sheet_add_json(ws, data, {skipHeader: true, origin: index === 0 ? "A2": -1});
+          })
+
+          var date = new Date();
+          var wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "WorksheetName");
+          XLSX.writeFile(wb, "report-linkchecker-"+date.toLocaleDateString() + "-"+date.toLocaleTimeString()+".xlsx", {});
+      }
+
       function generateLongReport(message) {
         var report = "";
         document.getElementById('btn-download').style.display = "initial";
         message.results.forEach(function (node) {
-          report += '<div class="widget-view internal-widget"><div class="widget-item-view properties-widget-item-view">';
-          report += '<div class="broke-links-error">';
-          report += "<h3>Found " + node.brokenLinks.length + " invalid link" + (node.brokenLinks.length > 1 ? "s":"") + "</h3>";
-          report += "<div class='broke-links-error__body'><h4>" + node.displayName + "</h4>";
-          report += "<p>" + node.path + "</p>";
-          node.brokenLinks.forEach(function (link) {
-            report += '<div class="show-status">';
-            report += "<div style='margin-right: 5px;'>&#10007;</div><div style='flex-grow:1;'><a  href=" + link.link + " target='_blank'>" + link.link + "</a>";
-            report += "</div><span style='margin-left: 5px'>" + (link.status == 408 ? "Timeout" : link.status) + "</span></div>"
-          });
-        report += "</div></div></div></div>";
+          report += '<div class="widget-view internal-widget"> \
+                      <div class="widget-item-view properties-widget-item-view"> \
+                        <div class="broken-links-error"> \
+                          <h3>Found ' + node.brokenLinks.length + ' invalid link' + (node.brokenLinks.length > 1 ? 's':'') + '</h3> \
+                          <div class="broken-links-error__body"> \
+                            <h4>' + node.displayName + '</h4> \
+                            <p>' + node.path + '</p>';
+                node.brokenLinks.forEach(function (link) {
+                  report += '<div class="broken-links-error__body__status"> \
+                              <div style="margin-right: 5px;">&#10007;</div> \
+                              <div style="flex-grow:1;"> \
+                                <a href=' + link.link + ' target="_blank">' + link.link + '</a> \
+                              </div> \
+                              <span style="margin-left: 5px">' + (link.status == 408 ? 'Timeout' : link.status) + '</span> \
+                            </div>';
+                });
+                report += "</div> \
+                        </div> \
+                      </div> \
+                    </div>";
         });
         return report;
       }
@@ -110,51 +139,58 @@
       function generateShortReport(message) {
         var report = "";
         document.getElementById('btn-download').style.display = "initial";
-        report += '<div class="widget-view internal-widget"><div class="widget-item-view properties-widget-item-view">';
-        report += '<div class="broke-links-error">';
-        report += "<h3>Found " + message.brokenCount + " invalid link" + (message.brokenCount > 1 ? "s":"") + "</h3>";
-        report += "<div class='broke-links-error__body'>";
-        var maxShown = 10;
+        report += '<div class="widget-view internal-widget"><div class="widget-item-view properties-widget-item-view"> \
+                    <div class="broken-links-error"> \
+                      <h3>Found ' + message.brokenCount + ' invalid link' + (message.brokenCount > 1 ? 's':'') + '</h3> \
+                      <div class="broken-links-error__body">';
+
+        var maxShown = 8;
         var countShown = 0;
         for (var i = 0; i < message.results.length; i++) {
           for (var j = 0; j < message.results[i].brokenLinks.length; j++) {
             if (countShown > maxShown) break;
             var link = message.results[i].brokenLinks[j];
-            report += '<div class="show-status">';
-            report += "<div style='margin-right: 5px;'>&#10007;</div><div style='flex-grow:1;'><a  href=" + link.link + " target='_blank'>" + link.link + "</a>";
-            report += "</div><span style='margin-left: 5px'>" + (link.status == 408 ? "Timeout" : link.status) + "</span></div>";
+            report += '<div class="broken-links-error__body__status"> \
+                        <div style="margin-right: 5px;">&#10007;</div> \
+                        <div style="flex-grow:1;"><a href=' + link.link + ' target="_blank">' + link.link + '</a></div> \
+                        <span style="margin-left: 5px">' + (link.status == 408 ? 'Timeout' : link.status) + '</span> \
+                      </div>';
             countShown++;
           }
-          if (countShown > maxShown) break;
+          if (countShown >= maxShown) break;
         }
-        report += "<p class='download-more'>...</p>";
-        report += "<p class='download-more'>Detailed in spreadsheet</p>";
-        report += "</div></div></div></div>";
+        report += "<p class='download-more'>...</p> \
+                   <p class='download-more'>Detailed in spreadsheet</p> \
+                   </div></div></div></div>";
         return report;
       }
 
       function updateProgress(message) {
         var key = document.querySelector('#contentId');
-        if (key.value == message.key) {
-          var elements = getElements([".progress", ".progress-status",
-            ".count", ".circle.left",".circle.right",".wrapper", "#btn-stop", "#btn-link", ".md-checkbox"]);
-          elements[".progress"].style.display = "block";
+        if (key && (key.value == message.key)) {
+          var elements = getElements([".link-checker__progress", ".link-checker__status",
+            ".circle-counter", "#btn-stop", "#btn-start", ".selection-radios"]);
+          elements[".link-checker__progress"].style.display = "block";
           var count = message.index;
           var total = message.total;
           if (message.brokenCount) {
-            elements[".progress-status"].innerHTML = "Found " + message.brokenCount + " broken links";
+            elements[".link-checker__status"].innerHTML = "Found <span class='broken-count'>" + message.brokenCount + "</span> broken links";
           }
-          elements[".count"].innerHTML = count + " / " + Math.max(total, 1);
+          var selection = document.querySelector('input[name="selection"]:checked').value;
+          if (selection == "both" || selection == "content") {
+            total++;
+          }
+          elements[".circle-counter"].innerHTML = count + " / " + total;
           var percent = parseInt(count / total * 100);
           updateCircle(percent);
-          elements["#btn-link"].style.display = 'none';
-          elements[".md-checkbox"].style.display = 'none';
+          elements["#btn-start"].style.display = 'none';
+          elements[".selection-radios"].style.display = 'none';
           elements["#btn-stop"].style.display = 'inline-block';
         }
       }
 
       function updateCircle(percent) {
-        var circle = document.querySelector("#progress-circle-bar");
+        var circle = document.querySelector("#circle-progress");
         var circumference = 339.29;
         var offset = ((100-percent)/100)*circumference;
         circle.style["stroke-dashoffset"] = offset;
@@ -162,46 +198,58 @@
 
       function setResult(message) {
         var key = document.querySelector('#contentId');
-        if (key.value == message.key) {
+        if (key && (key.value == message.key)) {
           updateCircle(100);
           setTimeout(function() {
-            var elements = getElements([".progress", ".progress-status", "#btn-stop", "#btn-link", ".wrapper", ".md-checkbox"]);
-            elements[".progress"].style.display = 'none';
-            elements["#btn-link"].style.display = 'inline-block';
-            elements[".md-checkbox"].style.display = 'inline-block';
+            var elements = getElements([".link-checker__progress", ".link-checker__status", 
+            "#btn-stop", "#btn-start", ".circle-wrapper", ".selection-radios"]);
+            elements[".link-checker__progress"].style.display = 'none';
+            elements["#btn-start"].style.display = 'inline-block';
+            elements[".selection-radios"].style.display = 'inline-block';
             elements["#btn-stop"].style.display = 'none';
-            elements[".wrapper"].style.display = "none";
-            elements[".progress-status"].innerHTML = 'Loading...';
+            elements[".circle-wrapper"].style.display = "none";
+            elements[".link-checker__status"].innerHTML = 'Loading...';
             createReport(message)
           },400);
         }
       }
 
+      function setError(message) {
+        var result = document.getElementById('link-checker__result');
+        result.innerHTML = '<div class="widget-view internal-widget"> \
+                              <div class="widget-item-view properties-widget-item-view version-widget-item-view"> \
+                                <div class="broken-links-error"> \
+                                  <h3 style="text-align: center">'+ message.error + '</h3> \
+                                </div> \
+                              </div> \
+                            </div>';
+      }
+
 
       function startCheck() {
-        var form = document.getElementById('form-link-checker');
-        var elements = getElements([".progress", ".progress-status",
-          ".count", ".wrapper", "#btn-stop", "#btn-link", "#btn-download", ".md-checkbox", "#checkChildren"]);
-        elements[".wrapper"].style = "display: inline";
-        elements["#btn-link"].style.display = 'none';
+        var form = document.getElementById('link-checker__form');
+        var elements = getElements([".link-checker__progress", ".link-checker__status", 
+        ".circle-wrapper", "#btn-stop", "#btn-start", "#btn-download", ".selection-radios", "#checkChildren"]);
+        elements[".circle-wrapper"].style = "display: inline";
+        elements["#btn-start"].style.display = 'none';
         elements["#btn-download"].style.display = 'none';
-        elements[".md-checkbox"].style.display = 'none';
+        elements[".selection-radios"].style.display = 'none';
         elements["#btn-stop"].style.display = 'inline-block';
         updateCircle(0);
-        // Show progress
-        elements[".progress"].style.display = 'inline';
-        var checkChildren = elements["#checkChildren"].checked;
-        var url = form.action + "&checkChildren="+checkChildren;
+        elements[".link-checker__progress"].style.display = 'inline';
+
+        var selection = document.querySelector('input[name="selection"]:checked').value;
+        var url = form.action + "&selection="+selection;
         var ws = new WebSocket(url)
         ws.onopen = function (event) {
-          console.log('CONNECTED')
+          //console.log('CONNECTED')
 
           /**
            * Need to attach function to window object to make it last between rendering of widget window.
            * Clicking on new content in content studio will rerender the HTML and run the JS again
            */
           window.stopCheck = function() {
-            console.log("STOPPING")
+            //console.log("STOPPING")
             ws.send("STOP");
           }
         }
@@ -214,15 +262,17 @@
             if (message.index <= message.total) {
               ws.send("NEXT:"+ message.index);
             }
-          } else if (message.results) {
+          } else if ("results" in message) {
             ws.close();
             setResult(message);
           } else if ("mainContent" in message) {
             updateProgress({total: message.total, index: 0, key: message.key});
+          } else if ("error" in message) {
+            setError(message);
           }
         }
         ws.onerror = function (event) {
-          console.log('ERROR')
+          console.log('ERROR in LinkChecker websocket')
         }
       };
     </script>

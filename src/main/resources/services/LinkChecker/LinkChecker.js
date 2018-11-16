@@ -1,23 +1,21 @@
-var portalLib = require("/lib/xp/portal");
 var contentLib = require("/lib/xp/content");
 var contextLib = require("/lib/xp/context");
 var httpClientLib = require("/lib/http-client");
 var cacheLib = require("/lib/xp/cache");
 var authLib = require("/lib/xp/auth");
-var thymeleaf = require("/lib/xp/thymeleaf");
-var view = resolve("LinkChecker.html");
 var webSocketLib = require("/lib/xp/websocket");
 
 exports.get = function(req) {
   // If web-socket request, then you will need to accept the web-socket.
-  log.info("LinkeChecker got a request!");
-  log.info(JSON.stringify(req, null, 2));
+  // log.info("LinkeChecker got a request!");
+  // log.info(JSON.stringify(req, null, 2));
   return {
     webSocket: {
       subProtocols: ["text"],
       data: {
         contentId: req.params.contentId,
-        branch: req.params.branch
+        branch: req.params.branch,
+        user: authLib.getUser().key // "user:userStore:userLogin",
       }
     }
   };
@@ -28,22 +26,20 @@ var cache = cacheLib.newCache({
 });
 
 var running = {};
-var PAGINATION_COUNT = 10;
+var PAGINATION_COUNT = 100;
 
 exports.webSocketEvent = function(event) {
   if (event.type == "open") {
-    log.info("OPEN " + event.session.id);
-    log.info(JSON.stringify(event, null, 2));
+    //log.info("OPEN " + event.session.id);
     startChecker(event);
-    log.info(JSON.stringify(Object.keys(running), null, 2));
   } else if (event.type == "close") {
     delete running[event.session.id];
-    log.info("CLOSE " + event.session.id);
+    //log.info("CLOSE " + event.session.id);
   } else if (event.type == "error") {
     delete running[event.session.id];
     log.error("ERROR LinkChecker connection:" + event.session.id);
   } else if (event.type == "message") {
-    log.info("MESSAGE %s", event.message);
+    //log.info("MESSAGE %s", event.message);
 
     if (event.message.split(":")[0] == "NEXT") {
       if (running[event.session.id].isRunning == true) {
@@ -67,21 +63,18 @@ exports.webSocketEvent = function(event) {
 };
 
 function startChecker(event) {
-  log.info("Sending Starting run to:");
-  log.info(JSON.stringify(contextLib.get(), null, 2));
-  contextLib.run({ repository: "system-repo", principals: ["role:system.admin"] }, function() {
-    log.info(JSON.stringify(authLib.getUser(), null, 2));
-  });
+  /*log.info("Sending Starting run to:");
+  log.info(JSON.stringify(event.data.user, null, 2));
   log.info("contentId is " + event.data.contentId);
-  log.info("branch is " + event.data.branch);
+  log.info("branch is " + event.data.branch); */
 
   var key = event.data.contentId;
-
-  var content = contextLib.run({ branch: event.data.branch, principals: ["role:system.admin"] }, function() {
+  var user = event.data.user.split(":");
+  var content = contextLib.run({ branch: event.data.branch, user: { login: user[2], userStore: user[1] } }, function() {
     return contentLib.get({ key: key, branch: event.data.branch });
-  }); //venstre, content type
+  });
   if (content) {
-    log.info("Found content with id " + key);
+    //log.info("Found content with id " + key);
 
     var cacheKey = buildCacheKey(event, key, content);
 
@@ -100,7 +93,8 @@ function startChecker(event) {
     }
 
     var nodes = { count: 0, total: 0, hits: [] };
-    if (event.session.params.checkChildren == "true") {
+    var selection = event.session.params.selection;
+    if (selection == "children" || selection == "both") {
       nodes = getNodes(content, event, 0);
     }
 
@@ -115,11 +109,14 @@ function startChecker(event) {
       brokenCount: 0
     };
 
-    // Check selected content first outside the "loop" as to not mess with starts and counts.
-    webSocketLib.send(event.session.id, JSON.stringify({ total: nodes.total, key: key, mainContent: true }));
-    checkNode(event, content);
-
+    if (selection == "content" || selection == "both") {
+      // Check selected content first outside the "loop" as to not mess with starts and counts.
+      webSocketLib.send(event.session.id, JSON.stringify({ total: nodes.total, key: key, mainContent: true }));
+      checkNode(event, content);
+    }
     webSocketLib.send(event.session.id, JSON.stringify({ index: 0, count: nodes.count, total: nodes.total, key: key }));
+  } else {
+    webSocketLib.send(event.session.id, JSON.stringify({ error: "Content not found :(", key: key }));
   }
 }
 
@@ -146,12 +143,11 @@ function next(event, index) {
     var nodes = getNodes(running[event.session.id].content, event, index);
     running[event.session.id].nodes = nodes;
   }
-  log.info("INDEX:" + index + "  START: " + nodes.start + "  COUNT: " + nodes.count + "  TOTAL: " + nodes.total);
+  //log.info("INDEX:" + index + "  START: " + nodes.start + "  COUNT: " + nodes.count + "  TOTAL: " + nodes.total);
 
   var node = nodes.hits[index % PAGINATION_COUNT];
-
-  log.info((index % PAGINATION_COUNT) + " : " + nodes.hits.length);
   checkNode(event, node);
+
   running[event.session.id].index++;
   var str = JSON.stringify({
     index: index + 1,
@@ -194,7 +190,8 @@ function buildCacheKey(event, key, content) {
    * This will ensure any changes to its children will trigger a new fresh link check.
    */
   var cacheKey = key;
-  var lastModifiedChild = contextLib.run({ branch: event.data.branch, principals: ["role:system.admin"] }, function() {
+  var user = event.data.user.split(":");
+  var lastModifiedChild = contextLib.run({ branch: event.data.branch, user: { login: user[2], userStore: user[1] } }, function() {
     return contentLib.getChildren({ key: key, count: 1, start: 0, sort: "modifiedTime DESC" }).hits;
   });
   if (lastModifiedChild[0] && lastModifiedChild[0].modifiedTime > content.modifiedTime) {
@@ -202,17 +199,15 @@ function buildCacheKey(event, key, content) {
   } else {
     cacheKey += content.modifiedTime;
   }
-  if (event.session.params.checkChildren == "true") {
-    cacheKey += "checkChildren";
-  }
+  cacheKey += event.session.params.selection;
   return cacheKey;
 }
 
 function getNodes(content, event, start) {
-  log.info("Display Name = " + content.displayName);
-  log.info("Path = " + content._path);
-
-  var results = contextLib.run({ branch: event.data.branch, principals: ["role:system.admin"] }, function() {
+  /*log.info("Display Name = " + content.displayName);
+  log.info("Path = " + content._path); */
+  var user = event.data.user.split(":");
+  var results = contextLib.run({ branch: event.data.branch, user: { login: user[2], userStore: user[1] } }, function() {
     return contentLib.query({
       query: "_path LIKE '/content" + content._path + "/*'",
       branch: event.data.branch,
@@ -227,7 +222,7 @@ function getNodes(content, event, start) {
 
 function getLinks(text) {
   var externalExpression = /((https?:\/\/|ftp:\/\/|www\.|[^\s:=]+@www\.).*?[a-z_\/0-9\-\#=&\(\)])(?=(\.|,|;|\?|\!)?(?:“|”|"|'|«|»|\[\/|\s|\r|\n|\\|<|>|\[\n))/gi; //(s:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/|www\.)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/[^" \\><]*)?/gi;
-  var internalExpression = /(content:\/\/)[a-z0-9]+([\-]{1}[a-z0-9]+)*/gi;
+  var internalExpression = /((content|media|image):\/\/)[a-z0-9]+([\-]{1}[a-z0-9]+)*/gi;
   var links = {
     externalLinks: text.match(externalExpression) || [],
     internalLinks: text.match(internalExpression) || []
@@ -236,7 +231,6 @@ function getLinks(text) {
 }
 
 function checkExternalUrl(url) {
-  log.info(url);
   try {
     if (url.indexOf("http://") == -1 && url.indexOf("https://") == -1) {
       url = "http://" + url;
@@ -261,7 +255,6 @@ function checkExternalUrl(url) {
     } else if (error.toString().match(/javax\.net\.ssl\.SSLPeerUnverifiedException/)) {
       return 526;
     }
-    log.info(error);
     return 500;
   }
 }
