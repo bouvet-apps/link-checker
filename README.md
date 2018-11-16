@@ -14,13 +14,13 @@ After adding this app you should see a new LinkChecker option in detail panel to
 
 **NB!** The app only checks internal content links that are added through the rich text editor (HtmlArea). 
 
-The result is cached, so if the content and its children have not been modified since last check it will return the cache immediatly.
+The result is cached, so if the content and its children have not been modified since last check it will return the cached result immediatly.
 
-The check prosess can be stopped anytime while checking and return the result found so far. This will however not cache any result. 
+The checking process can be stopped anytime while checking and return the result found so far. This will however not cache any results. 
 
 If you select another content while the checker is running, it will continue in the background. If you go back to the content you started on the widget will try to reestablish connection. 
 
-A max of 10 broken links are show in the detail panel. If more are found they are detailed the downloadable spreadsheet.
+A max of 10 broken links are show in the detail panel. If more are found they are detailed in the downloadable spreadsheet.
 
 ## Download report
 
