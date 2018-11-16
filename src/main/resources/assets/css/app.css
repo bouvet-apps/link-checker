@@ -1,7 +1,8 @@
 .link-checker {
   text-align: center;
   background: white;
-  box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
+          box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
   padding-top: 1rem;
 }
 
@@ -54,10 +55,19 @@ h5.success-text {
 
 
 .link-checker__start {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
   margin: 0.5rem 0;
 }
 
@@ -96,14 +106,22 @@ h5.success-text {
 
  .progress-indicator__container {
   height:120px;
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
   position:relative;
 }
 
 #progress-indicator__svg circle {
   stroke-dashoffset: 0;
+  -webkit-transition: stroke-dashoffset 0.2s linear;
+  -o-transition: stroke-dashoffset 0.2s linear;
   transition: stroke-dashoffset 0.2s linear;
   stroke: #BFFFCA;
   stroke-width: 1em;
@@ -116,7 +134,9 @@ circle#progress-indicator__bar {
 .progress-indicator__wrapper {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%) rotate(-90deg);
+  -webkit-transform: translateX(-50%) rotate(-90deg);
+      -ms-transform: translateX(-50%) rotate(-90deg);
+          transform: translateX(-50%) rotate(-90deg);
 }
 
 
@@ -134,7 +154,8 @@ circle#progress-indicator__bar {
   margin: 10px;
   text-align: center;
   background: white;
-  box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
+          box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
   padding: 10px;
 }
 
@@ -157,19 +178,35 @@ circle#progress-indicator__bar {
 }
 
 
-.broken-links-error__body__status {
+.broken-links-error__link {
   color: #d40000;
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
   margin-top: 0.2rem;
 }
 
-.broken-links-error__body__status a {
+
+.broken-links-error__link a {
   color: #d40000;
 }
 
+.broken-links-error__link__target {
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  word-break: break-word;
+}
 
 .download-more {
   color: #d40000;

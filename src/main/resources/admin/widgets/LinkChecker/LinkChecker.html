@@ -116,9 +116,9 @@
                             <h4>' + node.displayName + '</h4> \
                             <p>' + node.path + '</p>';
                 node.brokenLinks.forEach(function (link) {
-                  report += '<div class="broken-links-error__body__status"> \
+                  report += '<div class="broken-links-error__link"> \
                               <div style="margin-right: 5px;">&#10007;</div> \
-                              <div style="flex-grow:1;"> \
+                              <div class="broken-links-error__link__target"> \
                                 <a href=' + link.link + ' target="_blank">' + link.link + '</a> \
                               </div> \
                               <span style="margin-left: 5px">' + (link.status == 408 ? 'Timeout' : link.status) + '</span> \
