@@ -57,9 +57,12 @@ exports.webSocketEvent = function(event) {
 function startChecker(event) {
   var key = event.data.contentId;
   var user = event.data.user.split(":");
-  var content = contextLib.run({ branch: event.data.branch, user: { login: user[2], userStore: user[1] } }, function() {
-    return contentLib.get({ key: key, branch: event.data.branch });
-  });
+  var content = contextLib.run(
+    { branch: event.data.branch, user: { login: user[2], userStore: user[1] } },
+    function() {
+      return contentLib.get({ key: key, branch: event.data.branch });
+    }
+  );
   if (content) {
     var cacheKey = buildCacheKey(event, key, content);
 
@@ -73,7 +76,10 @@ function startChecker(event) {
       return false;
     });
     if (cached) {
-      webSocketLib.send(event.session.id, JSON.stringify({ results: cached.results, brokenCount: cached.brokenCount, key: key }));
+      webSocketLib.send(
+        event.session.id,
+        JSON.stringify({ results: cached.results, brokenCount: cached.brokenCount, key: key })
+      );
       return;
     }
 
@@ -96,12 +102,21 @@ function startChecker(event) {
 
     if (selection == "content" || selection == "both") {
       // Check selected content first outside the "loop" as to not mess with starts and counts.
-      webSocketLib.send(event.session.id, JSON.stringify({ total: nodes.total, key: key, mainContent: true }));
+      webSocketLib.send(
+        event.session.id,
+        JSON.stringify({ total: nodes.total, key: key, mainContent: true })
+      );
       checkNode(event, content);
     }
-    webSocketLib.send(event.session.id, JSON.stringify({ index: 0, count: nodes.count, total: nodes.total, key: key }));
+    webSocketLib.send(
+      event.session.id,
+      JSON.stringify({ index: 0, count: nodes.count, total: nodes.total, key: key })
+    );
   } else {
-    webSocketLib.send(event.session.id, JSON.stringify({ error: "Content not found :(", key: key }));
+    webSocketLib.send(
+      event.session.id,
+      JSON.stringify({ error: "Content not found :(", key: key })
+    );
   }
 }
 
@@ -115,7 +130,10 @@ function next(event, index) {
      */
     cache.remove(running[event.session.id].cacheKey);
     var results = cache.get(running[event.session.id].cacheKey, function() {
-      return { results: running[event.session.id].results, brokenCount: running[event.session.id].brokenCount };
+      return {
+        results: running[event.session.id].results,
+        brokenCount: running[event.session.id].brokenCount
+      };
     });
     var str = JSON.stringify({
       results: running[event.session.id].results,
@@ -175,9 +193,13 @@ function buildCacheKey(event, key, content) {
    */
   var cacheKey = key;
   var user = event.data.user.split(":");
-  var lastModifiedChild = contextLib.run({ branch: event.data.branch, user: { login: user[2], userStore: user[1] } }, function() {
-    return contentLib.getChildren({ key: key, count: 1, start: 0, sort: "modifiedTime DESC" }).hits;
-  });
+  var lastModifiedChild = contextLib.run(
+    { branch: event.data.branch, user: { login: user[2], userStore: user[1] } },
+    function() {
+      return contentLib.getChildren({ key: key, count: 1, start: 0, sort: "modifiedTime DESC" })
+        .hits;
+    }
+  );
   if (lastModifiedChild[0] && lastModifiedChild[0].modifiedTime > content.modifiedTime) {
     cacheKey += lastModifiedChild[0].modifiedTime;
   } else {
@@ -189,14 +211,17 @@ function buildCacheKey(event, key, content) {
 
 function getNodes(content, event, start) {
   var user = event.data.user.split(":");
-  var results = contextLib.run({ branch: event.data.branch, user: { login: user[2], userStore: user[1] } }, function() {
-    return contentLib.query({
-      query: "_path LIKE '/content" + content._path + "/*'",
-      branch: event.data.branch,
-      start: start,
-      count: PAGINATION_COUNT
-    });
-  });
+  var results = contextLib.run(
+    { branch: event.data.branch, user: { login: user[2], userStore: user[1] } },
+    function() {
+      return contentLib.query({
+        query: "_path LIKE '/content" + content._path + "/*'",
+        branch: event.data.branch,
+        start: start,
+        count: PAGINATION_COUNT
+      });
+    }
+  );
   results.start = start;
 
   return results;
@@ -213,6 +238,7 @@ function getLinks(text) {
 }
 
 function checkExternalUrl(url) {
+  log.info("Checking URL: " + url);
   try {
     if (url.indexOf("http://") == -1 && url.indexOf("https://") == -1) {
       url = "http://" + url;
@@ -221,15 +247,18 @@ function checkExternalUrl(url) {
       url: url,
       method: "GET",
       headers: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:62.0) Gecko/20100101 Firefox/62.0",
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:62.0) Gecko/20100101 Firefox/62.0",
         Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         Connection: "keep-alive"
       },
       connectionTimeout: 5000,
       readTimeout: 3000
     });
+    log.info("^ Status: " + response.status);
     return response.status;
   } catch (error) {
+    log.error(error);
     if (error.toString().match(/java\.net\.UnknownHostException/)) {
       return 404;
     } else if (error.toString().match(/java\.net\.SocketTimeoutException/)) {
