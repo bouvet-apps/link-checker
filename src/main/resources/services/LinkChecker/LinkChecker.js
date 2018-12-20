@@ -5,7 +5,7 @@ var cacheLib = require("/lib/xp/cache");
 var authLib = require("/lib/xp/auth");
 var webSocketLib = require("/lib/xp/websocket");
 
-exports.get = function(req) {
+exports.get = function (req) {
   return {
     webSocket: {
       subProtocols: ["text"],
@@ -25,7 +25,7 @@ var cache = cacheLib.newCache({
 var running = {};
 var PAGINATION_COUNT = 100;
 
-exports.webSocketEvent = function(event) {
+exports.webSocketEvent = function (event) {
   if (event.type == "open") {
     startChecker(event);
   } else if (event.type == "close") {
@@ -57,9 +57,12 @@ exports.webSocketEvent = function(event) {
 function startChecker(event) {
   var key = event.data.contentId;
   var user = event.data.user.split(":");
-  var content = contextLib.run({ branch: event.data.branch, user: { login: user[2], userStore: user[1] } }, function() {
-    return contentLib.get({ key: key, branch: event.data.branch });
-  });
+  var content = contextLib.run(
+    { branch: event.data.branch, user: { login: user[2], userStore: user[1] } },
+    function () {
+      return contentLib.get({ key: key, branch: event.data.branch });
+    }
+  );
   if (content) {
     var cacheKey = buildCacheKey(event, key, content);
 
@@ -69,7 +72,7 @@ function startChecker(event) {
      * Thus, we give it a false value and at the end of the link checks,
      * when we have a result, we put that in.
      */
-    var cached = cache.get(cacheKey, function() {
+    var cached = cache.get(cacheKey, function () {
       return false;
     });
     if (cached) {
@@ -114,8 +117,11 @@ function next(event, index) {
      * If the code has reached this point, we know that the cache contains no results
      */
     cache.remove(running[event.session.id].cacheKey);
-    var results = cache.get(running[event.session.id].cacheKey, function() {
-      return { results: running[event.session.id].results, brokenCount: running[event.session.id].brokenCount };
+    var results = cache.get(running[event.session.id].cacheKey, function () {
+      return {
+        results: running[event.session.id].results,
+        brokenCount: running[event.session.id].brokenCount
+      };
     });
     var str = JSON.stringify({
       results: running[event.session.id].results,
@@ -147,7 +153,7 @@ function checkNode(event, node) {
   var brokenLinks = [];
 
   var urls = getLinks(JSON.stringify(node));
-  urls.externalLinks.forEach(function(url) {
+  urls.externalLinks.forEach(function (url) {
     var checkStatus = checkExternalUrl(url);
     if (checkStatus >= 309 && checkStatus < 900) {
       // Under 900 to avoid annoying linkedIn response
@@ -155,7 +161,7 @@ function checkNode(event, node) {
       brokenLinks.push({ link: url, status: checkStatus });
     }
   });
-  urls.internalLinks.forEach(function(link) {
+  urls.internalLinks.forEach(function (link) {
     var checkStatus = checkInternalLink(link, event.data.branch);
     if (checkStatus >= 309 && checkStatus < 900) {
       running[event.session.id].brokenCount++;
@@ -175,9 +181,13 @@ function buildCacheKey(event, key, content) {
    */
   var cacheKey = key;
   var user = event.data.user.split(":");
-  var lastModifiedChild = contextLib.run({ branch: event.data.branch, user: { login: user[2], userStore: user[1] } }, function() {
-    return contentLib.getChildren({ key: key, count: 1, start: 0, sort: "modifiedTime DESC" }).hits;
-  });
+  var lastModifiedChild = contextLib.run(
+    { branch: event.data.branch, user: { login: user[2], userStore: user[1] } },
+    function () {
+      return contentLib.getChildren({ key: key, count: 1, start: 0, sort: "modifiedTime DESC" })
+        .hits;
+    }
+  );
   if (lastModifiedChild[0] && lastModifiedChild[0].modifiedTime > content.modifiedTime) {
     cacheKey += lastModifiedChild[0].modifiedTime;
   } else {
@@ -189,14 +199,17 @@ function buildCacheKey(event, key, content) {
 
 function getNodes(content, event, start) {
   var user = event.data.user.split(":");
-  var results = contextLib.run({ branch: event.data.branch, user: { login: user[2], userStore: user[1] } }, function() {
-    return contentLib.query({
-      query: "_path LIKE '/content" + content._path + "/*'",
-      branch: event.data.branch,
-      start: start,
-      count: PAGINATION_COUNT
-    });
-  });
+  var results = contextLib.run(
+    { branch: event.data.branch, user: { login: user[2], userStore: user[1] } },
+    function () {
+      return contentLib.query({
+        query: "_path LIKE '/content" + content._path + "/*'",
+        branch: event.data.branch,
+        start: start,
+        count: PAGINATION_COUNT
+      });
+    }
+  );
   results.start = start;
 
   return results;
@@ -204,7 +217,7 @@ function getNodes(content, event, start) {
 
 function getLinks(text) {
   var externalExpression = /((https?:\/\/|ftp:\/\/|www\.|[^\s:=]+@www\.).*?[a-z_\/0-9\-\#=&\(\)])(?=(\.|,|;|\?|\!)?(?:“|”|"|'|«|»|\[\/|\s|\r|\n|\\|<|>|\[\n))/gi; //(s:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/|www\.)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/[^" \\><]*)?/gi;
-  var internalExpression = /((content|media|image):\/\/)[a-z0-9]+([\-]{1}[a-z0-9]+)*/gi;
+  var internalExpression = /((content|media|image):\/\/)(download\/)?[a-z0-9]+([\-]{1}[a-z0-9]+)*/gi;
   var links = {
     externalLinks: text.match(externalExpression) || [],
     internalLinks: text.match(internalExpression) || []
@@ -242,9 +255,10 @@ function checkExternalUrl(url) {
 }
 
 function checkInternalLink(link, branch) {
-  var result = contextLib.run({ branch: branch, principals: ["role:system.admin"] }, function() {
+  var result = contextLib.run({ branch: branch, principals: ["role:system.admin"] }, function () {
+    var split = link.split("/");
     return contentLib.get({
-      key: link.split("//")[1]
+      key: split[split.length - 1]
     });
   });
   return result ? 200 : 404;
