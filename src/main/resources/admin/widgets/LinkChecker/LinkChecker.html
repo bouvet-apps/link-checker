@@ -1,4 +1,4 @@
-  <body>
+  <widget>
     <div style="min-height: 600px">
       <link rel="stylesheet" href="../../assets/css/app.css"
         data-th-href="${portal.assetUrl({'_path=css/app.css'})}"
@@ -81,7 +81,7 @@
           report = generateLongReport(message);
         }
         else {
-          report = '<div class="widget-view internal-widget success"><h5 class="success-text">&#10004; No broken links found!</h5></div>';
+          report = '<div class="widget-view internal-widget success active"><h5 class="success-text">&#10004; No broken links found!</h5></div>';
         }
         result.innerHTML = report;
       }
@@ -108,7 +108,7 @@
         var report = "";
         document.getElementById('btn-download').style.display = "initial";
         message.results.forEach(function (node) {
-          report += '<div class="widget-view internal-widget"> \
+          report += '<div class="widget-view internal-widget active"> \
                       <div class="widget-item-view properties-widget-item-view"> \
                         <div class="broken-links-error"> \
                           <h3>Found ' + node.brokenLinks.length + ' invalid link' + (node.brokenLinks.length > 1 ? 's':'') + '</h3> \
@@ -138,7 +138,7 @@
       function generateShortReport(message) {
         var report = "";
         document.getElementById('btn-download').style.display = "initial";
-        report += '<div class="widget-view internal-widget"><div class="widget-item-view properties-widget-item-view"> \
+        report += '<div class="widget-view active internal-widget"><div class="widget-item-view properties-widget-item-view"> \
                     <div class="broken-links-error"> \
                       <h3>Found ' + message.brokenCount + ' invalid link' + (message.brokenCount > 1 ? 's':'') + '</h3> \
                       <div class="broken-links-error__body">';
@@ -215,7 +215,7 @@
 
       function setError(message) {
         var result = document.getElementById('link-checker__result');
-        result.innerHTML = '<div class="widget-view internal-widget"> \
+        result.innerHTML = '<div class="widget-view active internal-widget"> \
                               <div class="widget-item-view properties-widget-item-view version-widget-item-view"> \
                                 <div class="broken-links-error"> \
                                   <h3 style="text-align: center">'+ message.error + '</h3> \
@@ -270,4 +270,4 @@
         }
       };
     </script>
-  </body>
+  </widget>

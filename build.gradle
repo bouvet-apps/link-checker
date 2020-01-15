@@ -1,5 +1,7 @@
 plugins {
-    id 'com.enonic.xp.app' version '1.0.15'
+    id 'com.enonic.xp.app' version '2.0.0'
+    id 'java'
+    id 'maven-publish'
 }
 
 app {
@@ -15,7 +17,7 @@ dependencies {
     compile "com.enonic.xp:portal-api:${xpVersion}"
     include "com.enonic.xp:lib-content:${xpVersion}"
     include "com.enonic.xp:lib-portal:${xpVersion}"
-    include "com.enonic.xp:lib-thymeleaf:${xpVersion}"
+    include "com.enonic.lib:lib-thymeleaf:2.0.0"
     include 'com.enonic.lib:lib-http-client:1.0.2'
     include 'com.enonic.lib:lib-cache:1.1.0'
     include "com.enonic.xp:lib-auth:${xpVersion}"
