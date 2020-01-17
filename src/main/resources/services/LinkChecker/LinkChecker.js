@@ -1,7 +1,8 @@
 var contentLib = require("/lib/xp/content");
+var portalLib = require("/lib/xp/portal");
 var contextLib = require("/lib/xp/context");
 var httpClientLib = require("/lib/http-client");
-var cacheLib = require("/lib/xp/cache");
+var cacheLib = require("/lib/cache");
 var authLib = require("/lib/xp/auth");
 var webSocketLib = require("/lib/xp/websocket");
 
@@ -17,6 +18,7 @@ exports.get = function(req) {
     }
   };
 };
+
 var cache = cacheLib.newCache({
   size: 100,
   expire: 259200
