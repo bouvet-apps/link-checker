@@ -11,7 +11,7 @@ const libs = {
 const devModeBean = __.newBean('no.bouvet.xp.lib.isdev.IsDev');
 const isDevMode = __.toNativeObject(devModeBean.isDevMode());
 
-function devLog(message, prefix = "") {
+const devLog = (message, prefix = "") => {
   if (isDevMode) {
     log.info(`${prefix}${JSON.stringify(message, null, 4)}`);
   }
@@ -25,12 +25,12 @@ const cache = libs.cache.newCache({
   expire: 259200
 });
 
-function getDefaultContextParams(event) {
+const getDefaultContextParams = (event) => {
   const user = event.data.user.split(":");
   return { branch: event.data.branch, user: { login: user[2], userStore: user[1] } };
 }
 
-function checkInternalLink(link, branch) {
+const checkInternalLink = (link, branch) => {
   devLog(link, "Link: ");
   const contextParams = { branch: branch, principals: ["role:system.admin"] };
   const result = libs.context.run(contextParams, () => {
@@ -43,7 +43,7 @@ function checkInternalLink(link, branch) {
 }
 
 
-function checkExternalUrl(url) {
+const checkExternalUrl = (url) => {
   try {
     if (url.indexOf("http://") == -1 && url.indexOf("https://") == -1) {
       url = `http://${url}`;
@@ -74,7 +74,7 @@ function checkExternalUrl(url) {
   }
 }
 
-function getInternalReferences(node) {
+const getInternalReferences = (node) => {
   const bean = __.newBean('no.bouvet.xp.lib.outboundreferences.OutboundReferences');
   const references = __.toNativeObject(bean.getOutboundReferences(node._id));
   log.info("NODE REF::::" + JSON.stringify(references, null, 4));
@@ -82,7 +82,7 @@ function getInternalReferences(node) {
 }
 
 
-function getLinks(text) {
+const getLinks = (text) => {
   // Do not have global regex, they must be initialized each time.
   const externalExpression = /((https?:\/\/|ftp:\/\/|www\.|[^\s:=]+@www\.).*?[a-z_\/0-9\-\#=&\(\)])(?=(\.|,|;|\?|\!)?(?:“|”|"|'|«|»|\[\/|\s|\r|\n|\\|<|>|\[\n))/gi; //(s:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/|www\.)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/[^" \\><]*)?/gi;
   const internalExpression = /((content|media|image):\/\/)(download\/)?[a-z0-9]+([\-]{1}[a-z0-9]+)*/gi;
@@ -93,7 +93,7 @@ function getLinks(text) {
   return links;
 }
 
-function getNodes(content, event, start) {
+const getNodes = (content, event, start) => {
   const results = libs.content.query({
     query: `_path LIKE '/content${content._path}/*'`,
     branch: event.data.branch,
@@ -105,7 +105,7 @@ function getNodes(content, event, start) {
   return results;
 }
 
-function buildCacheKey(event, key, content) {
+const buildCacheKey = (event, key, content) => {
   /*
     Get the last modified child of the content to use in the cache key.
     This will ensure any changes to its children will trigger a new fresh link check.
@@ -123,7 +123,7 @@ function buildCacheKey(event, key, content) {
   return cacheKey;
 }
 
-function checkNode(event, node) {
+const checkNode = (event, node) => {
   const currentSession = CURRENTLY_RUNNING[event.session.id]
   const brokenLinks = [];
   const failedLinks = [];
@@ -158,7 +158,7 @@ function checkNode(event, node) {
 }
 
 
-function next(event, indexParam) {
+const next = (event, indexParam) => {
   const currentSession = CURRENTLY_RUNNING[event.session.id]
   let nodes = currentSession.nodes;
   const index = parseInt(indexParam);
@@ -204,7 +204,7 @@ function next(event, indexParam) {
   libs.webSocket.send(event.session.id, str);
 }
 
-function startChecker(event) {
+const startChecker = (event) => {
   const key = event.data.contentId;
 
   const currentContent = libs.content.get({ key: key, branch: event.data.branch });
@@ -305,15 +305,13 @@ exports.webSocketEvent = (event) => {
   );
 };
 
-exports.get = (req) => {
-  return {
-    webSocket: {
-      subProtocols: ["text"],
-      data: {
-        contentId: req.params.contentId,
-        branch: req.params.branch,
-        user: libs.auth.getUser().key // Format: "user:userStore:userLogin",
-      }
+exports.get = (req) => ({
+  webSocket: {
+    subProtocols: ["text"],
+    data: {
+      contentId: req.params.contentId,
+      branch: req.params.branch,
+      user: libs.auth.getUser().key // Format: "user:userStore:userLogin",
     }
-  };
-};
+  }
+});

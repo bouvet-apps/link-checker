@@ -1,12 +1,14 @@
-const portalLib = require("/lib/xp/portal");
-const thymeleaf = require("/lib/thymeleaf");
+const libs = {
+  portal: require("/lib/xp/portal"),
+  thymeleaf: require("/lib/thymeleaf")
+};
 
 const view = resolve("link-checker.html");
 
 exports.get = req => {
-  var contentId = req.params.contentId;
-  if (!contentId && portalLib.getContent()) {
-    contentId = portalLib.getContent()._id;
+  let contentId = req.params.contentId;
+  if (!contentId && libs.portal.getContent()) {
+    contentId = libs.portal.getContent()._id;
   }
 
   if (!contentId) {
@@ -16,7 +18,7 @@ exports.get = req => {
     };
   }
 
-  let url = portalLib.serviceUrl({
+  let url = libs.portal.serviceUrl({
     service: "link-checker",
     type: "absolute",
     params: {
@@ -27,7 +29,7 @@ exports.get = req => {
   url = url.replace(/^http:\/\//i, "ws://");
   url = url.replace(/^https:\/\//i, "wss://");
 
-  const widgetScriptUrl = portalLib.assetUrl({ path: "js/widget.js" });
+  const widgetScriptUrl = libs.portal.assetUrl({ path: "js/widget.js" });
 
   const model = {
     serviceUrl: url,
@@ -36,7 +38,7 @@ exports.get = req => {
   };
 
   return {
-    body: thymeleaf.render(view, model),
+    body: libs.thymeleaf.render(view, model),
     contentType: "text/html"
   };
 };
