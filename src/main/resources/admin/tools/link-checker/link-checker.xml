@@ -1,7 +1,0 @@
-<tool>
-    <display-name>LinkChecker</display-name>
-    <description>Admin panel for LinkChecker</description>
-    <allow>
-      <principal>role:system.admin</principal>
-    </allow>
-  </tool>
