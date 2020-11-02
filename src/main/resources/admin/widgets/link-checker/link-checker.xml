@@ -2,9 +2,9 @@
 <widget>
   <display-name>LinkChecker</display-name>
   <interfaces>
-    <interface>contentstudio.detailpanel</interface>
+    <interface>contentstudio.contextpanel</interface>
   </interfaces>
-   <allow>
+  <allow>
     <principal>role:system.admin</principal>
     <principal>role:cms.admin</principal>
     <principal>role:cms.expert</principal>

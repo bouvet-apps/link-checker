@@ -1,8 +1,9 @@
-const libs = { 
+const libs = {
+  portal: require("/lib/xp/portal"),
   content: require("/lib/xp/content"),
   context: require("/lib/xp/context"),
   httpClient: require("/lib/http-client"),
-  cache: require("/lib/xp/cache"),
+  cache: require("/lib/cache"),
   auth: require("/lib/xp/auth"),
   webSocket: require("/lib/xp/websocket"),
 }
@@ -62,11 +63,11 @@ function checkExternalUrl(url) {
   } catch (error) {
     const errorString = error.toString();
     if (errorString.match(/java\.net\.UnknownHostException/)) {
-      return {status: 404 };
+      return { status: 404 };
     } else if (errorString.match(/java\.net\.SocketTimeoutException/)) {
-      return {status: 408 };
+      return { status: 408 };
     } else if (errorString.match(/javax\.net\.ssl\.SSLPeerUnverifiedException/)) {
-      return {status: 526 };
+      return { status: 526 };
     }
     // Assume local error with httpClient
     return { error: true };
@@ -82,7 +83,7 @@ function getInternalReferences(node) {
 
 
 function getLinks(text) {
-  // Do not have global regex, they must be initialized each time. 
+  // Do not have global regex, they must be initialized each time.
   const externalExpression = /((https?:\/\/|ftp:\/\/|www\.|[^\s:=]+@www\.).*?[a-z_\/0-9\-\#=&\(\)])(?=(\.|,|;|\?|\!)?(?:“|”|"|'|«|»|\[\/|\s|\r|\n|\\|<|>|\[\n))/gi; //(s:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/|www\.)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/[^" \\><]*)?/gi;
   const internalExpression = /((content|media|image):\/\/)(download\/)?[a-z0-9]+([\-]{1}[a-z0-9]+)*/gi;
   const links = {
@@ -129,7 +130,7 @@ function checkNode(event, node) {
 
   const urls = getLinks(JSON.stringify(node));
   urls.internalLinks = [...urls.internalLinks, ...getInternalReferences(node)];
-  
+
   urls.externalLinks.forEach(url => {
     const { status, error } = checkExternalUrl(url);
 
@@ -165,7 +166,7 @@ function next(event, indexParam) {
     /*
       Need to put finished result into cache.
       If the code has reached this point, we know that the cache contains no results.
-      Thus results variable is not used directly, but only for setting cache. 
+      Thus results variable is not used directly, but only for setting cache.
     */
     cache.remove(currentSession.cacheKey);
     const results = cache.get(currentSession.cacheKey, function () {
@@ -219,10 +220,10 @@ function startChecker(event) {
     */
     const cached = cache.get(cacheKey, () => false);
     if (cached) {
-      const str = JSON.stringify({ 
-        results: cached.results, 
-        brokenCount: cached.brokenCount, 
-        failedCount: cached.failedCount, 
+      const str = JSON.stringify({
+        results: cached.results,
+        brokenCount: cached.brokenCount,
+        failedCount: cached.failedCount,
         key: key
       });
       libs.webSocket.send(event.session.id, str);
@@ -272,12 +273,12 @@ exports.webSocketEvent = (event) => {
         case "open":
           startChecker(event);
           break;
-    
+
         case "close":
         case "error":
           delete CURRENTLY_RUNNING[event.session.id];
           break;
-    
+
         case "message":
           const [messageType, index] = message.split(":");
           if (messageType == "NEXT") {

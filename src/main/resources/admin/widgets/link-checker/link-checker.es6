@@ -1,14 +1,26 @@
 const portalLib = require("/lib/xp/portal");
-const thymeleaf = require("/lib/xp/thymeleaf");
+const thymeleaf = require("/lib/thymeleaf");
 
 const view = resolve("link-checker.html");
 
 exports.get = req => {
+  var contentId = req.params.contentId;
+  if (!contentId && portalLib.getContent()) {
+    contentId = portalLib.getContent()._id;
+  }
+
+  if (!contentId) {
+    return {
+      contentType: 'text/html',
+      body: '<widget class="error">No content selected</widget>'
+    };
+  }
+
   let url = portalLib.serviceUrl({
     service: "link-checker",
     type: "absolute",
     params: {
-      contentId: req.params.contentId,
+      contentId,
       branch: "draft"
     }
   });
@@ -16,10 +28,10 @@ exports.get = req => {
   url = url.replace(/^https:\/\//i, "wss://");
 
   const widgetScriptUrl = portalLib.assetUrl({ path: "js/widget.js" });
-  
-  const model = { 
-    serviceUrl: url, 
-    key: req.params.contentId, 
+
+  const model = {
+    serviceUrl: url,
+    key: contentId,
     widgetScriptUrl
   };
 

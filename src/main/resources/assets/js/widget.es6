@@ -5,14 +5,14 @@
 */
 function getElements(selectors) {
   var elements = {};
-  selectors.forEach(function(selector) {
+  selectors.forEach(function (selector) {
     elements[selector] = document.querySelector(selector);
   });
   return elements;
 }
 
 
-function createReport (message) {
+function createReport(message) {
   window.downloadCSV = function () {
     generateSpreadsheet(message.results);
   }
@@ -24,21 +24,21 @@ function createReport (message) {
     report = generateLongReport(message);
   }
   else {
-    report = '<div class="widget-view internal-widget success"><h5 class="success-text">&#10004; No broken links found!</h5></div>';
+    report = '<div class="widget-view internal-widget success active"><h5 class="success-text">&#10004; No broken links found!</h5></div>';
   }
   result.innerHTML = report;
 }
 
 function generateSpreadsheet(results) {
   const ws = XLSX.utils.json_to_sheet([],
-    {header: ["displayName", "path", "broken link", "status"], skipHeader: false});
+    { header: ["displayName", "path", "broken link", "status"], skipHeader: false });
   /* Write data starting at A2 */
-  results.forEach(function(result, index) {
-    const links = result.brokenLinks.map(function(link) {
-      return {C: link.link, D: link.status};
+  results.forEach(function (result, index) {
+    const links = result.brokenLinks.map(function (link) {
+      return { C: link.link, D: link.status };
     });
     const data = [{ A: result.displayName, B: result.path, C: links[0].C, D: links[0].D }].concat(links.slice(1));
-    XLSX.utils.sheet_add_json(ws, data, {skipHeader: true, origin: index === 0 ? "A2": -1});
+    XLSX.utils.sheet_add_json(ws, data, { skipHeader: true, origin: index === 0 ? "A2" : -1 });
   })
 
   const date = new Date();
@@ -51,23 +51,23 @@ function generateLongReport(message) {
   let report = "";
   document.getElementById("btn-download").style.display = "initial";
   message.results.forEach(node => {
-    report += `<div class="widget-view internal-widget">
+    report += `<div class="widget-view active internal-widget">
                 <div class="widget-item-view properties-widget-item-view">
                   <div class="broken-links-error">
-                    <h3>Found ${node.brokenLinks.length} invalid link${(node.brokenLinks.length > 1 ? 's':'')}</h3>
+                    <h3>Found ${node.brokenLinks.length} invalid link${(node.brokenLinks.length > 1 ? 's' : '')}</h3>
                     <div class="broken-links-error__body">
                       <h4>${node.displayName}</h4>
                       <p>${node.path}</p>`;
-          node.brokenLinks.forEach(link => {
-            report += `<div class="broken-links-error__link">
+    node.brokenLinks.forEach(link => {
+      report += `<div class="broken-links-error__link">
                         <div style="margin-right: 5px;">&#10007;</div>
                         <div class="broken-links-error__link__target">
                           <a href="${link.link}" target="_blank">${link.link}</a>
                         </div>
                         <span style="margin-left: 5px">${(link.status == 408 ? 'Timeout' : link.status)}</span>
                       </div>`;
-          });
-          report += `</div>
+    });
+    report += `</div>
                   </div>
                 </div>
               </div>`;
@@ -82,12 +82,12 @@ const MAX_BROKEN_SHOWN = 8;
 function generateShortReport(message) {
   var report = "";
   document.getElementById("btn-download").style.display = "initial";
-  report += `<div class="widget-view internal-widget">
+  report += `<div class="widget-view active internal-widget">
               <div class="widget-item-view properties-widget-item-view">
                 <div class="broken-links-error">
-                  <h3>Found ${message.brokenCount} invalid link ${(message.brokenCount > 1 ? 's':'')}</h3>
+                  <h3>Found ${message.brokenCount} invalid link ${(message.brokenCount > 1 ? 's' : '')}</h3>
                   <div class="broken-links-error__body">`;
-  
+
   let countShown = 0;
   for (let i = 0; i < message.results.length; i++) {
     for (let j = 0; j < message.results[i].brokenLinks.length; j++) {
@@ -106,7 +106,7 @@ function generateShortReport(message) {
     }
     if (countShown >= MAX_BROKEN_SHOWN) break;
   }
-      report += `<p class="download-more">...</p>
+  report += `<p class="download-more">...</p>
                 <p class="download-more">Detailed in spreadsheet</p>
                 </div>
               </div>
@@ -146,7 +146,7 @@ function updateProgress(message) {
 function updateIndicator(percent) {
   const circle = document.querySelector("#progress-indicator__bar");
   const circumference = 339.29;
-  const offset = ((100-percent)/100)*circumference;
+  const offset = ((100 - percent) / 100) * circumference;
   circle.style["stroke-dashoffset"] = offset;
 }
 
@@ -154,9 +154,9 @@ function setResult(message) {
   const key = document.querySelector("#contentId");
   if (key && (key.value == message.key)) {
     updateIndicator(100);
-    setTimeout(function() {
-      const elements = getElements([".link-checker__progress", ".link-checker__status", 
-      "#btn-stop", "#btn-start", ".progress-indicator__wrapper", ".selection-radios"]);
+    setTimeout(function () {
+      const elements = getElements([".link-checker__progress", ".link-checker__status",
+        "#btn-stop", "#btn-start", ".progress-indicator__wrapper", ".selection-radios"]);
 
       elements[".link-checker__progress"].style.display = "none";
       elements["#btn-start"].style.display = "inline-block";
@@ -171,7 +171,7 @@ function setResult(message) {
 
 function setError(message) {
   const result = document.getElementById("link-checker__result");
-  result.innerHTML = `<div class="widget-view internal-widget">
+  result.innerHTML = `<div class="widget-view active internal-widget">
                         <div class="widget-item-view properties-widget-item-view version-widget-item-view">
                           <div class="broken-links-error">
                             <h3 style="text-align: center">${message.error}</h3>
@@ -183,8 +183,8 @@ function setError(message) {
 
 function startCheck() {
   const form = document.getElementById("link-checker__form");
-  const elements = getElements([".link-checker__progress", ".link-checker__status", 
-  ".progress-indicator__wrapper", "#btn-stop", "#btn-start", "#btn-download", ".selection-radios", "#checkChildren"]);
+  const elements = getElements([".link-checker__progress", ".link-checker__status",
+    ".progress-indicator__wrapper", "#btn-stop", "#btn-start", "#btn-download", ".selection-radios", "#checkChildren"]);
 
   elements[".progress-indicator__wrapper"].style = "display: inline";
   elements["#btn-start"].style.display = "none";
