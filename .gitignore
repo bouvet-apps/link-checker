@@ -89,3 +89,7 @@ crashlytics-build.properties
 
 ### Enonic ###
 .enonic
+
+# Dependency directories
+node_modules/
+jspm_packages/
