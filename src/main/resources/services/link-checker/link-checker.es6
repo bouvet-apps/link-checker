@@ -9,15 +9,6 @@ const libs = {
   webSocket: require("/lib/xp/websocket")
 };
 
-const devModeBean = __.newBean("no.bouvet.xp.lib.isdev.IsDev");
-const isDevMode = __.toNativeObject(devModeBean.isDevMode());
-
-const devLog = (message, prefix = "") => {
-  if (isDevMode) {
-    log.info(`${prefix}${JSON.stringify(message, null, 4)}`);
-  }
-};
-
 const CURRENTLY_RUNNING = {};
 const PAGINATION_COUNT = 100;
 
@@ -32,7 +23,6 @@ const getDefaultContextParams = (event) => {
 };
 
 const checkInternalLink = (link, branch) => {
-  devLog(link, "Link: ");
   const contextParams = { branch: branch, principals: ["role:system.admin"] };
   const result = libs.context.run(contextParams, () => {
     const split = link.split("/");
