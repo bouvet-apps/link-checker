@@ -228,7 +228,6 @@ gradle-app.setting
 # End of https://www.gitignore.io/api/java,node,macos,gradle,java-web,intellij
 
 build
-src/main/resources/assets/
 src/main/resources/lib/moment.js
 src/main/resources/lib/momenttimezone.js
 src/main/resources/lib/fast-equals.js

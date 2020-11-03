@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 const libs = {
   portal: require("/lib/xp/portal"),
   content: require("/lib/xp/content"),
@@ -5,17 +6,17 @@ const libs = {
   httpClient: require("/lib/http-client"),
   cache: require("/lib/cache"),
   auth: require("/lib/xp/auth"),
-  webSocket: require("/lib/xp/websocket"),
-}
+  webSocket: require("/lib/xp/websocket")
+};
 
-const devModeBean = __.newBean('no.bouvet.xp.lib.isdev.IsDev');
+const devModeBean = __.newBean("no.bouvet.xp.lib.isdev.IsDev");
 const isDevMode = __.toNativeObject(devModeBean.isDevMode());
 
 const devLog = (message, prefix = "") => {
   if (isDevMode) {
     log.info(`${prefix}${JSON.stringify(message, null, 4)}`);
   }
-}
+};
 
 const CURRENTLY_RUNNING = {};
 const PAGINATION_COUNT = 100;
@@ -27,8 +28,8 @@ const cache = libs.cache.newCache({
 
 const getDefaultContextParams = (event) => {
   const user = event.data.user.split(":");
-  return { branch: event.data.branch, user: { login: user[2], userStore: user[1] } };
-}
+  return { branch: event.data.branch, user: { login: user[2], idProvider: user[1] } };
+};
 
 const checkInternalLink = (link, branch) => {
   devLog(link, "Link: ");
@@ -40,12 +41,13 @@ const checkInternalLink = (link, branch) => {
     });
   });
   return { status: result ? 200 : 404 };
-}
+};
 
 
-const checkExternalUrl = (url) => {
+const checkExternalUrl = (externalUrl) => {
+  let url = externalUrl;
   try {
-    if (url.indexOf("http://") == -1 && url.indexOf("https://") == -1) {
+    if (url.indexOf("http://") === -1 && url.indexOf("https://") === -1) {
       url = `http://${url}`;
     }
     const response = libs.httpClient.request({
@@ -64,34 +66,36 @@ const checkExternalUrl = (url) => {
     const errorString = error.toString();
     if (errorString.match(/java\.net\.UnknownHostException/)) {
       return { status: 404 };
-    } else if (errorString.match(/java\.net\.SocketTimeoutException/)) {
+    }
+    if (errorString.match(/java\.net\.SocketTimeoutException/)) {
       return { status: 408 };
-    } else if (errorString.match(/javax\.net\.ssl\.SSLPeerUnverifiedException/)) {
+    }
+    if (errorString.match(/javax\.net\.ssl\.SSLPeerUnverifiedException/)) {
       return { status: 526 };
     }
     // Assume local error with httpClient
     return { error: true };
   }
-}
+};
 
 const getInternalReferences = (node) => {
-  const bean = __.newBean('no.bouvet.xp.lib.outboundreferences.OutboundReferences');
+  const bean = __.newBean("no.bouvet.xp.lib.outboundreferences.OutboundReferences");
   const references = __.toNativeObject(bean.getOutboundReferences(node._id));
-  log.info("NODE REF::::" + JSON.stringify(references, null, 4));
+  log.info(`NODE REF::::${JSON.stringify(references, null, 4)}`);
   return references;
-}
+};
 
 
 const getLinks = (text) => {
   // Do not have global regex, they must be initialized each time.
-  const externalExpression = /((https?:\/\/|ftp:\/\/|www\.|[^\s:=]+@www\.).*?[a-z_\/0-9\-\#=&\(\)])(?=(\.|,|;|\?|\!)?(?:“|”|"|'|«|»|\[\/|\s|\r|\n|\\|<|>|\[\n))/gi; //(s:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/|www\.)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/[^" \\><]*)?/gi;
-  const internalExpression = /((content|media|image):\/\/)(download\/)?[a-z0-9]+([\-]{1}[a-z0-9]+)*/gi;
+  const externalExpression = /((https?:\/\/|ftp:\/\/|www\.|[^\s:=]+@www\.).*?[a-z_/0-9\-#=&()])(?=(\.|,|;|\?|!)?(?:“|”|"|'|«|»|\[\/|\s|\r|\n|\\|<|>|\[\n))/gi; // (s:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/|www\.)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/[^" \\><]*)?/gi;
+  const internalExpression = /((content|media|image):\/\/)(download\/)?[a-z0-9]+([-]{1}[a-z0-9]+)*/gi;
   const links = {
     externalLinks: text.match(externalExpression) || [],
     internalLinks: text.match(internalExpression) || []
   };
   return links;
-}
+};
 
 const getNodes = (content, event, start) => {
   const results = libs.content.query({
@@ -103,7 +107,7 @@ const getNodes = (content, event, start) => {
   results.start = start;
 
   return results;
-}
+};
 
 const buildCacheKey = (event, key, content) => {
   /*
@@ -112,7 +116,10 @@ const buildCacheKey = (event, key, content) => {
   */
   let cacheKey = key;
 
-  let lastModifiedChild = libs.content.getChildren({ key: key, count: 1, start: 0, sort: "modifiedTime DESC" }).hits;
+  const lastModifiedChild = libs.content.getChildren({
+    key: key, count: 1, start: 0, sort: "modifiedTime DESC"
+  }).hits;
+
   if (lastModifiedChild[0] && lastModifiedChild[0].modifiedTime > content.modifiedTime) {
     cacheKey += lastModifiedChild[0].modifiedTime;
   } else {
@@ -121,17 +128,17 @@ const buildCacheKey = (event, key, content) => {
 
   cacheKey += event.session.params.selection;
   return cacheKey;
-}
+};
 
 const checkNode = (event, node) => {
-  const currentSession = CURRENTLY_RUNNING[event.session.id]
+  const currentSession = CURRENTLY_RUNNING[event.session.id];
   const brokenLinks = [];
   const failedLinks = [];
 
   const urls = getLinks(JSON.stringify(node));
   urls.internalLinks = [...urls.internalLinks, ...getInternalReferences(node)];
 
-  urls.externalLinks.forEach(url => {
+  urls.externalLinks.forEach((url) => {
     const { status, error } = checkExternalUrl(url);
 
     if (error) {
@@ -144,7 +151,7 @@ const checkNode = (event, node) => {
       brokenLinks.push({ link: url, status: status });
     }
   });
-  urls.internalLinks.forEach(link => {
+  urls.internalLinks.forEach((link) => {
     const { status } = checkInternalLink(link, event.data.branch);
     if (status >= 309 && status < 900) {
       currentSession.brokenCount++;
@@ -152,14 +159,16 @@ const checkNode = (event, node) => {
     }
   });
   if (brokenLinks.length > 0) {
-    const data = { displayName: node.displayName, path: node._path, brokenLinks, failedLinks };
+    const data = {
+      displayName: node.displayName, path: node._path, brokenLinks, failedLinks
+    };
     currentSession.results.push(data);
   }
-}
+};
 
 
 const next = (event, indexParam) => {
-  const currentSession = CURRENTLY_RUNNING[event.session.id]
+  const currentSession = CURRENTLY_RUNNING[event.session.id];
   let nodes = currentSession.nodes;
   const index = parseInt(indexParam);
   if (index >= nodes.total) {
@@ -169,13 +178,12 @@ const next = (event, indexParam) => {
       Thus results variable is not used directly, but only for setting cache.
     */
     cache.remove(currentSession.cacheKey);
-    const results = cache.get(currentSession.cacheKey, function () {
-      return {
-        results: currentSession.results,
-        brokenCount: currentSession.brokenCount,
-        failedCount: currentSession.failedCount
-      };
-    });
+    cache.get(currentSession.cacheKey, () => ({
+      results: currentSession.results,
+      brokenCount: currentSession.brokenCount,
+      failedCount: currentSession.failedCount
+    }));
+
     const str = JSON.stringify({
       results: currentSession.results,
       key: currentSession.key,
@@ -184,7 +192,9 @@ const next = (event, indexParam) => {
     });
     libs.webSocket.send(event.session.id, str);
     return;
-  } else if (index >= nodes.start + nodes.count) {
+  }
+
+  if (index >= nodes.start + nodes.count) {
     nodes = getNodes(currentSession.content, event, index);
     currentSession.nodes = nodes;
   }
@@ -202,15 +212,14 @@ const next = (event, indexParam) => {
     failedCount: currentSession.failedCount
   });
   libs.webSocket.send(event.session.id, str);
-}
+};
 
 const startChecker = (event) => {
   const key = event.data.contentId;
-
   const currentContent = libs.content.get({ key: key, branch: event.data.branch });
 
   if (currentContent) {
-    let cacheKey = buildCacheKey(event, key, currentContent);
+    const cacheKey = buildCacheKey(event, key, currentContent);
 
     /*
       We cannot give the cache a single function to populate with,
@@ -232,7 +241,7 @@ const startChecker = (event) => {
 
     let nodes = { count: 0, total: 0, hits: [] };
     const selection = event.session.params.selection;
-    if (selection == "children" || selection == "both") {
+    if (selection === "children" || selection === "both") {
       nodes = getNodes(currentContent, event, 0);
     }
 
@@ -248,18 +257,18 @@ const startChecker = (event) => {
       failedCount: 0
     };
 
-    if (selection == "content" || selection == "both") {
+    if (selection === "content" || selection === "both") {
       // Check selected content first outside the "loop" as to not mess with starts and counts.
       libs.webSocket.send(event.session.id, JSON.stringify({ total: nodes.total, key: key, mainContent: true }));
       checkNode(event, currentContent);
     }
-    libs.webSocket.send(event.session.id, JSON.stringify({ index: 0, count: nodes.count, total: nodes.total, key: key }));
+    libs.webSocket.send(event.session.id, JSON.stringify({
+      index: 0, count: nodes.count, total: nodes.total, key: key
+    }));
   } else {
     libs.webSocket.send(event.session.id, JSON.stringify({ error: "Content not found :(", key: key }));
   }
-}
-
-
+};
 
 exports.webSocketEvent = (event) => {
   const currentSession = CURRENTLY_RUNNING[event.session.id];
@@ -268,7 +277,6 @@ exports.webSocketEvent = (event) => {
   libs.context.run(
     getDefaultContextParams(event),
     () => {
-
       switch (type) {
         case "open":
           startChecker(event);
@@ -281,8 +289,8 @@ exports.webSocketEvent = (event) => {
 
         case "message":
           const [messageType, index] = message.split(":");
-          if (messageType == "NEXT") {
-            if (currentSession.isRunning == true) {
+          if (messageType === "NEXT") {
+            if (currentSession.isRunning === true) {
               next(event, index);
             } else {
               const str = JSON.stringify({
@@ -293,25 +301,26 @@ exports.webSocketEvent = (event) => {
               libs.webSocket.send(event.session.id, str);
             }
           }
-          if (messageType == "STOP") {
+          if (messageType === "STOP") {
             if (currentSession) {
               currentSession.isRunning = false;
             }
           }
           break;
+        default:
+          break;
       }
-
     }
   );
 };
 
-exports.get = (req) => ({
+exports.get = req => ({
   webSocket: {
     subProtocols: ["text"],
     data: {
       contentId: req.params.contentId,
       branch: req.params.branch,
-      user: libs.auth.getUser().key // Format: "user:userStore:userLogin",
+      user: libs.auth.getUser().key // Format: "user:idProvider:userLogin",
     }
   }
 });

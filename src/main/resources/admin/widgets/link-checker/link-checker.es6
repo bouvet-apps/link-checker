@@ -5,7 +5,7 @@ const libs = {
 
 const view = resolve("link-checker.html");
 
-exports.get = req => {
+exports.get = (req) => {
   let contentId = req.params.contentId;
   if (!contentId && libs.portal.getContent()) {
     contentId = libs.portal.getContent()._id;
@@ -13,8 +13,8 @@ exports.get = req => {
 
   if (!contentId) {
     return {
-      contentType: 'text/html',
-      body: '<widget class="error">No content selected</widget>'
+      contentType: "text/html",
+      body: "<widget class=\"error\">No content selected</widget>"
     };
   }
 
