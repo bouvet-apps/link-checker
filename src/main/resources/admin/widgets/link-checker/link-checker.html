@@ -35,7 +35,7 @@
       </div>
       <button id="btn-stop" style="display: none;" onclick="window.stopCheck()" value="STOP">STOP</button>
       <button id="btn-download" onclick="window.downloadCSV()" style="display: none;" value="CSV"> <i
-          class="fas fa-download"></i> Download Excel</button>
+          class="fas fa-download"></i> Download report (.cvs) </button>
       <div class="link-checker__progress">
         <div class="progress-indicator__container">
           <div class="progress-indicator__counter">Loading...</div>
@@ -45,6 +45,8 @@
               <circle r="54" cx="60" cy="60" fill="transparent" stroke-dasharray="339.29" stroke-dashoffset="0">
               </circle>
               <circle id="progress-indicator__bar" r="54" cx="60" cy="60" fill="transparent" stroke-dasharray="339.29"
+                stroke-dashoffset="339.29" stroke-linecap="round"></circle>
+              <circle id="progress-indicator__next" r="54" cx="60" cy="60" fill="transparent" stroke-dasharray="339.29"
                 stroke-dashoffset="339.29" stroke-linecap="round"></circle>
             </svg>
           </div>

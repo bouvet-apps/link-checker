@@ -1,7 +1,7 @@
 
 /*
   Each function needs to select HTML content anew,
-  in case the html has been rerended by switching content in content studio.
+  in case the html has been rerended by e.g. switching content in content studio.
 */
 const getElements = (selectors) => {
   const elements = {};
@@ -11,15 +11,25 @@ const getElements = (selectors) => {
   return elements;
 };
 
+const mapStatus = (status) => {
+  switch (status) {
+    case 0:
+      return "Needs manuel review";
+    case 408:
+      return "Timeout";
+    default:
+      return status;
+  }
+};
 
 const generateSpreadsheet = (results) => {
   const ws = XLSX.utils.json_to_sheet([],
-    { header: ["displayName", "path", "broken link", "status"], skipHeader: false });
+    { header: ["displayName", "path", "type", "broken link", "status"], skipHeader: false });
   /* Write data starting at A2 */
   results.forEach((result, index) => {
-    const links = result.brokenLinks.map(link => ({ C: link.link, D: link.status }));
+    const links = result.brokenLinks.map(link => ({ C: link.type, D: link.link, E: mapStatus(link.status) }));
     const data = [{
-      A: result.displayName, B: result.path, C: links[0].C, D: links[0].D
+      A: result.displayName, B: result.path, C: links[0].C, D: links[0].D, E: links[0].E
     }].concat(links.slice(1));
     XLSX.utils.sheet_add_json(ws, data, { skipHeader: true, origin: index === 0 ? "A2" : -1 });
   });
@@ -30,6 +40,17 @@ const generateSpreadsheet = (results) => {
   XLSX.writeFile(wb, `report-linkchecker-${date.toLocaleDateString()}-${date.toLocaleTimeString()}.xlsx`, {});
 };
 
+const renderLink = link => `
+<div class="broken-links-error__link">
+  <div class="broken-links-error__link__body">
+    <div style="margin-right: 5px;">${link.type}</div>
+    <span style="margin-left: 5px">${mapStatus(link.status)}</span>
+  </div>
+  <div class="broken-links-error__link__target">
+    <a href="${link.link}" target="_blank">${link.link}</a>
+  </div>
+</div>
+`;
 
 const generateLongReport = (message) => {
   let report = "";
@@ -43,13 +64,7 @@ const generateLongReport = (message) => {
                       <h4>${node.displayName}</h4>
                       <p>${node.path}</p>`;
     node.brokenLinks.forEach((link) => {
-      report += `<div class="broken-links-error__link">
-                        <div style="margin-right: 5px;">&#10007;</div>
-                        <div class="broken-links-error__link__target">
-                          <a href="${link.link}" target="_blank">${link.link}</a>
-                        </div>
-                        <span style="margin-left: 5px">${(link.status === 408 ? "Timeout" : link.status)}</span>
-                      </div>`;
+      report += renderLink(link);
     });
     report += `</div>
                   </div>
@@ -68,34 +83,55 @@ const generateShortReport = (message) => {
   report += `<div class="widget-view active internal-widget">
               <div class="widget-item-view properties-widget-item-view">
                 <div class="broken-links-error">
-                  <h3>Found ${message.brokenCount} invalid link ${(message.brokenCount > 1 ? "s" : "")}</h3>
+                  <h3>Found ${message.brokenCount} invalid link${(message.brokenCount > 1 ? "s" : "")}</h3>
                   <div class="broken-links-error__body">`;
 
   let countShown = 0;
-  for (let i = 0; i < message.results.length; i++) {
-    for (let j = 0; j < message.results[i].brokenLinks.length; j++) {
-      if (countShown > MAX_BROKEN_SHOWN) break;
 
-      const link = message.results[i].brokenLinks[j];
-      report += `<div class="broken-links-error__body__status">
-                  <div style="margin-right: 5px;">&#10007;</div>
-                  <div style="flex-grow:1;">
-                    <a href="${link.link}" target="_blank">${link.link}</a>
-                  </div>
-                  <span style="margin-left: 5px">${(link.status === 408 ? "Timeout" : link.status)}</span>
-                </div>`;
+  message.results.some((result) => {
+    result.brokenLinks.some((link) => {
+      if (countShown > MAX_BROKEN_SHOWN) return true;
+      report += renderLink(link);
       countShown++;
-    }
-    if (countShown >= MAX_BROKEN_SHOWN) break;
-  }
+      return false;
+    });
+    return countShown >= MAX_BROKEN_SHOWN;
+  });
+
   report += `<p class="download-more">...</p>
-                <p class="download-more">Detailed in spreadsheet</p>
+                <p class="download-more">More details in report</p>
                 </div>
               </div>
             </div>
           </div>`;
   return report;
 };
+
+const generateTipsSection = () => `
+  <div class="widget-view active internal-widget link-checker__tips">
+    <div class="widget-item-view properties-widget-item-view">
+      <h3>Tips and information</h3>
+      <div class="link-checker__tips__body">
+        <ul>
+          <li>Only the <em>draft</em> branch is checked, which means the latest updated version of the content (which may or may not be the published version).</li>
+          <li>
+            <p>
+              <em>Internal content</em> links referes to connections to other content in Enonic XP. The text which looks something like <span class="pre">1397f305-c7ef-43e6-a563-4980883b6396</span> is the unique ID of the targeted content.
+            </p>
+            <p>
+              The most common cause for these errors are:
+              <ul>
+                <li>The targeted content has been deleted.</li>
+                <li>This content was imported from another site or server, but the targeted content was not.</li>
+              </ul>
+            </p>
+          </li>
+          <li>If an <em>Internal content</em> link begins with <span class="pre">content://</span>, <span class="pre">media://</span> or <span class="pre">image://</span>; it means the link was found in a rich text field.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+`;
 
 const createReport = (message) => {
   window.downloadCSV = () => {
@@ -111,14 +147,24 @@ const createReport = (message) => {
   } else {
     report = "<div class=\"widget-view internal-widget success active\"><h5 class=\"success-text\">&#10004; No broken links found!</h5></div>";
   }
+
+  if (message.brokenCount > 0) {
+    report += generateTipsSection();
+  }
   result.innerHTML = report;
 };
 
 const updateIndicator = (percent) => {
   const circle = document.querySelector("#progress-indicator__bar");
   const circumference = 339.29;
+  const current = parseInt(circle.style["stroke-dashoffset"]);
+
   const offset = ((100 - percent) / 100) * circumference;
   circle.style["stroke-dashoffset"] = offset;
+
+  const difference = Math.min(offset - current, -5);
+  const circleNext = document.querySelector("#progress-indicator__next");
+  circleNext.style["stroke-dashoffset"] = offset + difference;
 };
 
 const updateProgress = (message) => {

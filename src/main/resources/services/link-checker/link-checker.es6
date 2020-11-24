@@ -26,7 +26,7 @@ const checkInternalLink = (link, branch) => {
   const contextParams = { branch: branch, principals: ["role:system.admin"] };
   const result = libs.context.run(contextParams, () => {
     const split = link.split("/");
-    return libs.content.get({
+    return libs.content.exists({
       key: split[split.length - 1]
     });
   });
@@ -71,7 +71,6 @@ const checkExternalUrl = (externalUrl) => {
 const getInternalReferences = (node) => {
   const bean = __.newBean("no.bouvet.xp.lib.outboundreferences.OutboundReferences");
   const references = __.toNativeObject(bean.getOutboundReferences(node._id));
-  log.info(`NODE REF::::${JSON.stringify(references, null, 4)}`);
   return references;
 };
 
@@ -123,7 +122,6 @@ const buildCacheKey = (event, key, content) => {
 const checkNode = (event, node) => {
   const currentSession = CURRENTLY_RUNNING[event.session.id];
   const brokenLinks = [];
-  const failedLinks = [];
 
   const urls = getLinks(JSON.stringify(node));
   urls.internalLinks = [...urls.internalLinks, ...getInternalReferences(node)];
@@ -134,23 +132,23 @@ const checkNode = (event, node) => {
     if (error) {
       // Local error with httpClient
       currentSession.failedCount++;
-      failedLinks.push({ link: url });
+      brokenLinks.push({ link: url, status: 0, type: "External URL" });
     } else if (status >= 309 && status < 900) {
       // Under 900 to avoid annoying linkedIn response
       currentSession.brokenCount++;
-      brokenLinks.push({ link: url, status: status });
+      brokenLinks.push({ link: url, status: status, type: "External URL" });
     }
   });
   urls.internalLinks.forEach((link) => {
     const { status } = checkInternalLink(link, event.data.branch);
     if (status >= 309 && status < 900) {
       currentSession.brokenCount++;
-      brokenLinks.push({ link: link, status });
+      brokenLinks.push({ link: link, status, type: "Internal content" });
     }
   });
   if (brokenLinks.length > 0) {
     const data = {
-      displayName: node.displayName, path: node._path, brokenLinks, failedLinks
+      displayName: node.displayName, path: node._path, brokenLinks
     };
     currentSession.results.push(data);
   }
