@@ -1,5 +1,16 @@
 plugins {
-    id 'com.enonic.xp.app' version '1.0.15'
+    id 'java'
+    id "com.moowork.node" version "1.3.1"
+    id 'com.enonic.defaults' version '2.0.1'
+    id 'com.enonic.xp.app' version '2.0.0'
+}
+
+group = 'com.github.bouvet-apps'
+
+compileJava.options.encoding = "UTF-8"
+
+xp {
+  version = xpVersion
 }
 
 app {
@@ -10,21 +21,62 @@ app {
     systemVersion = "${xpVersion}"
 }
 
+task npmBuild(type: NpmTask,
+        group: 'node',
+        dependsOn: 'npmInstall',
+        description: 'Transpile ES6 files'
+    ) {
+    args = ['run', 'build']
+
+    inputs.dir 'src/main/resources'
+    outputs.dir "$buildDir/resources/main"
+}
+rootProject.tasks.getByName("processResources").dependsOn npmBuild
+
+task deployApp {
+    dependsOn(':deploy')
+    group 'application'
+    description 'Builds server-side components and deploys application'
+    doLast {
+        copy {
+            from "build/libs/${projectName}-${version}.jar"
+            into "${deployDir}"
+            rename ("${projectName}-${version}.jar", "${projectName}.jar")
+        }
+    }
+}
+
 dependencies {
     compile "com.enonic.xp:core-api:${xpVersion}"
     compile "com.enonic.xp:portal-api:${xpVersion}"
     include "com.enonic.xp:lib-content:${xpVersion}"
     include "com.enonic.xp:lib-portal:${xpVersion}"
-    include "com.enonic.xp:lib-thymeleaf:${xpVersion}"
-    include 'com.enonic.lib:lib-http-client:1.0.2'
-    include 'com.enonic.lib:lib-cache:1.1.0'
     include "com.enonic.xp:lib-auth:${xpVersion}"
     include "com.enonic.xp:lib-context:${xpVersion}"
     include "com.enonic.xp:lib-websocket:${xpVersion}"
+    include "com.enonic.lib:lib-thymeleaf:2.0.0"
+    include 'com.enonic.lib:lib-http-client:2.2.1'
+    include 'com.enonic.lib:lib-cache:1.1.0'
 }
 
 repositories {
     mavenLocal()
     jcenter()
     xp.enonicRepo()
+}
+
+
+version = "${jarVersion}"
+
+node {
+    // Version of node to use.
+    version = '12.16.0'
+    // Version of npm to use.
+    npmVersion = '6.13.4'
+    download = true
+}
+
+wrapper {
+    gradleVersion = '5.6.4'
+    distributionType = Wrapper.DistributionType.BIN
 }

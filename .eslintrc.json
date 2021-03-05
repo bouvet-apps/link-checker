@@ -1,0 +1,109 @@
+{
+    "extends": [
+        "airbnb"
+    ],
+    "plugins": [
+        "jest"
+    ],
+    "parserOptions": {
+        "parser": "babel-eslint"
+    },
+    "env": {
+        "jest/globals": true
+    },
+    "rules": {
+        "import/extensions": [
+            "error",
+            "ignorePackages",
+            {
+                "js": "never",
+                "mjs": "never",
+                "jsx": "never",
+                "ts": "never",
+                "tsx": "never",
+                "es6": "never",
+                "vue": "never"
+            }
+        ],
+        "indent": [
+            "error",
+            2,
+            {
+                "SwitchCase": 1
+            }
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "quotes": [
+            "error",
+            "double"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "comma-dangle": [
+            "error",
+            "never"
+        ],
+        "no-cond-assign": [
+            "error",
+            "always"
+        ],
+        "no-console": "off",
+        "global-require": "off",
+        "import/no-unresolved": "off",
+        "import/no-absolute-path": "off",
+        "no-underscore-dangle": "off",
+        "object-shorthand": "off",
+        "prefer-destructuring": "off",
+        "radix": [
+            "error",
+            "as-needed"
+        ],
+        "no-plusplus": "off",
+        "max-len": "off",
+        "func-names": "off"
+    },
+    "globals": {
+        "require": true,
+        "log": true,
+        "exports": true,
+        "resolve": true,
+        "app": true,
+        "fetch": true,
+        "document": true,
+        "window": true,
+        "__": true,
+        "XLSX": true
+    },
+    "overrides": [
+        {
+            "files": [
+                "*.html",
+                "*.ftl",
+                "*.xml"
+            ],
+            "rules": {
+                "max-len": "off"
+            }
+        }
+    ],
+    "settings": {
+        "import/resolver": {
+            "node": {
+                "extensions": [
+                    ".js",
+                    ".jsx",
+                    ".es6",
+                    ".ts",
+                    ".tsx",
+                    ".json",
+                    ".vue"
+                ]
+            }
+        }
+    }
+}

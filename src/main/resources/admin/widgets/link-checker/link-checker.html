@@ -1,0 +1,61 @@
+<widget>
+  <div style="min-height: 600px">
+    <link rel="stylesheet" href="../../assets/css/app.css" data-th-href="${portal.assetUrl({'_path=css/app.css'})}"
+      type="text/css" media="all">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
+      integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    <style data-th-if="${css}" data-th-text="${css}"></style>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <div class="link-checker">
+      <div class="link-checker__info">
+        <p>Check this content and its sub-content for broken links, both internal and external</p>
+      </div>
+      <form id="link-checker__form" data-th-if="${serviceUrl}" method="post" data-th-action="${serviceUrl}">
+        <input type="hidden" data-th-if="${key}" data-th-value="${key}" id="contentId" />
+      </form>
+      <div class="link-checker__start">
+        <button id="btn-start" onclick="startCheck()" value="Start">Start</button>
+        <div class="selection-radios">
+          <fieldset>
+            <legend>Check</legend>
+            <div>
+              <input type="radio" id="content" name="selection" value="content" />
+              <label for="content">This content</label>
+            </div>
+            <div>
+              <input type="radio" id="children" name="selection" value="children" />
+              <label for="children">Sub-content</label>
+            </div>
+            <div>
+              <input type="radio" id="both" name="selection" value="both" checked />
+              <label for="both">Both</label>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+      <button id="btn-stop" style="display: none;" onclick="window.stopCheck()" value="STOP">STOP</button>
+      <button id="btn-download" onclick="window.downloadCSV()" style="display: none;" value="CSV"> <i
+          class="fas fa-download"></i> Download report (.cvs) </button>
+      <div class="link-checker__progress">
+        <div class="progress-indicator__container">
+          <div class="progress-indicator__counter">Loading...</div>
+          <div class="progress-indicator__wrapper">
+            <svg id="progress-indicator__svg" width="120" height="120" viewPort="0 0 60 60" version="1.1"
+              xmlns="http://www.w3.org/2000/svg">
+              <circle r="54" cx="60" cy="60" fill="transparent" stroke-dasharray="339.29" stroke-dashoffset="0">
+              </circle>
+              <circle id="progress-indicator__bar" r="54" cx="60" cy="60" fill="transparent" stroke-dasharray="339.29"
+                stroke-dashoffset="339.29" stroke-linecap="round"></circle>
+              <circle id="progress-indicator__next" r="54" cx="60" cy="60" fill="transparent" stroke-dasharray="339.29"
+                stroke-dashoffset="339.29" stroke-linecap="round"></circle>
+            </svg>
+          </div>
+        </div>
+        <div class="link-checker__status"></div>
+      </div>
+      <br>
+    </div>
+    <div id="link-checker__result"></div>
+  </div>
+  <script data-th-src="${widgetScriptUrl}" async></script>
+</widget>

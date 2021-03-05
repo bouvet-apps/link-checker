@@ -1,6 +1,6 @@
 # Link checker app for Enonic XP
 
-This Enonic XP application adds a widget to your [Enonic XP](https://github.com/enonic/xp) site. This widget lets you check all your content for broken links, both internal (selecting content in a rich text editor) and external (URL).
+This Enonic XP application adds a widget to your [Enonic XP](https://github.com/enonic/xp) site. This widget lets you check all your content for broken links, both internal (to other content on same site) and external (URL).
 
 ## Installation
 
@@ -10,21 +10,21 @@ The **Link checker** app will then be available in the widget panel in the conte
 
 ## How to use this app
 
-After adding this app you should see a new LinkChecker option in detail panel to the top right in the content studio. Selecting a content and pressing the **Start** button will start the process. It will check the current content and all its children content for broken links. You can choose to only check the selected content, only the sub-content of that content or both. 
+After adding this app you should see a new LinkChecker option in detail panel to the top right in the content studio. Selecting a content and pressing the **Start** button will start the process. It will check the current content and all its children content for broken links. You can choose to only check the selected content, only the sub-content of that content or both.
 
-**NB!** The app only checks internal content links that are added through the rich text editor (HtmlArea). 
+**NB!** The internal data of the content is searched for links, not the corresponding webpage. Check [Siteimprove](https://market.enonic.com/vendors/enonic/siteimprove) app for a more complete check.
 
 The result is cached, so if the content and its children have not been modified since last check it will return the cached result immediatly.
 
-The checking process can be stopped anytime while checking and return the result found so far. This will however not cache any results. 
+The checking process can be stopped anytime while checking and return the result found so far. This will however not cache any results.
 
-If you select another content while the checker is running, it will continue in the background. If you go back to the content you started on the widget will try to reestablish connection. 
+If you select another content while the checker is running, it will continue in the background. If you go back to the content you started on the widget will try to reestablish connection.
 
 A max of 10 broken links are show in the detail panel. If more are found they are detailed in the downloadable spreadsheet.
 
 ## Download report
 
-After getting a result you can download it as an Excel spreadsheet. 
+After getting a result you can download it as an Excel spreadsheet.
 This has the form:
 
 | displayName | Path | broken link | status
@@ -47,7 +47,7 @@ This has the form:
 
 
 ### HTTPS in Apache2
-If you are running HTTPS and you are met with `failed: Error during WebSocket handshake: Unexpected response code: 200`, add the following code to you conf file in your apache server with `mod_rewrite` activated:
+If you are running HTTPS and you are met with `failed: Error during WebSocket handshake: Unexpected response code: 200`, add the following code to your conf file in your apache server with `mod_rewrite` activated:
 
 ```
 <VirtualHost *:443>
@@ -67,11 +67,20 @@ If you are running HTTPS and you are met with `failed: Error during WebSocket ha
 
 | Version | XP version |
 | ------------- | ------------- |
+| 2.0.0 | >=7.2.0 |
 | 1.0.0 | >=6.12.0 |
 
 Not tested for below 6.12.0
 
 ## Changelog
+
+### Version 2.0.0
+
+* Add functionality for checking all internal links, not just those in HTMLAreas.
+* Add checking of internal links to media and image content.
+* Upgrade httpClientLib so we don't have to intepret its crashes as status codes at target URL's quite as often.
+* Improved clarity in widget panel.
+
 
 ### Version 1.0.0
 
