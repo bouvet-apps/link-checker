@@ -23,6 +23,7 @@ exports.get = (req) => {
     type: "absolute",
     params: {
       contentId,
+      repository: req.params.repository,
       branch: "draft"
     }
   });

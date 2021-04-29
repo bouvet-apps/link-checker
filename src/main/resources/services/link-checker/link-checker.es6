@@ -19,7 +19,7 @@ const cache = libs.cache.newCache({
 
 const getDefaultContextParams = (event) => {
   const user = event.data.user.split(":");
-  return { branch: event.data.branch, user: { login: user[2], idProvider: user[1] } };
+  return { repository: event.data.repository, branch: event.data.branch, user: { login: user[2], idProvider: user[1] } };
 };
 
 const checkInternalLink = (link, branch) => {
@@ -308,6 +308,7 @@ exports.get = req => ({
     data: {
       contentId: req.params.contentId,
       branch: req.params.branch,
+      repository: req.params.repository,
       user: libs.auth.getUser().key // Format: "user:idProvider:userLogin",
     }
   }
