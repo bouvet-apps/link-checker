@@ -67,12 +67,17 @@ If you are running HTTPS and you are met with `failed: Error during WebSocket ha
 
 | Version | XP version |
 | ------------- | ------------- |
+| 2.0.1 | >=7.2.0 |
 | 2.0.0 | >=7.2.0 |
 | 1.0.0 | >=6.12.0 |
 
 Not tested for below 6.12.0
 
 ## Changelog
+
+### Version 2.0.1
+
+* Add support for checking multiple content projects
 
 ### Version 2.0.0
 
