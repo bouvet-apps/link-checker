@@ -1,3 +1,4 @@
+import XLSX from "xlsx";
 
 /*
   Each function needs to select HTML content anew,
@@ -226,6 +227,27 @@ const setError = (message) => {
                       </div>`;
 };
 
+
+const startBtn = document.getElementById("btn-start");
+if (startBtn) {
+  startBtn.addEventListener("click", () => {
+    startCheck();
+  })
+}
+
+const stopBtn = document.getElementById("btn-stop");
+if (stopBtn) {
+  stopBtn.addEventListener("click", () => {
+    window.stopCheck();
+  })
+}
+
+const downloadBtn = document.getElementById("btn-download");
+if (downloadBtn) {
+  downloadBtn.addEventListener("click", () => {
+    window.downloadCSV();
+  })
+}
 
 // Triggered by onclick
 // eslint-disable-next-line no-unused-vars
