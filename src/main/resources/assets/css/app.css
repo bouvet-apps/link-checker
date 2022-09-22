@@ -71,6 +71,15 @@ h5.success-text {
   cursor: pointer;
 }
 
+#btn-download .aligned-center {
+    display: flex;
+    align-items: center;
+}
+
+#btn-download .aligned-center svg {
+    margin-right: 5px;
+}
+
 #btn-stop {
   margin: 1rem 0;
   color: #fff;

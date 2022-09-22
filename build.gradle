@@ -54,7 +54,7 @@ task installWithCI(
     args = ['ci', '--ignore-scripts', '--quiet']
 }
 
-task npm_install(
+task npmInstall(
         type: NpmTask,
         group: 'node',
         description: 'Install node dependencies, ignoring scripts'
