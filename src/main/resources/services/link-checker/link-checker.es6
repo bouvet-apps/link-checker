@@ -125,7 +125,7 @@ const checkNode = (event, node) => {
   /**
    * @phrases ["services.link-checker.external-url", "services.link-checker.internal-content"]
    */
-  const locale = event?.session?.params?.locale || 'no';
+  const locale = event?.data?.locale || 'no';
   const localizedExternalUrl = libs.i18n.localize({ key: "services.link-checker.external-url", locale }) || "External URL";
   const localizedInternalContent = libs.i18n.localize({ key: "services.link-checker.internal-content", locale }) || "Internal content";
 
@@ -315,7 +315,8 @@ exports.get = req => ({
       contentId: req.params.contentId,
       branch: req.params.branch,
       repository: req.params.repository,
-      user: libs.auth.getUser().key // Format: "user:idProvider:userLogin",
+      user: libs.auth.getUser().key, // Format: "user:idProvider:userLogin",
+      locale: req.params.locale
     }
   }
 });
