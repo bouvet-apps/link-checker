@@ -3,10 +3,19 @@
 This Enonic XP application adds a widget to your [Enonic XP](https://github.com/enonic/xp) site. This widget lets you check all your content for broken links, both internal (to other content on same site) and external (URL).
 
 ## Installation
-
+### Enonic Market
 Go into the Enonic XP Application admin tool and install the app from the [Enonic Market](https://market.enonic.com/).
 
 The **Link checker** app will then be available in the widget panel in the content studio.
+
+### Build yourself
+Build this app with gradle. In the terminal, from the root of the project, enter `./gradlew build`.
+On Windows, just enter `gradlew build` in the command line from the project root.
+Next, move the JAR file from /build/libs to your `$XP_HOME/deploy` directory.
+
+The **Link checker** app will then be available in the widget panel in the content studio.
+
+If you update package.json, make sure to run `./gradlew npm_install`.
 
 ## How to use this app
 
@@ -67,6 +76,7 @@ If you are running HTTPS and you are met with `failed: Error during WebSocket ha
 
 | Version | XP version |
 | ------------- | ------------- |
+| 3.0.0 | >=7.9.0 |
 | 2.0.1 | >=7.2.0 |
 | 2.0.0 | >=7.2.0 |
 | 1.0.0 | >=6.12.0 |
@@ -74,6 +84,10 @@ If you are running HTTPS and you are met with `failed: Error during WebSocket ha
 Not tested for below 6.12.0
 
 ## Changelog
+### Version 3.0.0
+
+* Possible to use with Content Security Policy (CSP) from Enonic XP version 7.9.0.
+* Localization added, so it now supports Norwegian and English.
 
 ### Version 2.0.1
 

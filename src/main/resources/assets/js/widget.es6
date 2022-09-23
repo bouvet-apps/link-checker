@@ -1,5 +1,8 @@
 import XLSX from "xlsx";
 
+const localizedData = document.getElementById("link-checker__form").dataset.localizedElements;
+const localized = JSON.parse(localizedData);
+
 /*
   Each function needs to select HTML content anew,
   in case the html has been rerended by e.g. switching content in content studio.
@@ -15,9 +18,9 @@ const getElements = (selectors) => {
 const mapStatus = (status) => {
   switch (status) {
     case 0:
-      return "Needs manuel review";
+      return localized?.manualReview || "Needs manuel review";
     case 408:
-      return "Timeout";
+      return localized?.timeout || "Timeout";
     default:
       return status;
   }
@@ -25,7 +28,7 @@ const mapStatus = (status) => {
 
 const generateSpreadsheet = (results) => {
   const ws = XLSX.utils.json_to_sheet([],
-    { header: ["displayName", "path", "type", "broken link", "status"], skipHeader: false });
+    { header: ["displayName", "path", "type", (localized?.brokenLink || "broken link"), "status"], skipHeader: false });
   /* Write data starting at A2 */
   results.forEach((result, index) => {
     const links = result.brokenLinks.map(link => ({ C: link.type, D: link.link, E: mapStatus(link.status) }));
@@ -38,10 +41,10 @@ const generateSpreadsheet = (results) => {
   const date = new Date();
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "WorksheetName");
-  XLSX.writeFile(wb, `report-linkchecker-${date.toLocaleDateString()}-${date.toLocaleTimeString()}.xlsx`, {});
+  XLSX.writeFile(wb, `${localized?.report || 'report'}-linkchecker-${date.toLocaleDateString()}-${date.toLocaleTimeString()}.xlsx`, {});
 };
 
-const renderLink = link => `
+const renderLink = (link) => (`
 <div class="broken-links-error__link">
   <div class="broken-links-error__link__body">
     <div style="margin-right: 5px;">${link.type}</div>
@@ -51,7 +54,7 @@ const renderLink = link => `
     <a href="${link.link}" target="_blank">${link.link}</a>
   </div>
 </div>
-`;
+`);
 
 const generateLongReport = (message) => {
   let report = "";
@@ -60,7 +63,9 @@ const generateLongReport = (message) => {
     report += `<div class="widget-view active internal-widget">
                 <div class="widget-item-view properties-widget-item-view">
                   <div class="broken-links-error">
-                    <h3>Found ${node.brokenLinks.length} invalid link${(node.brokenLinks.length > 1 ? "s" : "")}</h3>
+                    <h3>
+                      ${localized?.found || "Found"} ${node.brokenLinks.length} ${(node.brokenLinks.length > 1 ? (localized?.invalidLinks || "invalid links") : (localized?.invalidLink || "invalid link"))}
+                    </h3>
                     <div class="broken-links-error__body">
                       <h4>${node.displayName}</h4>
                       <p>${node.path}</p>`;
@@ -81,11 +86,15 @@ const MAX_BROKEN_SHOWN = 8;
 const generateShortReport = (message) => {
   let report = "";
   document.getElementById("btn-download").style.display = "initial";
-  report += `<div class="widget-view active internal-widget">
-              <div class="widget-item-view properties-widget-item-view">
-                <div class="broken-links-error">
-                  <h3>Found ${message.brokenCount} invalid link${(message.brokenCount > 1 ? "s" : "")}</h3>
-                  <div class="broken-links-error__body">`;
+  report += (`
+    <div class="widget-view active internal-widget">
+      <div class="widget-item-view properties-widget-item-view">
+        <div class="broken-links-error">
+          <h3>
+            ${localized?.found || "Found"} ${message.brokenCount} ${(message.brokenCount > 1 ? (localized?.invalidLinks || "invalid links") : (localized?.invalidLink || "invalid link"))}
+          </h3>
+          <div class="broken-links-error__body">
+  `);
 
   let countShown = 0;
 
@@ -99,40 +108,62 @@ const generateShortReport = (message) => {
     return countShown >= MAX_BROKEN_SHOWN;
   });
 
-  report += `<p class="download-more">...</p>
-                <p class="download-more">More details in report</p>
-                </div>
-              </div>
-            </div>
-          </div>`;
+  report += (`
+          <p class="download-more">...</p>
+          <p class="download-more">${localized?.downloadMore || "More details in report"}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `);
   return report;
 };
 
-const generateTipsSection = () => `
+const generateTipsSection = () => (`
   <div class="widget-view active internal-widget link-checker__tips">
     <div class="widget-item-view properties-widget-item-view">
-      <h3>Tips and information</h3>
+      <h3>${localized?.tipsAndInfo || 'Tips and information'}</h3>
       <div class="link-checker__tips__body">
         <ul>
-          <li>Only the <em>draft</em> branch is checked, which means the latest updated version of the content (which may or may not be the published version).</li>
+          <li>
+            ${localized?.draftCheckedTip
+            ||
+            'Only the <em>draft</em> branch is checked, which means the latest updated version of the content (which may or may not be the published version).'}
+          </li>
           <li>
             <p>
-              <em>Internal content</em> links referes to connections to other content in Enonic XP. The text which looks something like <span class="pre">1397f305-c7ef-43e6-a563-4980883b6396</span> is the unique ID of the targeted content.
+              ${localized?.internalContentLinksTip
+              ||
+              '<em>Internal content</em> links referes to connections to other content in Enonic XP. The text which looks something like <span class="pre">1397f305-c7ef-43e6-a563-4980883b6396</span> is the unique ID of the targeted content.'}
             </p>
             <p>
-              The most common cause for these errors are:
+              ${localized?.commonCauseInternalTip
+              ||
+              'The most common cause for these errors are:'}
               <ul>
-                <li>The targeted content has been deleted.</li>
-                <li>This content was imported from another site or server, but the targeted content was not.</li>
+                <li>
+                  ${localized?.targetContentDeletedTip
+                  ||
+                  'The targeted content has been deleted.'}
+                </li>
+                <li>
+                  ${localized?.contentImportedTip
+                  ||
+                  'This content was imported from another site or server, but the targeted content was not.'}
+                </li>
               </ul>
             </p>
           </li>
-          <li>If an <em>Internal content</em> link begins with <span class="pre">content://</span>, <span class="pre">media://</span> or <span class="pre">image://</span>; it means the link was found in a rich text field.</li>
+          <li>
+            ${localized?.richTextFieldBeginsTip || 'If an <em>Internal content</em> link begins with'}
+            <span class="pre">content://</span>, <span class="pre">media://</span> or <span class="pre">image://</span>;
+            ${localized?.richTextFieldTip || 'it means the link was found in a rich text field.'}
+          </li>
         </ul>
       </div>
     </div>
   </div>
-`;
+`);
 
 const createReport = (message) => {
   window.downloadCSV = () => {
@@ -141,12 +172,18 @@ const createReport = (message) => {
 
   const result = document.getElementById("link-checker__result");
   let report = "";
-  if (message.brokenCount > 8) {
+  if (message.brokenCount > MAX_BROKEN_SHOWN) {
     report = generateShortReport(message);
   } else if (message.brokenCount > 0) {
     report = generateLongReport(message);
   } else {
-    report = "<div class=\"widget-view internal-widget success active\"><h5 class=\"success-text\">&#10004; No broken links found!</h5></div>";
+    report = (`
+      <div class="widget-view internal-widget success active">
+        <h5 class="success-text">
+          &#10004; ${localized?.noBrokenLinks || 'No broken links found!'}
+        </h5>
+      </div>
+    `);
   }
 
   if (message.brokenCount > 0) {
@@ -180,7 +217,11 @@ const updateProgress = (message) => {
     let total = message.total;
 
     if (message.brokenCount) {
-      elements[".link-checker__status"].innerHTML = `Found <span class="broken-count">${message.brokenCount}</span> broken links`;
+      elements[".link-checker__status"].innerHTML = (`
+        ${localized?.found || 'Found'}
+        <span class="broken-count">${message.brokenCount}</span>
+        ${(message.brokenCount > 1 ? (localized?.brokenLinks || "broken links") : (localized?.brokenLink || "broken link"))}
+      `);
     }
 
     const selection = document.querySelector("input[name=\"selection\"]:checked").value;
@@ -218,13 +259,15 @@ const setResult = (message) => {
 
 const setError = (message) => {
   const result = document.getElementById("link-checker__result");
-  result.innerHTML = `<div class="widget-view active internal-widget">
-                        <div class="widget-item-view properties-widget-item-view version-widget-item-view">
-                          <div class="broken-links-error">
-                            <h3 style="text-align: center">${message.error}</h3>
-                          </div>
-                        </div>
-                      </div>`;
+  result.innerHTML = (`
+    <div class="widget-view active internal-widget">
+      <div class="widget-item-view properties-widget-item-view version-widget-item-view">
+        <div class="broken-links-error">
+          <h3 style="text-align: center">${message.error}</h3>
+        </div>
+      </div>
+    </div>
+  `);
 };
 
 

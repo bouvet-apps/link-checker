@@ -54,7 +54,7 @@ task installWithCI(
     args = ['ci', '--ignore-scripts', '--quiet']
 }
 
-task npmInstall(
+task npm_install(
         type: NpmTask,
         group: 'node',
         description: 'Install node dependencies, ignoring scripts'
@@ -84,6 +84,7 @@ dependencies {
     include "com.enonic.xp:lib-auth:${xpVersion}"
     include "com.enonic.xp:lib-content:${xpVersion}"
     include "com.enonic.xp:lib-context:${xpVersion}"
+    include "com.enonic.xp:lib-i18n:${xpVersion}"
     include "com.enonic.xp:lib-portal:${xpVersion}"
     include "com.enonic.xp:lib-websocket:${xpVersion}"
     include 'com.enonic.lib:lib-cache:2.1.1'
