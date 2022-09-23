@@ -19,7 +19,7 @@ const getElements = (selectors) => {
 const mapStatus = (status) => {
   switch (status) {
     case 0:
-      return localized?.manualReview || "Needs manuel review";
+      return localized?.manualReview || "Needs manual review";
     case 408:
       return localized?.timeout || "Timeout";
     default:
