@@ -1,12 +1,12 @@
 /* eslint-disable no-case-declarations */
 const libs = {
-  portal: require("/lib/xp/portal"),
   content: require("/lib/xp/content"),
   context: require("/lib/xp/context"),
   httpClient: require("/lib/http-client"),
   cache: require("/lib/cache"),
   auth: require("/lib/xp/auth"),
-  webSocket: require("/lib/xp/websocket")
+  webSocket: require("/lib/xp/websocket"),
+  i18n: require("/lib/xp/i18n")
 };
 
 const CURRENTLY_RUNNING = {};
@@ -122,6 +122,12 @@ const buildCacheKey = (event, key, content) => {
 const checkNode = (event, node) => {
   const currentSession = CURRENTLY_RUNNING[event.session.id];
   const brokenLinks = [];
+  /**
+   * @phrases ["services.link-checker.external-url", "services.link-checker.internal-content"]
+   */
+  const locale = event?.session?.params?.locale || 'no';
+  const localizedExternalUrl = libs.i18n.localize({ key: "services.link-checker.external-url", locale }) || "External URL";
+  const localizedInternalContent = libs.i18n.localize({ key: "services.link-checker.internal-content", locale }) || "Internal content";
 
   const urls = getLinks(JSON.stringify(node));
   urls.internalLinks = [...urls.internalLinks, ...getInternalReferences(node)];
@@ -132,18 +138,18 @@ const checkNode = (event, node) => {
     if (error) {
       // Local error with httpClient
       currentSession.failedCount++;
-      brokenLinks.push({ link: url, status: 0, type: "External URL" });
+      brokenLinks.push({ link: url, status: 0, type: localizedExternalUrl });
     } else if (status >= 309 && status < 900) {
       // Under 900 to avoid annoying linkedIn response
       currentSession.brokenCount++;
-      brokenLinks.push({ link: url, status: status, type: "External URL" });
+      brokenLinks.push({ link: url, status: status, type: localizedExternalUrl });
     }
   });
   urls.internalLinks.forEach((link) => {
     const { status } = checkInternalLink(link, event.data.branch);
     if (status >= 309 && status < 900) {
       currentSession.brokenCount++;
-      brokenLinks.push({ link: link, status, type: "Internal content" });
+      brokenLinks.push({ link: link, status, type: localizedInternalContent });
     }
   });
   if (brokenLinks.length > 0) {

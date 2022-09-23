@@ -1,6 +1,7 @@
 import XLSX from "xlsx";
 
 const localizedData = document.getElementById("link-checker__form").dataset.localizedElements;
+const locale = document.getElementById("link-checker__form").dataset.locale;
 const localized = JSON.parse(localizedData);
 
 /*
@@ -308,7 +309,7 @@ const startCheck = () => {
   elements[".link-checker__progress"].style.display = "inline";
 
   const selection = document.querySelector("input[name=\"selection\"]:checked").value;
-  const url = `${form.action}&selection=${selection}`;
+  const url = `${form.action}&selection=${selection}&locale=${locale}`;
   const ws = new window.WebSocket(url);
   ws.onopen = () => {
     /*

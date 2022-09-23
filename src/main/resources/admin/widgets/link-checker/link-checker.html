@@ -11,7 +11,7 @@
             <div class="link-checker__info">
                 <p data-th-text="${localized.info}">Check this content and its sub-content for broken links, both internal and external</p>
             </div>
-            <form id="link-checker__form" data-th-if="${serviceUrl}" method="post" data-th-action="${serviceUrl}" data-th-data-localized-elements="${localizedString}">
+            <form id="link-checker__form" data-th-if="${serviceUrl}" method="post" data-th-action="${serviceUrl}" data-th-data-localized-elements="${localizedString}" data-th-data-locale="${locale}">
                 <input type="hidden" data-th-if="${key}" data-th-value="${key}" id="contentId"/>
             </form>
             <div class="link-checker__start">

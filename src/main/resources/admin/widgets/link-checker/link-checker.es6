@@ -1,5 +1,6 @@
 const libs = {
   portal: require("/lib/xp/portal"),
+  content: require("/lib/xp/content"),
   thymeleaf: require("/lib/thymeleaf"),
   i18n: require("/lib/xp/i18n")
 };
@@ -33,12 +34,13 @@ exports.get = (req) => {
 
   const widgetScriptUrl = libs.portal.assetUrl({ path: "js/widget.js" });
 
-  const locale = libs.portal.getContent()?.language || libs.portal.getSite()?.language || 'no';
+  const locale = libs.content.get({ key: contentId })?.language || 'no';
 
   const model = {
     serviceUrl: url,
     key: contentId,
     widgetScriptUrl,
+    locale,
     /**
      * @phrases ["widgets.link-checker.info", "widgets.link-checker.start", "widgets.link-checker.radio-legend", "widgets.link-checker.radio-this-content",
      * "widgets.link-checker.radio-child-content", "widgets.link-checker.radio-both", "widgets.link-checker.stop", "widgets.link-checker.download-report",
