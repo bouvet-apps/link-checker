@@ -11,29 +11,29 @@
             <div class="link-checker__info">
                 <p data-th-text="${localized.info}">Check this content and its sub-content for broken links, both internal and external</p>
             </div>
-            <form id="link-checker__form" data-th-if="${serviceUrl}" method="get" data-th-action="${serviceUrl}" data-th-data-localized-elements="${localizedString}" data-th-data-locale="${locale}">
+            <form id="link-checker__form" data-th-if="${serviceUrl}" method="get" data-th-data-action="${serviceUrl}" data-th-data-localized-elements="${localizedString}" data-th-data-locale="${locale}">
                 <input type="hidden" data-th-if="${key}" data-th-value="${key}" id="contentId"/>
-            </form>
-            <div class="link-checker__start">
-                <button id="btn-start" value="Start" data-th-text="${localized.start}">Start</button>
-                <div class="selection-radios">
-                    <fieldset>
-                        <legend data-th-text="${localized.radioLegend}">Check</legend>
-                        <div>
-                            <input type="radio" id="content" name="selection" value="content"/>
-                            <label for="content" data-th-text="${localized.radioThisContent}">This content</label>
-                        </div>
-                        <div>
-                            <input type="radio" id="children" name="selection" value="children"/>
-                            <label for="children" data-th-text="${localized.radioChildContent}">Child content</label>
-                        </div>
-                        <div>
-                            <input type="radio" id="both" name="selection" value="both" checked/>
-                            <label for="both" data-th-text="${localized.radioBoth}">Both</label>
-                        </div>
-                    </fieldset>
+                <div class="link-checker__start">
+                    <button id="btn-start" value="Start" data-th-text="${localized.start}">Start</button>
+                    <div class="selection-radios">
+                        <fieldset>
+                            <legend data-th-text="${localized.radioLegend}">Check</legend>
+                            <div>
+                                <input type="radio" id="content" name="selection" value="content"/>
+                                <label for="content" data-th-text="${localized.radioThisContent}">This content</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="children" name="selection" value="children"/>
+                                <label for="children" data-th-text="${localized.radioChildContent}">Child content</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="both" name="selection" value="both" checked/>
+                                <label for="both" data-th-text="${localized.radioBoth}">Both</label>
+                            </div>
+                        </fieldset>
+                    </div>
                 </div>
-            </div>
+            </form>
             <button id="btn-stop" style="display: none;" value="STOP" data-th-text="${localized.stop}">STOP</button>
             <button id="btn-download" style="display: none;" value="CSV">
                 <div class="aligned-center">

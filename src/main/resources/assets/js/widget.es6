@@ -274,8 +274,8 @@ const setError = (message) => {
 
 const startBtn = document.getElementById("btn-start");
 if (startBtn) {
-  startBtn.addEventListener("click", () => {
-    startCheck();
+  startBtn.addEventListener("click", (event) => {
+    startCheck(event);
   })
 }
 
@@ -295,7 +295,8 @@ if (downloadBtn) {
 
 // Triggered by onclick
 // eslint-disable-next-line no-unused-vars
-const startCheck = () => {
+const startCheck = (event) => {
+  event.preventDefault();
   const form = document.getElementById("link-checker__form");
   const elements = getElements([".link-checker__progress", ".link-checker__status",
     ".progress-indicator__wrapper", "#btn-stop", "#btn-start", "#btn-download", ".selection-radios", "#checkChildren"]);
@@ -309,7 +310,7 @@ const startCheck = () => {
   elements[".link-checker__progress"].style.display = "inline";
 
   const selection = document.querySelector("input[name=\"selection\"]:checked").value;
-  const url = `${form.action}&selection=${selection}&locale=${locale}`;
+  const url = `${form.dataset.action}&selection=${selection}&locale=${locale}`;
   const ws = new window.WebSocket(url);
   ws.onopen = () => {
     /*
