@@ -16,6 +16,7 @@ app {
     vendorName = project.ext.vendorName
     vendorUrl = project.ext.vendorUrl
     systemVersion = "${xpVersion}"
+    keepArchiveFileName = true
 }
 
 sourceSets {
