@@ -1,14 +1,26 @@
 plugins {
     id 'java'
+    id 'maven-publish'
     id 'com.enonic.xp.app' version '3.1.0'
     id "com.github.node-gradle.node" version "3.4.0"
     id 'org.ajoberstar.grgit' version '4.1.1'
     id "com.github.ben-manes.versions" version '0.42.0'
-    id 'maven-publish'
 }
 
 sourceCompatibility = "1.11"
 targetCompatibility = "1.11"
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = "${group}"
+            artifactId = "${projectName}"
+            version = "${version}"
+
+            from components.java
+        }
+    }
+}
 
 app {
     name = project.ext.appName
@@ -114,23 +126,4 @@ node {
 wrapper {
     gradleVersion = '7.3.1'
     distributionType = Wrapper.DistributionType.BIN
-}
-
-
-publishing {
-    publications {
-        mavenJava( MavenPublication ) {
-            from components.java
-        }
-    }
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = "https://maven.pkg.github.com/bouvet-apps/distro"
-            credentials {
-                username = project.property("bouvetGithubUser")
-                password = project.property("bouvetGithubToken")
-            }
-        }
-    }
 }
