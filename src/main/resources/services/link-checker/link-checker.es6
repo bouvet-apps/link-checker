@@ -45,8 +45,7 @@ const checkExternalUrl = (externalUrl) => {
       method: "GET",
       headers: {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:62.0) Gecko/20100101 Firefox/62.0",
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        Connection: "keep-alive"
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
       },
       connectionTimeout: 5000,
       readTimeout: 3000
@@ -75,15 +74,10 @@ const getInternalReferences = (node) => {
 };
 
 
-const getLinks = (text) => {
+const getExternalLinks = (text) => {
   // Do not have global regex, they must be initialized each time.
   const externalExpression = /((https?:\/\/|ftp:\/\/|www\.|[^\s:=]+@www\.).*?[a-z_/0-9\-#=&()])(?=(\.|,|;|\?|!)?(?:“|”|"|'|«|»|\[\/|\s|\r|\n|\\|<|>|\[\n))/gi; // (s:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/|www\.)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/[^" \\><]*)?/gi;
-  const internalExpression = /((content|media|image):\/\/)(download\/)?[a-z0-9]+([-]{1}[a-z0-9]+)*/gi;
-  const links = {
-    externalLinks: text.match(externalExpression) || [],
-    internalLinks: text.match(internalExpression) || []
-  };
-  return links;
+  return text.match(externalExpression) || [];
 };
 
 const getNodes = (content, event, start) => {
@@ -129,8 +123,10 @@ const checkNode = (event, node) => {
   const localizedExternalUrl = libs.i18n.localize({ key: "services.link-checker.external-url", locale }) || "External URL";
   const localizedInternalContent = libs.i18n.localize({ key: "services.link-checker.internal-content", locale }) || "Internal content";
 
-  const urls = getLinks(JSON.stringify(node));
-  urls.internalLinks = [...urls.internalLinks, ...getInternalReferences(node)];
+  const urls = {
+    externalLinks: getExternalLinks(JSON.stringify(node)),
+    internalLinks: getInternalReferences(node)
+  };
 
   urls.externalLinks.forEach((url) => {
     const { status, error } = checkExternalUrl(url);

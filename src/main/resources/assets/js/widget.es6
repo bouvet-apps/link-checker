@@ -135,7 +135,7 @@ const generateTipsSection = () => (`
             <p>
               ${localized?.internalContentLinksTip
               ||
-              '<em>Internal content</em> links referes to connections to other content in Enonic XP. The text which looks something like <span class="pre">1397f305-c7ef-43e6-a563-4980883b6396</span> is the unique ID of the targeted content.'}
+              '<em>Internal content</em> links referes to connections to other content in Enonic XP. The text which looks something like <span class="pre">1397f305-c7ef-43e6-a563-4980883b6396</span> is the unique ID of the targeted content. <em>NB:</em> An ID may be found more than one place in the content'}
             </p>
             <p>
               ${localized?.commonCauseInternalTip
@@ -154,11 +154,6 @@ const generateTipsSection = () => (`
                 </li>
               </ul>
             </p>
-          </li>
-          <li>
-            ${localized?.richTextFieldBeginsTip || 'If an <em>Internal content</em> link begins with'}
-            <span class="pre">content://</span>, <span class="pre">media://</span> or <span class="pre">image://</span>;
-            ${localized?.richTextFieldTip || 'it means the link was found in a rich text field.'}
           </li>
         </ul>
       </div>
