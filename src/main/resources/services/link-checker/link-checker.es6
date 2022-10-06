@@ -127,7 +127,6 @@ const checkNode = (event, node) => {
     externalLinks: getExternalLinks(JSON.stringify(node)),
     internalLinks: getInternalReferences(node)
   };
-  log.info("urls: %s", JSON.stringify(urls, null, 2));
 
   urls.externalLinks.forEach((url) => {
     const { status, error } = checkExternalUrl(url);
