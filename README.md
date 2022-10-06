@@ -41,7 +41,7 @@ This has the form:
 | Contact us | /en/contact-us | http://www.brokenlink.broken | 404 |
 |            |                | https://enonic.com/doesnotexist| 404 |
 | Article B | /en/blog/article-b | http://www.example.crash | 500 |
-|           |                 | content://22c1574a-38f4-4cf444-5fgd9sd | 404 |
+|           |                 | 22c1574a-38f4-4cf444-5fgd9sd | 404 |
 
 
 
@@ -75,15 +75,20 @@ If you are running HTTPS and you are met with `failed: Error during WebSocket ha
 ## Releases and Compatibility
 
 | Version | XP version |
-| ------------- | ------------- |
-| 3.0.0 | >=7.9.0 |
-| 2.0.1 | >=7.2.0 |
-| 2.0.0 | >=7.2.0 |
-| 1.0.0 | >=6.12.0 |
+|---------| ------------- |
+| 3.0.1   | >=7.9.0 |
+| 3.0.0   | >=7.9.0 |
+| 2.0.1   | >=7.2.0 |
+| 2.0.0   | >=7.2.0 |
+| 1.0.0   | >=6.12.0 |
 
 Not tested for below 6.12.0
 
 ## Changelog
+### Version 3.0.1
+* Fixed bug with valid external links being listed as "Need manual review".
+* Fixed bug with internal links always being listed twice.
+
 ### Version 3.0.0
 
 * Possible to use with Content Security Policy (CSP) from Enonic XP version 7.9.0.
