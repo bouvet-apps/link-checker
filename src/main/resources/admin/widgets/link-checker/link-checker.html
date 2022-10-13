@@ -31,6 +31,19 @@
                                 <label for="both" data-th-text="${localized.radioBoth}">Both</label>
                             </div>
                         </fieldset>
+                        <fieldset>
+                            <legend data-th-text="${localized.from}">From</legend>
+                            <div>
+                                <input type="radio" id="draft" name="branch" value="draft" checked/>
+                                <label for="draft">Draft</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="master" name="branch" value="master"/>
+                                <label for="master">Master</label>
+                            </div>
+                            <p data-th-utext="${localized.draftExplanation}"><em>Draft:</em> the latest updated version of the content, which may or may not be the published version</p>
+                            <p data-th-utext="${localized.masterExplanation}"><em>Master:</em> only the published version of the content, which will not include new, scheduled, modified or unpublished versions</p>
+                        </fieldset>
                     </div>
                 </div>
             </form>

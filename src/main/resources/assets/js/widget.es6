@@ -127,11 +127,6 @@ const generateTipsSection = () => (`
       <div class="link-checker__tips__body">
         <ul>
           <li>
-            ${localized?.draftCheckedTip
-            ||
-            'Only the <em>draft</em> branch is checked, which means the latest updated version of the content (which may or may not be the published version).'}
-          </li>
-          <li>
             <p>
               ${localized?.internalContentLinksTip
               ||
@@ -305,7 +300,8 @@ const startCheck = (event) => {
   elements[".link-checker__progress"].style.display = "inline";
 
   const selection = document.querySelector("input[name=\"selection\"]:checked").value;
-  const url = `${form.dataset.action}&selection=${selection}&locale=${locale}`;
+  const branch = document.querySelector("input[name=\"branch\"]:checked").value;
+  const url = `${form.dataset.action}&selection=${selection}&locale=${locale}&branch=${branch}`;
   const ws = new window.WebSocket(url);
   ws.onopen = () => {
     /*

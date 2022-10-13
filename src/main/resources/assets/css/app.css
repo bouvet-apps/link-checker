@@ -136,8 +136,20 @@ h5.success-text {
   padding-bottom: 0.2rem;
 }
 
+.selection-radios fieldset {
+    margin-top: 5px;
+}
+
 .selection-radios fieldset div {
   margin: 0.4rem 0;
+}
+
+.selection-radios em {
+    font-style: italic;
+}
+
+.selection-radios p {
+    margin: 5px 0;
 }
 
  /* ------------- Circle progress bar ------------- */

@@ -110,6 +110,7 @@ const buildCacheKey = (event, key, content) => {
   }
 
   cacheKey += event.session.params.selection;
+  cacheKey += event.session.params.branch;
   return cacheKey;
 };
 
