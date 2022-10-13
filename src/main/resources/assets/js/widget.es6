@@ -279,6 +279,32 @@ const setError = (message) => {
   }, 400);
 };
 
+const draftBtn = document.getElementById("draft-btn");
+if (draftBtn) {
+  draftBtn.addEventListener("click", (event) => {
+    event.preventDefault();
+    const draftExplanation = document.getElementById("draft-explanation");
+    if (draftExplanation.style.display === "none") {
+      draftExplanation.style.display = "block";
+    } else {
+      draftExplanation.style.display = "none";
+    }
+  })
+}
+
+const masterBtn = document.getElementById("master-btn");
+if (masterBtn) {
+  masterBtn.addEventListener("click", (event) => {
+    event.preventDefault();
+    const masterExplanation = document.getElementById("master-explanation");
+    if (masterExplanation.style.display === "none") {
+      masterExplanation.style.display = "block";
+    } else {
+      masterExplanation.style.display = "none";
+    }
+  })
+}
+
 const startBtn = document.getElementById("btn-start");
 if (startBtn) {
   startBtn.addEventListener("click", (event) => {

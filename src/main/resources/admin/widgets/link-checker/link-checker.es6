@@ -44,6 +44,7 @@ exports.get = (req) => {
      * @phrases ["widgets.link-checker.info", "widgets.link-checker.start", "widgets.link-checker.radio-legend", "widgets.link-checker.radio-this-content",
      * "widgets.link-checker.radio-child-content", "widgets.link-checker.radio-both", "widgets.link-checker.stop", "widgets.link-checker.download-report",
      * "widgets.link-checker.loading","widgets.link-checker.from", "widgets.link-checker.draft-explanation", "widgets.link-checker.master-explanation",
+     * "widgets.link-checker.explanation-title",
      *
      * "widgets.link-checker.timeout", "widgets.link-checker.manual-review", "widgets.link-checker.broken-link",
      * "widgets.link-checker.broken-links", "widgets.link-checker.report", "widgets.link-checker.found", "widgets.link-checker.invalid-link", "widgets.link-checker.invalid-links",
@@ -63,7 +64,8 @@ exports.get = (req) => {
       loading: libs.i18n.localize({ key: "widgets.link-checker.loading", locale }),
       from: libs.i18n.localize({ key: "widgets.link-checker.from", locale }),
       draftExplanation: libs.i18n.localize({ key: "widgets.link-checker.draft-explanation", locale }),
-      masterExplanation: libs.i18n.localize({ key: "widgets.link-checker.master-explanation", locale })
+      masterExplanation: libs.i18n.localize({ key: "widgets.link-checker.master-explanation", locale }),
+      explanationTitle: libs.i18n.localize({ key: "widgets.link-checker.explanation-title", locale })
     },
     localizedString: JSON.stringify({
       timeout: libs.i18n.localize({ key: "widgets.link-checker.timeout", locale }),

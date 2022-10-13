@@ -34,14 +34,14 @@
                             <legend data-th-text="${localized.from}">From</legend>
                             <div>
                                 <input type="radio" id="draft" name="branch" value="draft" checked/>
-                                <label for="draft">Draft</label>
+                                <label for="draft">Draft <button id="draft-btn" class="question-btn" data-th-title="${explanationTitle}"><svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 0 24 24" width="16px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg></button></label>
+                                <p data-th-text="${localized.draftExplanation}" id="draft-explanation" style="display: none;">Checks the latest updated version of the content, which may or may not be the published version</p>
                             </div>
                             <div>
                                 <input type="radio" id="master" name="branch" value="master"/>
-                                <label for="master">Master</label>
+                                <label for="master">Master <button id="master-btn" class="question-btn" data-th-title="${explanationTitle}"><svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 0 24 24" width="16px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg></button></label>
+                                <p data-th-text="${localized.masterExplanation}" id="master-explanation" style="display: none;">Checks only the published version of the content, which will not include new, scheduled, modified or unpublished versions</p>
                             </div>
-                            <p data-th-utext="${localized.draftExplanation}"><em>Draft:</em> the latest updated version of the content, which may or may not be the published version</p>
-                            <p data-th-utext="${localized.masterExplanation}"><em>Master:</em> only the published version of the content, which will not include new, scheduled, modified or unpublished versions</p>
                         </fieldset>
                     </div>
                     <button id="btn-start" value="Start" data-th-text="${localized.start}">Start</button>
