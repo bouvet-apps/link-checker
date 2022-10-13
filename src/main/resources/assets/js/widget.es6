@@ -239,7 +239,7 @@ const setResult = (message) => {
   if (key && (key.value === message.key)) {
     updateIndicator(100);
     setTimeout(() => {
-      const elements = getElements([".link-checker__progress", ".link-checker__status",
+      const elements = getElements([".link-checker__progress", ".link-checker__status", "#link-checker__result",
         "#btn-stop", "#btn-start", ".progress-indicator__wrapper", ".selection-radios"]);
 
       elements[".link-checker__progress"].style.display = "none";
@@ -248,6 +248,7 @@ const setResult = (message) => {
       elements["#btn-stop"].style.display = "none";
       elements[".progress-indicator__wrapper"].style.display = "none";
       elements[".link-checker__status"].innerHTML = "Loading...";
+      elements["#link-checker__result"].style.display = "block";
       createReport(message);
     }, 400);
   }
@@ -256,7 +257,7 @@ const setResult = (message) => {
 const setError = (message) => {
   const result = document.getElementById("link-checker__result");
   setTimeout(() => {
-    const elements = getElements([".link-checker__progress", ".link-checker__status",
+    const elements = getElements([".link-checker__progress", ".link-checker__status", "#link-checker__result",
       "#btn-stop", "#btn-start", ".progress-indicator__wrapper", ".selection-radios"]);
 
     elements[".link-checker__progress"].style.display = "none";
@@ -265,15 +266,16 @@ const setError = (message) => {
     elements["#btn-stop"].style.display = "none";
     elements[".progress-indicator__wrapper"].style.display = "none";
     elements[".link-checker__status"].innerHTML = "Loading...";
+    elements["#link-checker__result"].style.display = "block";
     let report = `
       <div class="widget-view internal-widget error active">
         <div class="broken-links-error">
-          <h3 style="text-align: center">${message.error}</h3>
+          <h3>${message.error}</h3>
         </div>
       </div>
     `;
     report += generateTipsSection();
-    result.innerHTML = report
+    result.innerHTML = report;
   }, 400);
 };
 
@@ -303,7 +305,7 @@ if (downloadBtn) {
 const startCheck = (event) => {
   event.preventDefault();
   const form = document.getElementById("link-checker__form");
-  const elements = getElements([".link-checker__progress", ".link-checker__status",
+  const elements = getElements([".link-checker__progress", ".link-checker__status", "#link-checker__result",
     ".progress-indicator__wrapper", "#btn-stop", "#btn-start", "#btn-download", ".selection-radios", "#checkChildren"]);
 
   elements[".progress-indicator__wrapper"].style = "display: inline";
@@ -311,6 +313,7 @@ const startCheck = (event) => {
   elements["#btn-download"].style.display = "none";
   elements[".selection-radios"].style.display = "none";
   elements["#btn-stop"].style.display = "inline-block";
+  elements["#link-checker__result"].style.display = "none";
   updateIndicator(0);
   elements[".link-checker__progress"].style.display = "inline";
 

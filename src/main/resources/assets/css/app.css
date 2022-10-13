@@ -1,5 +1,4 @@
 .link-checker {
-  text-align: center;
   background: white;
   -webkit-box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
           box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
@@ -7,8 +6,13 @@
 }
 
 .link-checker__info p {
-  max-width: 270px;
-  margin: auto;
+  margin: 0 0.5rem;
+}
+
+.link-checker button {
+  margin: 0 0.5rem;
+  width: calc(100% - 1rem);
+  text-align: center;
 }
 
 .link-checker__tips p {
@@ -61,7 +65,7 @@ h5.success-text {
 }
 
 #btn-download {
-  margin: 1rem 0;
+  margin: 1rem 0.5rem;
   border:none;
   color: #fdfdfd;
   background-color: rgb(24, 135, 50);
@@ -74,6 +78,7 @@ h5.success-text {
 #btn-download .aligned-center {
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 
 #btn-download .aligned-center svg {
@@ -93,22 +98,8 @@ h5.success-text {
 
 
 .link-checker__start {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: row;
-          flex-direction: row;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
   margin: 0.5rem 0;
 }
-
 
 #btn-start {
   color: #fff;
@@ -118,7 +109,7 @@ h5.success-text {
   border-radius: 22px;
   font-size: 15px;
   cursor: pointer;
-  margin-right: 0.5rem;
+  margin-top: 5px;
 }
 
 
@@ -126,14 +117,18 @@ h5.success-text {
 
 .selection-radios {
   text-align: left;
-  margin-left: 0.5rem;
+  margin: 0 0.5rem;
 }
 
 .selection-radios legend {
   width: 100%;
-  text-align: center;
   border-bottom: 1px solid #2663b8;
   padding-bottom: 0.2rem;
+}
+
+.selection-radios input[type="radio"] {
+    margin-top: -1px;
+    vertical-align: middle;
 }
 
 .selection-radios fieldset {
@@ -215,7 +210,6 @@ circle#progress-indicator__bar, circle#progress-indicator__next {
 
 .widget-view.internal-widget.success {
   margin: 10px;
-  text-align: center;
   background: white;
   -webkit-box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
           box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
@@ -224,7 +218,6 @@ circle#progress-indicator__bar, circle#progress-indicator__next {
 
 .widget-view.external-widget .widget-item-view .widget-view.internal-widget.error {
   margin: 10px;
-  text-align: center;
   background-color: #d40000;
   -webkit-box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
   box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
@@ -234,7 +227,6 @@ circle#progress-indicator__bar, circle#progress-indicator__next {
 }
 
 .widget-view.internal-widget.error .broken-links-error h3 {
-  text-align: center;
   line-height: 20px;
   font-size: 18px;
   padding: 0;

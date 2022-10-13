@@ -14,7 +14,6 @@
             <form id="link-checker__form" data-th-if="${serviceUrl}" method="get" data-th-data-action="${serviceUrl}" data-th-data-localized-elements="${localizedString}" data-th-data-locale="${locale}">
                 <input type="hidden" data-th-if="${key}" data-th-value="${key}" id="contentId"/>
                 <div class="link-checker__start">
-                    <button id="btn-start" value="Start" data-th-text="${localized.start}">Start</button>
                     <div class="selection-radios">
                         <fieldset>
                             <legend data-th-text="${localized.radioLegend}">Check</legend>
@@ -45,18 +44,9 @@
                             <p data-th-utext="${localized.masterExplanation}"><em>Master:</em> only the published version of the content, which will not include new, scheduled, modified or unpublished versions</p>
                         </fieldset>
                     </div>
+                    <button id="btn-start" value="Start" data-th-text="${localized.start}">Start</button>
                 </div>
             </form>
-            <button id="btn-stop" style="display: none;" value="STOP" data-th-text="${localized.stop}">STOP</button>
-            <button id="btn-download" style="display: none;" value="CSV">
-                <div class="aligned-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF">
-                        <g><rect fill="none" height="24" width="24"/></g>
-                        <g><path d="M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M17,11l-1.41-1.41L13,12.17V4h-2v8.17L8.41,9.59L7,11l5,5 L17,11z"/></g>
-                    </svg>
-                    <span data-th-text="${localized.downloadReport}">Download report (.csv)</span>
-                </div>
-            </button>
             <div class="link-checker__progress">
                 <div class="progress-indicator__container">
                     <div class="progress-indicator__counter" data-th-text="${localized.loading}">Loading...</div>
@@ -71,6 +61,16 @@
                 </div>
                 <div class="link-checker__status"></div>
             </div>
+            <button id="btn-stop" style="display: none;" value="STOP" data-th-text="${localized.stop}">STOP</button>
+            <button id="btn-download" style="display: none;" value="CSV">
+                <div class="aligned-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF">
+                        <g><rect fill="none" height="24" width="24"/></g>
+                        <g><path d="M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M17,11l-1.41-1.41L13,12.17V4h-2v8.17L8.41,9.59L7,11l5,5 L17,11z"/></g>
+                    </svg>
+                    <span data-th-text="${localized.downloadReport}">Download report (.csv)</span>
+                </div>
+            </button>
             <br>
         </div>
         <div id="link-checker__result"></div>
