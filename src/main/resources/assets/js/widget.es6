@@ -120,47 +120,6 @@ const generateShortReport = (message) => {
   return report;
 };
 
-const generateTipsSection = () => (`
-  <div class="widget-view active internal-widget link-checker__tips">
-    <div class="widget-item-view properties-widget-item-view">
-      <h3>${localized?.tipsAndInfo || 'Tips and information'}</h3>
-      <div class="link-checker__tips__body">
-        <ul>
-          <li>
-            ${localized?.draftCheckedTip
-            ||
-            'Only the <em>draft</em> branch is checked, which means the latest updated version of the content (which may or may not be the published version).'}
-          </li>
-          <li>
-            <p>
-              ${localized?.internalContentLinksTip
-              ||
-              '<em>Internal content</em> links referes to connections to other content in Enonic XP. The text which looks something like <span class="pre">1397f305-c7ef-43e6-a563-4980883b6396</span> is the unique ID of the targeted content. <em>NB:</em> An ID may be found more than one place in the content'}
-            </p>
-            <p>
-              ${localized?.commonCauseInternalTip
-              ||
-              'The most common cause for these errors are:'}
-              <ul>
-                <li>
-                  ${localized?.targetContentDeletedTip
-                  ||
-                  'The targeted content has been deleted.'}
-                </li>
-                <li>
-                  ${localized?.contentImportedTip
-                  ||
-                  'This content was imported from another site or server, but the targeted content was not.'}
-                </li>
-              </ul>
-            </p>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div>
-`);
-
 const createReport = (message) => {
   window.downloadCSV = () => {
     generateSpreadsheet(message.results);
@@ -182,9 +141,6 @@ const createReport = (message) => {
     `);
   }
 
-  if (message.brokenCount > 0) {
-    report += generateTipsSection();
-  }
   result.innerHTML = report;
 };
 

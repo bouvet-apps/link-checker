@@ -59,7 +59,13 @@ exports.get = (req) => {
       radioBoth: libs.i18n.localize({ key: "widgets.link-checker.radio-both", locale }),
       stop: libs.i18n.localize({ key: "widgets.link-checker.stop", locale }),
       downloadReport: libs.i18n.localize({ key: "widgets.link-checker.download-report", locale }),
-      loading: libs.i18n.localize({ key: "widgets.link-checker.loading", locale })
+      loading: libs.i18n.localize({ key: "widgets.link-checker.loading", locale }),
+      tipsAndInfo: libs.i18n.localize({ key: "widgets.link-checker.tips-and-info", locale }),
+      draftCheckedTip: libs.i18n.localize({ key: "widgets.link-checker.draft-checked-tip", locale }),
+      internalContentLinksTip: libs.i18n.localize({ key: "widgets.link-checker.internal-content-links-tip", locale }),
+      commonCauseInternalTip: libs.i18n.localize({ key: "widgets.link-checker.common-cause-internal-tip", locale }),
+      targetContentDeletedTip: libs.i18n.localize({ key: "widgets.link-checker.target-content-deleted-tip", locale }),
+      contentImportedTip: libs.i18n.localize({ key: "widgets.link-checker.content-imported-tip", locale })
     },
     localizedString: JSON.stringify({
       timeout: libs.i18n.localize({ key: "widgets.link-checker.timeout", locale }),
@@ -71,13 +77,7 @@ exports.get = (req) => {
       invalidLink: libs.i18n.localize({ key: "widgets.link-checker.invalid-link", locale }),
       invalidLinks: libs.i18n.localize({ key: "widgets.link-checker.invalid-links", locale }),
       downloadMore: libs.i18n.localize({ key: "widgets.link-checker.download-more", locale }),
-      noBrokenLinks: libs.i18n.localize({ key: "widgets.link-checker.no-broken-links", locale }),
-      tipsAndInfo: libs.i18n.localize({ key: "widgets.link-checker.tips-and-info", locale }),
-      draftCheckedTip: libs.i18n.localize({ key: "widgets.link-checker.draft-checked-tip", locale }),
-      internalContentLinksTip: libs.i18n.localize({ key: "widgets.link-checker.internal-content-links-tip", locale }),
-      commonCauseInternalTip: libs.i18n.localize({ key: "widgets.link-checker.common-cause-internal-tip", locale }),
-      targetContentDeletedTip: libs.i18n.localize({ key: "widgets.link-checker.target-content-deleted-tip", locale }),
-      contentImportedTip: libs.i18n.localize({ key: "widgets.link-checker.content-imported-tip", locale })
+      noBrokenLinks: libs.i18n.localize({ key: "widgets.link-checker.no-broken-links", locale })
     })
   };
 
