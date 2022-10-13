@@ -49,7 +49,7 @@ exports.get = (req) => {
      * "widgets.link-checker.broken-links", "widgets.link-checker.report", "widgets.link-checker.found", "widgets.link-checker.invalid-link", "widgets.link-checker.invalid-links",
      * "widgets.link-checker.download-more", "widgets.link-checker.no-broken-links", "widgets.link-checker.tips-and-info",
      * "widgets.link-checker.internal-content-links-tip", "widgets.link-checker.common-cause-internal-tip", "widgets.link-checker.target-content-deleted-tip",
-     * "widgets.link-checker.content-imported-tip"]
+     * "widgets.link-checker.content-imported-tip", "widgets.link-checker.content-not-found"]
      */
     localized: {
       info: libs.i18n.localize({ key: "widgets.link-checker.info", locale }),
@@ -80,7 +80,8 @@ exports.get = (req) => {
       internalContentLinksTip: libs.i18n.localize({ key: "widgets.link-checker.internal-content-links-tip", locale }),
       commonCauseInternalTip: libs.i18n.localize({ key: "widgets.link-checker.common-cause-internal-tip", locale }),
       targetContentDeletedTip: libs.i18n.localize({ key: "widgets.link-checker.target-content-deleted-tip", locale }),
-      contentImportedTip: libs.i18n.localize({ key: "widgets.link-checker.content-imported-tip", locale })
+      contentImportedTip: libs.i18n.localize({ key: "widgets.link-checker.content-imported-tip", locale }),
+      contentNotFoundTip: libs.i18n.localize({ key: "widgets.link-checker.content-not-found", locale })
     })
   };
 

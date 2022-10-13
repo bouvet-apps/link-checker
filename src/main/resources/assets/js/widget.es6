@@ -150,6 +150,11 @@ const generateTipsSection = () => (`
               </ul>
             </p>
           </li>
+          <li>
+            ${localized?.contentNotFoundTip
+            ||
+            '<em>Content not found</em> might occur if you from <em>Master</em> try to check links for a content which only exists in Draft branch. Try to publish the content, and try again.'}
+          </li>
         </ul>
       </div>
     </div>
@@ -250,17 +255,27 @@ const setResult = (message) => {
 
 const setError = (message) => {
   const result = document.getElementById("link-checker__result");
-  result.innerHTML = (`
-    <div class="widget-view active internal-widget">
-      <div class="widget-item-view properties-widget-item-view version-widget-item-view">
+  setTimeout(() => {
+    const elements = getElements([".link-checker__progress", ".link-checker__status",
+      "#btn-stop", "#btn-start", ".progress-indicator__wrapper", ".selection-radios"]);
+
+    elements[".link-checker__progress"].style.display = "none";
+    elements["#btn-start"].style.display = "inline-block";
+    elements[".selection-radios"].style.display = "inline-block";
+    elements["#btn-stop"].style.display = "none";
+    elements[".progress-indicator__wrapper"].style.display = "none";
+    elements[".link-checker__status"].innerHTML = "Loading...";
+    let report = `
+      <div class="widget-view internal-widget error active">
         <div class="broken-links-error">
           <h3 style="text-align: center">${message.error}</h3>
         </div>
       </div>
-    </div>
-  `);
+    `;
+    report += generateTipsSection();
+    result.innerHTML = report
+  }, 400);
 };
-
 
 const startBtn = document.getElementById("btn-start");
 if (startBtn) {

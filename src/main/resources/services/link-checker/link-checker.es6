@@ -11,6 +11,7 @@ const libs = {
 
 const CURRENTLY_RUNNING = {};
 const PAGINATION_COUNT = 100;
+let locale = 'no';
 
 const cache = libs.cache.newCache({
   size: 100,
@@ -120,7 +121,6 @@ const checkNode = (event, node) => {
   /**
    * @phrases ["services.link-checker.external-url", "services.link-checker.internal-content"]
    */
-  const locale = event?.data?.locale || 'no';
   const localizedExternalUrl = libs.i18n.localize({ key: "services.link-checker.external-url", locale }) || "External URL";
   const localizedInternalContent = libs.i18n.localize({ key: "services.link-checker.internal-content", locale }) || "Internal content";
 
@@ -257,13 +257,19 @@ const startChecker = (event) => {
       index: 0, count: nodes.count, total: nodes.total, key: key
     }));
   } else {
-    libs.webSocket.send(event.session.id, JSON.stringify({ error: "Content not found :(", key: key }));
+    /**
+     * @phrases ["services.link-checker.no-content"]
+     */
+    libs.webSocket.send(event.session.id, JSON.stringify({ error: `${libs.i18n.localize({ key: "services.link-checker.no-content", locale })} :(` || "Content not found :(", key: key }));
   }
 };
 
 exports.webSocketEvent = (event) => {
   const currentSession = CURRENTLY_RUNNING[event.session.id];
   const { message, type } = event;
+  if (event?.data?.locale) {
+    locale = event.data.locale;
+  }
 
   libs.context.run(
     getDefaultContextParams(event),
