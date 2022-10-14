@@ -60,17 +60,23 @@ const generateSpreadsheet = (results) => {
   XLSX.writeFile(wb, `${localized?.report || 'report'}-linkchecker-${date.toLocaleDateString()}-${date.toLocaleTimeString()}.xlsx`, {});
 };
 
-const renderLink = (link) => (`
-<div class="broken-links-error__link">
-  <div class="broken-links-error__link__body">
-    <div style="margin-right: 5px;">${link.type}</div>
-    <span style="margin-left: 5px">${mapStatusCode(link.status)} ${mapStatusMessage(link.status)}</span>
-  </div>
-  <div class="broken-links-error__link__target">
-    <a href="${link.link}" target="_blank">${link.link}</a>
-  </div>
-</div>
-`);
+const renderLink = (link) => {
+  let brokenLinkTarget = `<a href="${link.link}" target="_blank">${link.link}</a>`;
+  if (link.internal) {
+    brokenLinkTarget = `<p>${link.link}</p>`;
+  }
+  return (`
+    <div class="broken-links-error__link">
+      <div class="broken-links-error__link__body">
+        <div style="margin-right: 5px;">${link.type}</div>
+        <span style="margin-left: 5px">${mapStatusCode(link.status)} ${mapStatusMessage(link.status)}</span>
+      </div>
+      <div class="broken-links-error__link__target">
+        ${brokenLinkTarget}
+      </div>
+    </div>
+  `);
+};
 
 const generateLongReport = (message) => {
   let report = "";

@@ -146,18 +146,18 @@ const checkNode = (event, node) => {
     if (error) {
       // Local error with httpClient
       currentSession.failedCount++;
-      brokenLinks.push({ link: url, status: 0, type: localizedExternalUrl });
+      brokenLinks.push({ link: url, status: 0, type: localizedExternalUrl, internal: false });
     } else if (status >= 309 && status < 900) {
       // Under 900 to avoid annoying linkedIn response
       currentSession.brokenCount++;
-      brokenLinks.push({ link: url, status: status, type: localizedExternalUrl });
+      brokenLinks.push({ link: url, status: status, type: localizedExternalUrl, internal: false });
     }
   });
   urls.internalLinks.forEach((link) => {
     const { status } = checkInternalLink(link, event.data.branch);
     if (status >= 309 && status < 900) {
       currentSession.brokenCount++;
-      brokenLinks.push({ link: link, status, type: localizedInternalContent });
+      brokenLinks.push({ link: link, status, type: localizedInternalContent, internal: true });
     }
   });
   if (brokenLinks.length > 0) {
