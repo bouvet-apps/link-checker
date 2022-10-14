@@ -171,6 +171,10 @@ h5.success-text {
   margin: 0.4rem 0;
 }
 
+.selection-radios .content-disabled {
+    color: #575555;
+}
+
 .selection-radios em {
   font-style: italic;
 }

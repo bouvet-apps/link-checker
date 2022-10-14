@@ -20,6 +20,14 @@ exports.get = (req) => {
     };
   }
 
+  const content = libs.content.get({ key: contentId });
+
+  let publishedContent = false;
+  if (content?.publish?.from) {
+    // Content exist in master branch
+    publishedContent = true;
+  }
+
   let url = libs.portal.serviceUrl({
     service: "link-checker",
     type: "absolute",
@@ -33,12 +41,13 @@ exports.get = (req) => {
 
   const widgetScriptUrl = libs.portal.assetUrl({ path: "js/widget.js" });
 
-  const locale = libs.content.get({ key: contentId })?.language || 'no';
+  const locale = content?.language || 'no';
 
   const model = {
     serviceUrl: url,
     key: contentId,
     widgetScriptUrl,
+    publishedContent,
     locale,
     /**
      * @phrases ["widgets.link-checker.info", "widgets.link-checker.start", "widgets.link-checker.radio-legend", "widgets.link-checker.radio-this-content",
