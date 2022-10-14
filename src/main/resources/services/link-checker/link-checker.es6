@@ -99,6 +99,7 @@ const buildCacheKey = (event, key, content) => {
     This will ensure any changes to its children will trigger a new fresh link check.
   */
   let cacheKey = key;
+  const branch = event.session.params.branch;
 
   const lastModifiedChild = libs.content.getChildren({
     key: key, count: 1, start: 0, sort: "modifiedTime DESC"
@@ -110,8 +111,18 @@ const buildCacheKey = (event, key, content) => {
     cacheKey += content.modifiedTime;
   }
 
+  if (branch === "master") {
+    const lastPublishedChild = libs.content.getChildren({
+      key: key, count: 1, start: 0, sort: "publish.from DESC"
+    }).hits;
+
+    if (lastPublishedChild[0]?.publish?.from && lastPublishedChild[0]?._id) {
+      cacheKey += lastPublishedChild[0]._id;
+    }
+  }
+
   cacheKey += event.session.params.selection;
-  cacheKey += event.session.params.branch;
+  cacheKey += branch;
   return cacheKey;
 };
 

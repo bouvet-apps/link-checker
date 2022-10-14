@@ -16,25 +16,40 @@ const getElements = (selectors) => {
   return elements;
 };
 
-const mapStatus = (status) => {
+const mapStatusCode = (status) => {
   switch (status) {
     case 0:
       return localized?.manualReview || "Needs manual review";
-    case 408:
-      return localized?.timeout || "Timeout";
     default:
       return status;
   }
 };
 
+const mapStatusMessage = (status) => {
+  switch (status) {
+    case 403:
+      return localized?.http403 || "Forbidden";
+    case 404:
+      return localized?.http404 || "Not Found";
+    case 408:
+      return localized?.http408 || "Request Timeout";
+    case 500:
+      return localized?.http500 || "Internal Server Error";
+    case 503:
+      return localized?.http503 || "Service Unavailable";
+    default:
+      return "";
+  }
+};
+
 const generateSpreadsheet = (results) => {
   const ws = XLSX.utils.json_to_sheet([],
-    { header: ["displayName", "path", "type", (localized?.brokenLink || "broken link"), "status"], skipHeader: false });
+    { header: ["displayName", "path", "type", (localized?.brokenLink || "broken link"), (localized?.statusCode || "status code"), (localized?.statusMessage ||"status message")], skipHeader: false });
   /* Write data starting at A2 */
   results.forEach((result, index) => {
-    const links = result.brokenLinks.map(link => ({ C: link.type, D: link.link, E: mapStatus(link.status) }));
+    const links = result.brokenLinks.map(link => ({ C: link.type, D: link.link, E: mapStatusCode(link.status), F: mapStatusMessage(link.status) }));
     const data = [{
-      A: result.displayName, B: result.path, C: links[0].C, D: links[0].D, E: links[0].E
+      A: result.displayName, B: result.path, C: links[0].C, D: links[0].D, E: links[0].E, F: links[0].F
     }].concat(links.slice(1));
     XLSX.utils.sheet_add_json(ws, data, { skipHeader: true, origin: index === 0 ? "A2" : -1 });
   });
@@ -49,7 +64,7 @@ const renderLink = (link) => (`
 <div class="broken-links-error__link">
   <div class="broken-links-error__link__body">
     <div style="margin-right: 5px;">${link.type}</div>
-    <span style="margin-left: 5px">${mapStatus(link.status)}</span>
+    <span style="margin-left: 5px">${mapStatusCode(link.status)} ${mapStatusMessage(link.status)}</span>
   </div>
   <div class="broken-links-error__link__target">
     <a href="${link.link}" target="_blank">${link.link}</a>
@@ -149,6 +164,11 @@ const generateTipsSection = () => (`
                 </li>
               </ul>
             </p>
+          </li>
+          <li>
+            ${localized?.cacheTip
+            ||
+            'LinkChecker will cache the result for each content and branch you run it on. The cache will only check for changes in the current content and in its immediate children. So, if you check the root content, then apply changes to a child of a child, the root content cache will not be updated.'}
           </li>
           <li>
             ${localized?.contentNotFoundTip
