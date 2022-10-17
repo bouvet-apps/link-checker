@@ -85,6 +85,12 @@ If you are running HTTPS and you are met with `failed: Error during WebSocket ha
 Not tested for below 6.12.0
 
 ## Changelog
+### Version 3.1.0
+* Possible to choose to check master brach
+* Added HTTP status messages to result (including report)
+* Added information about how the cache works in the "Tips and information" box
+* Can start linkChecker again without refreshing browser if we get error from websocket
+
 ### Version 3.0.1
 * Fixed bug with valid external links being listed as "Need manual review".
 * Fixed bug with internal links always being listed twice.

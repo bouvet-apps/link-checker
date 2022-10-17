@@ -1,5 +1,4 @@
 .link-checker {
-  text-align: center;
   background: white;
   -webkit-box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
           box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
@@ -7,8 +6,13 @@
 }
 
 .link-checker__info p {
-  max-width: 270px;
-  margin: auto;
+  margin: 0 0.5rem;
+}
+
+.link-checker button {
+  margin: 0 0.5rem;
+  width: calc(100% - 1rem);
+  text-align: center;
 }
 
 .link-checker__tips p {
@@ -61,7 +65,7 @@ h5.success-text {
 }
 
 #btn-download {
-  margin: 1rem 0;
+  margin: 1rem 0.5rem;
   border:none;
   color: #fdfdfd;
   background-color: rgb(24, 135, 50);
@@ -71,13 +75,18 @@ h5.success-text {
   cursor: pointer;
 }
 
+#btn-download:focus, #btn-download:hover {
+  background-color: rgb(149 176 155);
+}
+
 #btn-download .aligned-center {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #btn-download .aligned-center svg {
-    margin-right: 5px;
+  margin-right: 5px;
 }
 
 #btn-stop {
@@ -91,24 +100,13 @@ h5.success-text {
   cursor: pointer;
 }
 
-
-.link-checker__start {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: row;
-          flex-direction: row;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  margin: 0.5rem 0;
+#btn-stop:focus, #btn-stop:hover {
+  background-color: #d56363;
 }
 
+.link-checker__start {
+  margin: 0.5rem 0;
+}
 
 #btn-start {
   color: #fff;
@@ -118,7 +116,11 @@ h5.success-text {
   border-radius: 22px;
   font-size: 15px;
   cursor: pointer;
-  margin-right: 0.5rem;
+  margin-top: 5px;
+}
+
+#btn-start:focus, #btn-start:hover {
+  background-color: #678ec5;
 }
 
 
@@ -126,18 +128,61 @@ h5.success-text {
 
 .selection-radios {
   text-align: left;
-  margin-left: 0.5rem;
+  margin: 0 0.5rem;
+  width: calc(100% - 1rem);
 }
 
 .selection-radios legend {
   width: 100%;
-  text-align: center;
   border-bottom: 1px solid #2663b8;
   padding-bottom: 0.2rem;
 }
 
+.selection-radios label {
+  display: inline-flex;
+}
+
+.selection-radios .question-btn {
+  display: inline;
+  width: fit-content;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0 0 1px 5px;
+  cursor: pointer;
+  outline: 0;
+}
+
+.selection-radios .question-btn:focus, .selection-radios .question-btn:hover {
+  border-bottom: 1px solid;
+  margin: 0 0 0 5px;
+}
+
+.selection-radios input[type="radio"] {
+  margin-top: -3px;
+  vertical-align: middle;
+}
+
+.selection-radios fieldset {
+  margin-top: 5px;
+}
+
 .selection-radios fieldset div {
   margin: 0.4rem 0;
+}
+
+.selection-radios .content-disabled {
+    color: #575555;
+}
+
+.selection-radios em {
+  font-style: italic;
+}
+
+.selection-radios p {
+  margin: 5px 0;
+  color: #575555;
+  font-style: italic;
 }
 
  /* ------------- Circle progress bar ------------- */
@@ -203,11 +248,26 @@ circle#progress-indicator__bar, circle#progress-indicator__next {
 
 .widget-view.internal-widget.success {
   margin: 10px;
-  text-align: center;
   background: white;
   -webkit-box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
           box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
   padding: 10px;
+}
+
+.widget-view.external-widget .widget-item-view .widget-view.internal-widget.error {
+  margin: 10px;
+  background-color: #d40000;
+  -webkit-box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  position: relative;
+  width: auto;
+}
+
+.widget-view.internal-widget.error .broken-links-error h3 {
+  line-height: 20px;
+  font-size: 18px;
+  padding: 0;
 }
 
 
@@ -260,6 +320,7 @@ circle#progress-indicator__bar, circle#progress-indicator__next {
 }
 
 .broken-links-error__link__target {
+  color: #d40000;
   -webkit-box-flex: 1;
       -ms-flex-positive: 1;
           flex-grow: 1;

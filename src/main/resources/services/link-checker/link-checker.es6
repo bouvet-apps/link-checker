@@ -11,6 +11,7 @@ const libs = {
 
 const CURRENTLY_RUNNING = {};
 const PAGINATION_COUNT = 100;
+let locale = 'no';
 
 const cache = libs.cache.newCache({
   size: 100,
@@ -98,6 +99,7 @@ const buildCacheKey = (event, key, content) => {
     This will ensure any changes to its children will trigger a new fresh link check.
   */
   let cacheKey = key;
+  const branch = event.session.params.branch;
 
   const lastModifiedChild = libs.content.getChildren({
     key: key, count: 1, start: 0, sort: "modifiedTime DESC"
@@ -109,7 +111,18 @@ const buildCacheKey = (event, key, content) => {
     cacheKey += content.modifiedTime;
   }
 
+  if (branch === "master") {
+    const lastPublishedChild = libs.content.getChildren({
+      key: key, count: 1, start: 0, sort: "publish.from DESC"
+    }).hits;
+
+    if (lastPublishedChild[0]?.publish?.from && lastPublishedChild[0]?._id) {
+      cacheKey += lastPublishedChild[0]._id;
+    }
+  }
+
   cacheKey += event.session.params.selection;
+  cacheKey += branch;
   return cacheKey;
 };
 
@@ -119,7 +132,6 @@ const checkNode = (event, node) => {
   /**
    * @phrases ["services.link-checker.external-url", "services.link-checker.internal-content"]
    */
-  const locale = event?.data?.locale || 'no';
   const localizedExternalUrl = libs.i18n.localize({ key: "services.link-checker.external-url", locale }) || "External URL";
   const localizedInternalContent = libs.i18n.localize({ key: "services.link-checker.internal-content", locale }) || "Internal content";
 
@@ -134,18 +146,18 @@ const checkNode = (event, node) => {
     if (error) {
       // Local error with httpClient
       currentSession.failedCount++;
-      brokenLinks.push({ link: url, status: 0, type: localizedExternalUrl });
+      brokenLinks.push({ link: url, status: 0, type: localizedExternalUrl, internal: false });
     } else if (status >= 309 && status < 900) {
       // Under 900 to avoid annoying linkedIn response
       currentSession.brokenCount++;
-      brokenLinks.push({ link: url, status: status, type: localizedExternalUrl });
+      brokenLinks.push({ link: url, status: status, type: localizedExternalUrl, internal: false });
     }
   });
   urls.internalLinks.forEach((link) => {
     const { status } = checkInternalLink(link, event.data.branch);
     if (status >= 309 && status < 900) {
       currentSession.brokenCount++;
-      brokenLinks.push({ link: link, status, type: localizedInternalContent });
+      brokenLinks.push({ link: link, status, type: localizedInternalContent, internal: true });
     }
   });
   if (brokenLinks.length > 0) {
@@ -256,13 +268,19 @@ const startChecker = (event) => {
       index: 0, count: nodes.count, total: nodes.total, key: key
     }));
   } else {
-    libs.webSocket.send(event.session.id, JSON.stringify({ error: "Content not found :(", key: key }));
+    /**
+     * @phrases ["services.link-checker.no-content"]
+     */
+    libs.webSocket.send(event.session.id, JSON.stringify({ error: `${libs.i18n.localize({ key: "services.link-checker.no-content", locale })} :(` || "Content not found :(", key: key }));
   }
 };
 
 exports.webSocketEvent = (event) => {
   const currentSession = CURRENTLY_RUNNING[event.session.id];
   const { message, type } = event;
+  if (event?.data?.locale) {
+    locale = event.data.locale;
+  }
 
   libs.context.run(
     getDefaultContextParams(event),

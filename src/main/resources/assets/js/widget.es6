@@ -16,25 +16,40 @@ const getElements = (selectors) => {
   return elements;
 };
 
-const mapStatus = (status) => {
+const mapStatusCode = (status) => {
   switch (status) {
     case 0:
       return localized?.manualReview || "Needs manual review";
-    case 408:
-      return localized?.timeout || "Timeout";
     default:
       return status;
   }
 };
 
+const mapStatusMessage = (status) => {
+  switch (status) {
+    case 403:
+      return localized?.http403 || "Forbidden";
+    case 404:
+      return localized?.http404 || "Not Found";
+    case 408:
+      return localized?.http408 || "Request Timeout";
+    case 500:
+      return localized?.http500 || "Internal Server Error";
+    case 503:
+      return localized?.http503 || "Service Unavailable";
+    default:
+      return "";
+  }
+};
+
 const generateSpreadsheet = (results) => {
   const ws = XLSX.utils.json_to_sheet([],
-    { header: ["displayName", "path", "type", (localized?.brokenLink || "broken link"), "status"], skipHeader: false });
+    { header: ["displayName", "path", "type", (localized?.brokenLink || "broken link"), (localized?.statusCode || "status code"), (localized?.statusMessage ||"status message")], skipHeader: false });
   /* Write data starting at A2 */
   results.forEach((result, index) => {
-    const links = result.brokenLinks.map(link => ({ C: link.type, D: link.link, E: mapStatus(link.status) }));
+    const links = result.brokenLinks.map(link => ({ C: link.type, D: link.link, E: mapStatusCode(link.status), F: mapStatusMessage(link.status) }));
     const data = [{
-      A: result.displayName, B: result.path, C: links[0].C, D: links[0].D, E: links[0].E
+      A: result.displayName, B: result.path, C: links[0].C, D: links[0].D, E: links[0].E, F: links[0].F
     }].concat(links.slice(1));
     XLSX.utils.sheet_add_json(ws, data, { skipHeader: true, origin: index === 0 ? "A2" : -1 });
   });
@@ -45,17 +60,23 @@ const generateSpreadsheet = (results) => {
   XLSX.writeFile(wb, `${localized?.report || 'report'}-linkchecker-${date.toLocaleDateString()}-${date.toLocaleTimeString()}.xlsx`, {});
 };
 
-const renderLink = (link) => (`
-<div class="broken-links-error__link">
-  <div class="broken-links-error__link__body">
-    <div style="margin-right: 5px;">${link.type}</div>
-    <span style="margin-left: 5px">${mapStatus(link.status)}</span>
-  </div>
-  <div class="broken-links-error__link__target">
-    <a href="${link.link}" target="_blank">${link.link}</a>
-  </div>
-</div>
-`);
+const renderLink = (link) => {
+  let brokenLinkTarget = `<a href="${link.link}" target="_blank">${link.link}</a>`;
+  if (link.internal) {
+    brokenLinkTarget = `<p>${link.link}</p>`;
+  }
+  return (`
+    <div class="broken-links-error__link">
+      <div class="broken-links-error__link__body">
+        <div style="margin-right: 5px;">${link.type}</div>
+        <span style="margin-left: 5px">${mapStatusCode(link.status)} ${mapStatusMessage(link.status)}</span>
+      </div>
+      <div class="broken-links-error__link__target">
+        ${brokenLinkTarget}
+      </div>
+    </div>
+  `);
+};
 
 const generateLongReport = (message) => {
   let report = "";
@@ -127,11 +148,6 @@ const generateTipsSection = () => (`
       <div class="link-checker__tips__body">
         <ul>
           <li>
-            ${localized?.draftCheckedTip
-            ||
-            'Only the <em>draft</em> branch is checked, which means the latest updated version of the content (which may or may not be the published version).'}
-          </li>
-          <li>
             <p>
               ${localized?.internalContentLinksTip
               ||
@@ -154,6 +170,16 @@ const generateTipsSection = () => (`
                 </li>
               </ul>
             </p>
+          </li>
+          <li>
+            ${localized?.cacheTip
+            ||
+            'LinkChecker will cache the result for each content and branch you run it on. The cache will only check for changes in the current content and in its immediate children. So, if you check the root content, then apply changes to a child of a child, the root content cache will not be updated.'}
+          </li>
+          <li>
+            ${localized?.contentNotFoundTip
+            ||
+            '<em>Content not found</em> might occur if you from <em>Master</em> try to check links for a content which only exists in Draft branch. Try to publish the content, and try again.'}
           </li>
         </ul>
       </div>
@@ -239,7 +265,7 @@ const setResult = (message) => {
   if (key && (key.value === message.key)) {
     updateIndicator(100);
     setTimeout(() => {
-      const elements = getElements([".link-checker__progress", ".link-checker__status",
+      const elements = getElements([".link-checker__progress", ".link-checker__status", "#link-checker__result",
         "#btn-stop", "#btn-start", ".progress-indicator__wrapper", ".selection-radios"]);
 
       elements[".link-checker__progress"].style.display = "none";
@@ -248,6 +274,7 @@ const setResult = (message) => {
       elements["#btn-stop"].style.display = "none";
       elements[".progress-indicator__wrapper"].style.display = "none";
       elements[".link-checker__status"].innerHTML = "Loading...";
+      elements["#link-checker__result"].style.display = "block";
       createReport(message);
     }, 400);
   }
@@ -255,17 +282,54 @@ const setResult = (message) => {
 
 const setError = (message) => {
   const result = document.getElementById("link-checker__result");
-  result.innerHTML = (`
-    <div class="widget-view active internal-widget">
-      <div class="widget-item-view properties-widget-item-view version-widget-item-view">
+  setTimeout(() => {
+    const elements = getElements([".link-checker__progress", ".link-checker__status", "#link-checker__result",
+      "#btn-stop", "#btn-start", ".progress-indicator__wrapper", ".selection-radios"]);
+
+    elements[".link-checker__progress"].style.display = "none";
+    elements["#btn-start"].style.display = "inline-block";
+    elements[".selection-radios"].style.display = "inline-block";
+    elements["#btn-stop"].style.display = "none";
+    elements[".progress-indicator__wrapper"].style.display = "none";
+    elements[".link-checker__status"].innerHTML = "Loading...";
+    elements["#link-checker__result"].style.display = "block";
+    let report = `
+      <div class="widget-view internal-widget error active">
         <div class="broken-links-error">
-          <h3 style="text-align: center">${message.error}</h3>
+          <h3>${message.error}</h3>
         </div>
       </div>
-    </div>
-  `);
+    `;
+    report += generateTipsSection();
+    result.innerHTML = report;
+  }, 400);
 };
 
+const draftBtn = document.getElementById("draft-btn");
+if (draftBtn) {
+  draftBtn.addEventListener("click", (event) => {
+    event.preventDefault();
+    const draftExplanation = document.getElementById("draft-explanation");
+    if (draftExplanation.style.display === "none") {
+      draftExplanation.style.display = "block";
+    } else {
+      draftExplanation.style.display = "none";
+    }
+  })
+}
+
+const masterBtn = document.getElementById("master-btn");
+if (masterBtn) {
+  masterBtn.addEventListener("click", (event) => {
+    event.preventDefault();
+    const masterExplanation = document.getElementById("master-explanation");
+    if (masterExplanation.style.display === "none") {
+      masterExplanation.style.display = "block";
+    } else {
+      masterExplanation.style.display = "none";
+    }
+  })
+}
 
 const startBtn = document.getElementById("btn-start");
 if (startBtn) {
@@ -293,7 +357,7 @@ if (downloadBtn) {
 const startCheck = (event) => {
   event.preventDefault();
   const form = document.getElementById("link-checker__form");
-  const elements = getElements([".link-checker__progress", ".link-checker__status",
+  const elements = getElements([".link-checker__progress", ".link-checker__status", "#link-checker__result",
     ".progress-indicator__wrapper", "#btn-stop", "#btn-start", "#btn-download", ".selection-radios", "#checkChildren"]);
 
   elements[".progress-indicator__wrapper"].style = "display: inline";
@@ -301,11 +365,13 @@ const startCheck = (event) => {
   elements["#btn-download"].style.display = "none";
   elements[".selection-radios"].style.display = "none";
   elements["#btn-stop"].style.display = "inline-block";
+  elements["#link-checker__result"].style.display = "none";
   updateIndicator(0);
   elements[".link-checker__progress"].style.display = "inline";
 
   const selection = document.querySelector("input[name=\"selection\"]:checked").value;
-  const url = `${form.dataset.action}&selection=${selection}&locale=${locale}`;
+  const branch = document.querySelector("input[name=\"branch\"]:checked").value;
+  const url = `${form.dataset.action}&selection=${selection}&locale=${locale}&branch=${branch}`;
   const ws = new window.WebSocket(url);
   ws.onopen = () => {
     /*

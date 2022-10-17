@@ -14,7 +14,6 @@
             <form id="link-checker__form" data-th-if="${serviceUrl}" method="get" data-th-data-action="${serviceUrl}" data-th-data-localized-elements="${localizedString}" data-th-data-locale="${locale}">
                 <input type="hidden" data-th-if="${key}" data-th-value="${key}" id="contentId"/>
                 <div class="link-checker__start">
-                    <button id="btn-start" value="Start" data-th-text="${localized.start}">Start</button>
                     <div class="selection-radios">
                         <fieldset>
                             <legend data-th-text="${localized.radioLegend}">Check</legend>
@@ -31,19 +30,24 @@
                                 <label for="both" data-th-text="${localized.radioBoth}">Both</label>
                             </div>
                         </fieldset>
+                        <fieldset>
+                            <legend data-th-text="${localized.from}">From</legend>
+                            <div>
+                                <input type="radio" id="draft" name="branch" value="draft" checked/>
+                                <label for="draft">Draft <button id="draft-btn" class="question-btn" data-th-title="${explanationTitle}"><svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 0 24 24" width="16px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg></button></label>
+                                <p data-th-text="${localized.draftExplanation}" id="draft-explanation" style="display: none;">Checks the latest updated version of the content, which may or may not be the published version</p>
+                            </div>
+                            <div>
+                                <input data-th-if="${publishedContent}" type="radio" id="master" name="branch" value="master"/>
+                                <input data-th-unless="${publishedContent}" type="radio" name="branch" value="master" disabled/>
+                                <label for="master" data-th-classappend="${publishedContent} ? content-published : content-disabled">Master <button id="master-btn" class="question-btn" data-th-title="${explanationTitle}"><svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 0 24 24" width="16px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg></button></label>
+                                <p data-th-text="${localized.masterExplanation}" id="master-explanation" style="display: none;">Checks only the published version of the content, which will not include new, scheduled, modified or unpublished versions</p>
+                            </div>
+                        </fieldset>
                     </div>
+                    <button id="btn-start" value="Start" data-th-text="${localized.start}">Start</button>
                 </div>
             </form>
-            <button id="btn-stop" style="display: none;" value="STOP" data-th-text="${localized.stop}">STOP</button>
-            <button id="btn-download" style="display: none;" value="CSV">
-                <div class="aligned-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF">
-                        <g><rect fill="none" height="24" width="24"/></g>
-                        <g><path d="M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M17,11l-1.41-1.41L13,12.17V4h-2v8.17L8.41,9.59L7,11l5,5 L17,11z"/></g>
-                    </svg>
-                    <span data-th-text="${localized.downloadReport}">Download report (.csv)</span>
-                </div>
-            </button>
             <div class="link-checker__progress">
                 <div class="progress-indicator__container">
                     <div class="progress-indicator__counter" data-th-text="${localized.loading}">Loading...</div>
@@ -58,6 +62,16 @@
                 </div>
                 <div class="link-checker__status"></div>
             </div>
+            <button id="btn-stop" style="display: none;" value="STOP" data-th-text="${localized.stop}">STOP</button>
+            <button id="btn-download" style="display: none;" value="CSV">
+                <div class="aligned-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF">
+                        <g><rect fill="none" height="24" width="24"/></g>
+                        <g><path d="M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M17,11l-1.41-1.41L13,12.17V4h-2v8.17L8.41,9.59L7,11l5,5 L17,11z"/></g>
+                    </svg>
+                    <span data-th-text="${localized.downloadReport}">Download report (.csv)</span>
+                </div>
+            </button>
             <br>
         </div>
         <div id="link-checker__result"></div>
