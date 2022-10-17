@@ -76,6 +76,7 @@ If you are running HTTPS and you are met with `failed: Error during WebSocket ha
 
 | Version | XP version |
 |---------| ------------- |
+| 3.1.0   | >=7.9.0 |
 | 3.0.1   | >=7.9.0 |
 | 3.0.0   | >=7.9.0 |
 | 2.0.1   | >=7.2.0 |
