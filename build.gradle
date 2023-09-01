@@ -1,10 +1,10 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'com.enonic.xp.app' version '3.2.0'
-    id "com.github.node-gradle.node" version "3.4.0"
+    id 'com.enonic.xp.app' version '3.4.0'
+    id "com.github.node-gradle.node" version "7.0.0"
     id 'org.ajoberstar.grgit' version '4.1.1'
-    id "com.github.ben-manes.versions" version '0.42.0'
+    id "com.github.ben-manes.versions" version '0.47.0'
 }
 
 sourceCompatibility = "1.11"
@@ -100,9 +100,9 @@ dependencies {
     include "com.enonic.xp:lib-i18n:${xpVersion}"
     include "com.enonic.xp:lib-portal:${xpVersion}"
     include "com.enonic.xp:lib-websocket:${xpVersion}"
-    include 'com.enonic.lib:lib-cache:2.1.1'
-    include 'com.enonic.lib:lib-http-client:3.2.0'
-    include "com.enonic.lib:lib-thymeleaf:2.0.1"
+    include 'com.enonic.lib:lib-cache:2.2.0'
+    include 'com.enonic.lib:lib-http-client:3.2.2'
+    include "com.enonic.lib:lib-thymeleaf:2.1.0"
 }
 
 repositories {
@@ -115,15 +115,15 @@ repositories {
 
 node {
     // Version of node to use.
-    version = '16.14.2'
+    version = '18.17.1'
     // Version of npm to use.
-    npmVersion = '8.5.0'
+    npmVersion = '9.8.1'
     // If true, it will download node using above parameters.
     // If false, it will try to use globally installed node.
     download = true
 }
 
 wrapper {
-    gradleVersion = '7.3.1'
+    gradleVersion = '8.3'
     distributionType = Wrapper.DistributionType.BIN
 }

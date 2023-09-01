@@ -259,7 +259,6 @@ const updateProgress = (message) => {
   }
 };
 
-
 const setResult = (message) => {
   const key = document.querySelector("#contentId");
   if (key && (key.value === message.key)) {
