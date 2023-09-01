@@ -39,6 +39,10 @@ sourceSets {
     }
 }
 
+tasks.named("jar") {
+    dependsOn(":npmBuild")
+}
+
 task copyDist {
   dependsOn(':deploy')
   group 'application'
@@ -86,7 +90,8 @@ task npmBuild(type: NpmTask,
     outputs.dir "$buildDir/resources/main"
 }
 
-jar.dependsOn npmBuild
+rootProject.tasks.getByName('build').dependsOn npmBuild
+
 build.finalizedBy(copyDist)
 
 clean.dependsOn(cleanDist)
