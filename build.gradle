@@ -115,9 +115,9 @@ repositories {
 
 node {
     // Version of node to use.
-    version = '18.17.1'
+    version = '16.20.2'
     // Version of npm to use.
-    npmVersion = '9.8.1'
+    npmVersion = '8.19.4'
     // If true, it will download node using above parameters.
     // If false, it will try to use globally installed node.
     download = true
