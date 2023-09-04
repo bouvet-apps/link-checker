@@ -34,7 +34,6 @@ const checkInternalLink = (link, branch) => {
   return { status: result ? 200 : 404 };
 };
 
-
 const checkExternalUrl = (externalUrl) => {
   let url = externalUrl;
   try {
@@ -73,7 +72,6 @@ const getInternalReferences = (node) => {
   const references = __.toNativeObject(bean.getOutboundReferences(node._id));
   return references;
 };
-
 
 const getExternalLinks = (text) => {
   // Do not have global regex, they must be initialized each time.
@@ -167,7 +165,6 @@ const checkNode = (event, node) => {
     currentSession.results.push(data);
   }
 };
-
 
 const next = (event, indexParam) => {
   const currentSession = CURRENTLY_RUNNING[event.session.id];
