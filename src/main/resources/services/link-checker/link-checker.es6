@@ -23,7 +23,7 @@ const getDefaultContextParams = (event) => {
   return { repository: event.data.repository, branch: event.data.branch, user: { login: user[2], idProvider: user[1] } };
 };
 
-const checkInternalLink = (link, branch) => {
+export const checkInternalLink = (link, branch) => {
   const contextParams = { branch: branch, principals: ["role:system.admin"] };
   const result = libs.context.run(contextParams, () => {
     const split = link.split("/");
@@ -35,7 +35,7 @@ const checkInternalLink = (link, branch) => {
 };
 
 
-const checkExternalUrl = (externalUrl) => {
+export const checkExternalUrl = (externalUrl) => {
   let url = externalUrl;
   try {
     if (url.indexOf("http://") === -1 && url.indexOf("https://") === -1) {
@@ -68,14 +68,14 @@ const checkExternalUrl = (externalUrl) => {
   }
 };
 
-const getInternalReferences = (node) => {
+export const getInternalReferences = (node) => {
   const bean = __.newBean("no.bouvet.xp.lib.outboundreferences.OutboundReferences");
   const references = __.toNativeObject(bean.getOutboundReferences(node._id));
   return references;
 };
 
 
-const getExternalLinks = (text) => {
+export const getExternalLinks = (text) => {
   // Do not have global regex, they must be initialized each time.
   const externalExpression = /((https?:\/\/|ftp:\/\/|www\.|[^\s:=]+@www\.).*?[a-z_/0-9\-#=&()])(?=(\.|,|;|\?|!)?(?:“|”|"|'|«|»|\[\/|\s|\r|\n|\\|<|>|\[\n))/gi; // (s:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/|www\.)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/[^" \\><]*)?/gi;
   return text.match(externalExpression) || [];
