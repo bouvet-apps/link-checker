@@ -1,4 +1,5 @@
 import { saveResults } from "../../lib/utils";
+import { getSites } from "../../lib/utils.es6";
 import { getExternalLinks, getInternalReferences, checkInternalLink, checkExternalUrl } from "../../services/link-checker/link-checker";
 
 const libs = {
@@ -16,18 +17,19 @@ const libs = {
 const PAGINATION_COUNT = 500;
 const BRANCH = 'draft';
 let locale = 'no';
+const QUERYBASE = "_path LIKE '/content";
 
-
-const iterateFetch = (start, types) => {
+const iterateFetch = (start, types, siteName) => {
+  const queryString = `${QUERYBASE}/${siteName}/*'`;
   const { hits, total: contentNodesTotal } = libs.content.query({
     start: start,
     count: PAGINATION_COUNT,
-    query: "",
-    contentTypes: types
+    query: queryString,
+    contentTypes: [].concat(types)
   });
   let fetched = hits;
   if(start + fetched.length < contentNodesTotal){
-    fetched = fetched.concat(iterateFetch(start + fetched.length, types))
+    fetched = fetched.concat(iterateFetch(start + fetched.length, types, siteName))
   }
   return fetched;
 }
@@ -82,16 +84,20 @@ const checkLinks = () => {
   const allContentTypes = libs.content.getTypes().map((type) => type.name);
   const searchedContentTypes = allContentTypes.filter((type) => !type.startsWith("media:") && !type.startsWith("base:"));
   
-  let nodesFetched = iterateFetch(0, searchedContentTypes)
-  // nodesFetched = nodesFetched.slice(0,100)
-  let checkedNodes = nodesFetched.map((node, index) => {
-    if (node._id) {
-      return checkNode(node);
-    }
-  }).filter(node => !!node);
+  const sites = getSites();
   
-  saveResults(checkedNodes)
-  
+  [].concat(sites.hits).forEach(site => {
+    const types = libs.content.getSiteConfig({key: site._id, applicationKey: app.name})
+    let nodesFetched = iterateFetch(0, types, site._name)
+
+    // nodesFetched = nodesFetched.slice(0,100)
+    let checkedNodes = nodesFetched.map((node, index) => {
+      if (node._id) {
+        return checkNode(node);
+      }
+    }).filter(node => !!node);
+    saveResults(checkedNodes, site._name)
+  })
 
 }
 

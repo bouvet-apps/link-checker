@@ -1,15 +1,13 @@
 const libs = {
   repo: require("/lib/xp/repo"),
   context: require("/lib/xp/context"),
+  content: require("/lib/xp/content"),
   node: require("/lib/xp/node"),
 };
 
 
 const REPO_NAME = "link-checker";
 const LINK_CHECK_NODE = "log";
-const LOG_PATH = `/${LINK_CHECK_NODE}`;
-
-exports.LOG_PATH = LOG_PATH
 
 
 
@@ -66,22 +64,31 @@ const getRepoConnection = () => {
 };
 exports.getRepoConnection = getRepoConnection;
 
-const saveResults = (result) => {
+const saveResults = (result, name) => {
   const repo = getRepoConnection();
-  if (!repo.exists(LOG_PATH)) {
-    log.info("Logging link checker results")
+  if (repo.exists(`/${name}`)) {
+    repo.delete(`/${name}`);
+    log.info("Removing old log at...")
+    log.info(name)
+  } 
+
+  log.info("Logging link checker results for " + name)
     let createdNode = repo.create({
-      _name: LINK_CHECK_NODE,
-      displayName: 'Link Checker scan results',
+      _name: name,
+      displayName: name,
       brokenCount: result.length,
+      timestamp: Date.now(),
       results: result
     })
-  } else {
-    repo.delete(LOG_PATH);
-    log.info("Removing old log...")
-    saveResults(result);
-  }
+
 
 }
 
 exports.saveResults = saveResults
+
+const getSites = () => libs.content.query({
+  query: "_path LIKE '/content/*' AND data.siteConfig.applicationKey = '" + app.name + "'",
+  contentTypes: ["portal:site"]
+});
+
+exports.getSites = getSites;
