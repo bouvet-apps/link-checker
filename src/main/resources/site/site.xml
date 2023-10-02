@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-    <form/>
+    <form>
+        <input type="TextLine" name="email">
+        <label>E-Mail</label>
+        <help-text>The address that will receive a log of broken links on the current site.</help-text> 
+        <occurrences minimum="0" maximum="1"/>
+        <config>
+            <regexp>^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$</regexp>
+        </config>
+        </input>
+  </form>
 </site>

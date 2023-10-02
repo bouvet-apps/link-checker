@@ -3,19 +3,18 @@ const libs = {
   context: require("/lib/xp/context"),
   content: require("/lib/xp/content"),
   node: require("/lib/xp/node"),
+  io: require("/lib/xp/io")
 };
 
 
 const REPO_NAME = "link-checker";
-const LINK_CHECK_NODE = "log";
-
 
 
 /**
  * Sets up repository and structure.
  */
 const initRepository = () => {
-  var result = libs.context.run(
+  let result = libs.context.run(
     {
       repository: "system-repo",
       branch: "master",
@@ -36,58 +35,71 @@ const initRepository = () => {
         log.info("Link Checker storage repository exists");
       } else {
         log.info("Link Checker storage repository does not exist, setting it up");
-        var result1 = libs.repo.create({
+        const result1 = libs.repo.create({
           id: REPO_NAME
         });
-        log.info("Repository created with id " + result1.id);
+        log.info(`Repository created with id ${result1.id}`);
       }
 
       // Set up repository
-      const repo = libs.node.connect({
+      libs.node.connect({
         repoId: REPO_NAME,
-        branch: 'master'
+        branch: "master"
       });
-
     }
   );
-
 };
 
 exports.initRepository = initRepository;
 
-
-const getRepoConnection = () => {
-  return libs.node.connect({
-    repoId: REPO_NAME,
-    branch: 'master'
+const generateMailReport = (results) => {
+  let resultstring = "Name, Path, Link, Status, Type, Internal ";
+  results.forEach((result) => {
+    // Commas break the format, but are legal in Enonic names
+    resultstring += `\n ${result.displayName.replace(",", "")}, ${result.path}, `;
+    result.brokenLinks.forEach((link, index) => {
+      if (index === 0) {
+        resultstring += `${link.link}, ${link.status}, ${link.type}, ${link.internal}`;
+      } else {
+        resultstring += `\n , , ${link.link}, ${link.status}, ${link.type}, ${link.internal}`;
+      }
+    });
   });
+  const stream = libs.io.newStream(resultstring);
+  return stream;
 };
+
+
+exports.generateMailReport = generateMailReport;
+
+
+const getRepoConnection = () => libs.node.connect({
+  repoId: REPO_NAME,
+  branch: "master"
+});
 exports.getRepoConnection = getRepoConnection;
 
 const saveResults = (result, name) => {
   const repo = getRepoConnection();
   if (repo.exists(`/${name}`)) {
     repo.delete(`/${name}`);
-    log.info("Removing old log at...")
-    log.info(name)
-  } 
+    log.info(`Removing old log at... ${name}`);
+  }
 
-  log.info("Logging link checker results for " + name)
-    let createdNode = repo.create({
-      _name: name,
-      displayName: name,
-      brokenCount: result.length,
-      timestamp: Date.now(),
-      results: result
-    })
+  log.info(`Logging link checker results for ${name}`);
+  repo.create({
+    _name: name,
+    displayName: name,
+    brokenCount: result.length,
+    timestamp: Date.now(),
+    results: [].concat(result)
+  });
+};
 
-
-}
-
-exports.saveResults = saveResults
+exports.saveResults = saveResults;
 
 const getSites = () => libs.content.query({
-  query: "_path LIKE '/content/*' AND data.siteConfig.applicationKey = '" + app.name + "'",
+  query: `_path LIKE '/content/*' AND data.siteConfig.applicationKey = '${app.name}'`,
   contentTypes: ["portal:site"]
 });
 

@@ -2,20 +2,15 @@
     "extends": [
         "airbnb"
     ],
-    "plugins": [
-        "jest"
-    ],
     "parserOptions": {
         "parser": "babel-eslint"
-    },
-    "env": {
-        "jest/globals": true
     },
     "rules": {
         "import/extensions": [
             "error",
             "ignorePackages",
             {
+                "": "never",
                 "js": "never",
                 "mjs": "never",
                 "jsx": "never",
