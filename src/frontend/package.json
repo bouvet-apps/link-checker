@@ -1,0 +1,25 @@
+{
+  "name": "website",
+  "version": "1.0.0",
+  "description": "Frontend for link-checker",
+  "main": "./scripts/main.jsx",
+  "scripts": {
+    "clean": "rimraf ../../build/resources/main/assets",
+    "lint": "eslint --config ../../.eslintrc.json scripts/**/*.es6",
+    "build": "npm-run-all build:*",
+    "build:js": "webpack --config webpack.config.js"
+  },
+  "author": "Bouvet",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.22.20",
+    "@babel/preset-react": "^7.22.15",
+    "babel-loader": "^9.1.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "mini-css-extract-plugin": "^2.7.6"
+  }
+}

@@ -23,7 +23,7 @@ const QUERYBASE = "_path LIKE '/content";
 const iterateFetch = (start, siteName) => {
   const queryString = `${QUERYBASE}/${siteName}/*'`;
   const { hits, total: contentNodesTotal } = libs.content.query({
-    start: start,
+    start,
     count: PAGINATION_COUNT,
     query: queryString
   });
@@ -39,8 +39,14 @@ const checkNode = (node) => {
   /**
    * @phrases ["services.link-checker.external-url", "services.link-checker.internal-content"]
    */
-  const localizedExternalUrl = libs.i18n.localize({ key: "services.link-checker.external-url", locale }) || "External URL";
-  const localizedInternalContent = libs.i18n.localize({ key: "services.link-checker.internal-content", locale }) || "Internal content";
+  const localizedExternalUrl = libs.i18n.localize({
+    key: "services.link-checker.external-url",
+    locale
+  }) || "External URL";
+  const localizedInternalContent = libs.i18n.localize({
+    key: "services.link-checker.internal-content",
+    locale
+  }) || "Internal content";
 
   const urls = {
     externalLinks: getExternalLinks(JSON.stringify(node)),
@@ -54,12 +60,18 @@ const checkNode = (node) => {
     if (error) {
       // Local error with httpClient
       brokenLinks.push({
-        link: url, status: 0, type: localizedExternalUrl, internal: false
+        link: url,
+        status: 0,
+        type: localizedExternalUrl,
+        internal: false
       });
     } else if (status >= 309 && status < 900) {
       // Under 900 to avoid annoying linkedIn response
       brokenLinks.push({
-        link: url, status: status, type: localizedExternalUrl, internal: false
+        link: url,
+        status,
+        type: localizedExternalUrl,
+        internal: false
       });
     }
   });
@@ -68,7 +80,10 @@ const checkNode = (node) => {
     const { status } = checkInternalLink(link, BRANCH);
     if (status >= 309 && status < 900) {
       brokenLinks.push({
-        link: link, status, type: localizedInternalContent, internal: true
+        link,
+        status,
+        type: localizedInternalContent,
+        internal: true
       });
     }
   });
@@ -76,7 +91,11 @@ const checkNode = (node) => {
 
   if (brokenLinks.length > 0) {
     data = {
-      displayName: node.displayName, path: node._path, brokenLinks
+      displayName: node.displayName,
+      path: node._path,
+      lastModified: node.modifiedTime,
+      owner: node.owner,
+      brokenLinks
     };
   }
   return data;
@@ -87,7 +106,10 @@ const checkLinks = () => {
   const sites = getSites();
 
   [].concat(sites.hits).forEach((site) => {
-    const siteConfig = libs.content.getSiteConfig({ key: site._id, applicationKey: app.name });
+    const siteConfig = libs.content.getSiteConfig({
+      key: site._id,
+      applicationKey: app.name
+    });
     const nodesFetched = iterateFetch(0, site._name);
 
     // nodesFetched = nodesFetched.slice(0,100)
@@ -108,7 +130,8 @@ const checkLinks = () => {
         body: "hei",
         attachments: [
           {
-            // .xlsx is difficult to build on the backend, but .csv is easy. Excel reads it just fine.
+            // .xlsx is difficult to build on the backend, but .csv is easy.
+            // Excel reads it just fine.
             fileName: `${site._name}.csv`,
             mimeType: "text/csv",
             data: report
@@ -120,7 +143,7 @@ const checkLinks = () => {
 };
 
 
-export function run() {
+export default function run() {
   libs.context.run({
     branch: BRANCH,
     principals: ["role:system.admin"]

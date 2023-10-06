@@ -1,0 +1,7 @@
+<tool>
+    <display-name >Link Checker</display-name>
+    <description >Link Checker</description>
+    <allow>
+        <principal>role:system.admin</principal>
+    </allow>
+</tool>

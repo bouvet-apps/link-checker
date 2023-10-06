@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <meta name="theme-color" content="#ffffff">
+  <link
+            rel="stylesheet"
+            href="../../assets/css/app.css"
+            data-th-href="${portal.assetUrl({'_path=css/app.css'})}"
+            type="text/css"
+            media="all"
+        >
+
+
+  <title>Link Checker</title>
+</head>
+<body>
+    <div id="app-root" th:attr="data-log=${log}"></div>
+
+    <script data-th-src="${portal.assetUrl({'_path=js/main.js'})}" async></script>
+</body>
+</html>

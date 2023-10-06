@@ -47,20 +47,29 @@
             "error",
             "always"
         ],
-        "no-console": "off",
+        "no-console": "error",
         "global-require": "off",
-        "import/no-unresolved": "off",
-        "import/no-absolute-path": "off",
+        "import/no-unresolved": "on",
+        "import/no-absolute-path": "on",
         "no-underscore-dangle": "off",
-        "object-shorthand": "off",
+        "object-shorthand": "error",
+        "object-property-newline": [
+            "error",
+            {
+                "allowAllPropertiesOnSameLine": false
+            }
+        ],
         "prefer-destructuring": "off",
         "radix": [
             "error",
             "as-needed"
         ],
         "no-plusplus": "off",
-        "max-len": "off",
-        "func-names": "off"
+        "max-len": [
+            "error"
+        ],
+        "func-names": "error",
+        "react/react-in-jsx-scope": "off"
     },
     "globals": {
         "require": true,

@@ -56,12 +56,12 @@ const generateMailReport = (results) => {
   let resultstring = "Name, Path, Link, Status, Type, Internal ";
   results.forEach((result) => {
     // Commas break the format, but are legal in Enonic names
-    resultstring += `\n ${result.displayName.replace(",", "")}, ${result.path}, `;
+    resultstring += `\n ${result.displayName.replace(",", "")}, ${result.path}, ${result.owner}, ${result.lastModified} `;
     result.brokenLinks.forEach((link, index) => {
       if (index === 0) {
         resultstring += `${link.link}, ${link.status}, ${link.type}, ${link.internal}`;
       } else {
-        resultstring += `\n , , ${link.link}, ${link.status}, ${link.type}, ${link.internal}`;
+        resultstring += `\n , , , , ${link.link}, ${link.status}, ${link.type}, ${link.internal}`;
       }
     });
   });

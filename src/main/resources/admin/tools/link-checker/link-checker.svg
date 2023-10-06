@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="166px" height="180px" viewBox="0 0 166 180" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.2 (67145) - http://www.bohemiancoding.com/sketch -->
+    <title>URLChecker_icon</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group" transform="translate(42.000000, 0.000000)">
+            <rect id="Rectangle" stroke="#ffffff" stroke-width="12" transform="translate(69.800429, 34.400060) rotate(-286.000000) translate(-69.800429, -34.400060) " x="52.3004288" y="0.40005951" width="35" height="68" rx="8"></rect>
+            <path d="M70.206696,49.897243 L6.23019146,49.897243 C2.91648296,49.897243 0.230191461,47.2109515 0.230191461,43.897243 C0.230191461,40.5835345 2.91648296,37.897243 6.23019146,37.897243 L66.2865227,37.897243 L64.2265764,41.2430374 L73.7301915,43.2781262 L70.206696,49.897243 Z" id="Combined-Shape" fill="#ffffff" transform="translate(36.980191, 43.897243) rotate(-196.000000) translate(-36.980191, -43.897243) "></path>
+        </g>
+        <path d="M46.523968,33.8936221 C40.523968,30.5602888 34.523968,27.2269554 28.523968,23.8936221" id="Path" stroke="#C73838" stroke-width="4" stroke-linecap="round" transform="translate(37.523968, 28.893622) rotate(64.000000) translate(-37.523968, -28.893622) "></path>
+        <path d="M22.4714593,59.5412473 C16.4714593,56.207914 10.4714593,52.8745807 4.47145934,49.5412473" id="Path" stroke="#C73838" stroke-width="4" stroke-linecap="round" transform="translate(13.471459, 54.541247) scale(1, -1) rotate(-26.000000) translate(-13.471459, -54.541247) "></path>
+        <path d="M28.5764912,44.5764912 C25.9098246,41.9098246 23.2431579,39.2431579 20.5764912,36.5764912" id="Path" stroke="#C73838" stroke-width="4" stroke-linecap="round" transform="translate(24.576491, 40.576491) rotate(9.000000) translate(-24.576491, -40.576491) "></path>
+        <path d="M71.8574012,102.75 L6.25,102.75 C3.21243388,102.75 0.75,100.287566 0.75,97.25 C0.75,94.2124339 3.21243388,91.75 6.25,91.75 L68.1511254,91.75 L64.8502121,96.7188936 L74.25,98.5843916 L71.8574012,102.75 Z" id="Combined-Shape" fill="#ffffff" transform="translate(37.500000, 97.250000) rotate(-90.000000) translate(-37.500000, -97.250000) "></path>
+        <rect id="Rectangle" stroke="#ffffff" stroke-width="12" transform="translate(37.672086, 129.150300) rotate(-360.000000) translate(-37.672086, -129.150300) " x="20.1720863" y="95.1503003" width="35" height="68" rx="8"></rect>
+    </g>
+</svg>
