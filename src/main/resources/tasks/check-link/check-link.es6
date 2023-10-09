@@ -142,8 +142,8 @@ const checkLinks = () => {
   });
 };
 
-
-export default function run() {
+/* eslint-disable import/prefer-default-export */
+export function run() {
   libs.context.run({
     branch: BRANCH,
     principals: ["role:system.admin"]

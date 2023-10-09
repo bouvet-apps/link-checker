@@ -7,7 +7,8 @@
     "clean": "rimraf ../../build/resources/main/assets",
     "lint": "eslint --config ../../.eslintrc.json scripts/**/*.es6",
     "build": "npm-run-all build:*",
-    "build:js": "webpack --config webpack.config.js"
+    "build:js": "webpack --config webpack.config.js --node-env=production",
+    "dev":  "webpack --config webpack.config.js --node-env=development"
   },
   "author": "Bouvet",
   "license": "UNLICENSED",
@@ -20,6 +21,7 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "mini-css-extract-plugin": "^2.7.6"
+    "mini-css-extract-plugin": "^2.7.6",
+    "webpack-dev-server": "^4.15.1"
   }
 }

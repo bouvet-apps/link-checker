@@ -4,6 +4,8 @@ import App from "./App";
 
 
 const domNode = document.getElementById("app-root");
-const logs = domNode.dataset.log;
+const logs = JSON.parse(domNode.dataset.log);
+
+
 const root = createRoot(domNode);
-root.render(<App logs={{ logs }} />);
+root.render(<App logArray={logs} />);

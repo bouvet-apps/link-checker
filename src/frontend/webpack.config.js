@@ -1,4 +1,3 @@
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const path = require("path");
 
 const resourceFolder = "../../build/resources/main/assets/";
@@ -19,13 +18,11 @@ module.exports = {
   entry: {
     main: "./scripts/main.jsx"
   },
-  devtool: "eval-source-map",
-  plugins: [
-    // new MiniCssExtractPlugin({
-    //   filename: "css/[name].css",
-    //   allChunks: true
-    // })
-  ],
+  devtool: process.env.NODE_ENV === "development" ? "eval-source-map" : false,
+  devServer: {
+    hot: process.env.NODE_ENV === "development"
+  },
+  watch: process.env.NODE_ENV === "development",
   module: {
     rules: [
       {
