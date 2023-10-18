@@ -17,7 +17,7 @@
   <title>Link Checker</title>
 </head>
 <body>
-    <div id="app-root" th:attr="data-log=${report}"></div>
+    <div id="app-root" th:attr="data-log=${report}, data-task=${taskPerformed}"></div>
 
     <script data-th-src="${portal.assetUrl({'_path=js/main.js'})}" async></script>
 </body>

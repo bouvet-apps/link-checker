@@ -31,9 +31,7 @@ const initRepository = () => {
       result = libs.repo.get(REPO_NAME);
 
       // Create repository
-      if (result) {
-        log.info("Link Checker storage repository exists");
-      } else {
+      if (!result) {
         log.info("Link Checker storage repository does not exist, setting it up");
         const result1 = libs.repo.create({
           id: REPO_NAME

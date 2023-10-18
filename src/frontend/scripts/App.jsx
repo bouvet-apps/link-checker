@@ -11,12 +11,26 @@ const App = ({ logArray }) => {
     newArray.sort((a, b) => {
       switch (mode) {
         case 'site':
-          return a.site > b.site ? 1 : -1;
+          if(a.site > b.site){
+            return 1;
+          } else if(a.site < b.site) {
+            return -1;
+          } else {
+            return 0;
+          };
         case 'numBroken':
           return [].concat(a.brokenLinks).length - [].concat(b.brokenLinks).length;
         case 'dateChanged':
-          return a.lastModified > b.lastModified ? 1 : -1;
-      }
+          return Date.parse(a.lastModified) - Date.parse(b.lastModified);
+        case 'owner':
+          if(a.owner > b.owner){
+            return 1;
+          } else if(a.owner < b.owner) {
+            return -1;
+          } else {
+            return 0;
+          };
+      } 
     })
     setLogs(newArray)
   }
@@ -44,6 +58,7 @@ const App = ({ logArray }) => {
           <option value="numBroken"># broken links</option>
           <option value="site">Site</option>
           <option value="dateChanged">Date</option>
+          <option value="owner">Owner</option>
         </select>
         <select value={ascending} onChange={(e) => setAscending(e.target.value)}>
           <option value="ascending">Ascending</option>
@@ -58,7 +73,7 @@ const App = ({ logArray }) => {
                 Found {[].concat(result.brokenLinks).length} {([].concat(result.brokenLinks).length > 1 ? "invalid links" : "invalid link")}
               </h3>
               <div>{new Date(Date.parse(result.lastModified)).toString()}</div>
-              <h4>{result.displayName} {result.site}</h4>
+              <h4>{result.displayName} {result.site} {result.owner}</h4>
               <div className="broken-links-error__body">
 
                 {[].concat(result.brokenLinks).map(link => renderLink(link))}

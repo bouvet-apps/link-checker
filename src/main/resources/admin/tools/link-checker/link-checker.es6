@@ -14,19 +14,23 @@ exports.get = () => {
 
   const report = logNodes.hits.map(site => linkRepo.get({ key: site.id }));
   const logArray = [];
+  let taskPerformed = false;
   report.forEach((site) => {
-    site.results.forEach((node) => {
-      logArray.push(
-        {
-          ...node,
-          site: site.displayName
-        }
-      );
-    });
+    taskPerformed = true;
+    if (site.results) {
+      site.results.forEach((node) => {
+        logArray.push(
+          {
+            ...node,
+            site: site.displayName
+          }
+        );
+      });
+    }
   });
-
   const model = {
-    report: JSON.stringify(logArray, null, 4)
+    report: JSON.stringify(logArray, null, 4),
+    taskPerformed
   };
 
 
