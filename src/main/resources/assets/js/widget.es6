@@ -60,7 +60,7 @@ const generateSpreadsheet = (results) => {
   XLSX.writeFile(wb, `${localized?.report || 'report'}-linkchecker-${date.toLocaleDateString()}-${date.toLocaleTimeString()}.xlsx`, {});
 };
 
-const renderLink = (link) => {
+const renderLink = (link, path) => {
   let brokenLinkTarget = `<a href="${link.link}" target="_blank">${link.link}</a>`;
   if (link.internal) {
     brokenLinkTarget = `<p>${link.link}</p>`;
@@ -72,6 +72,7 @@ const renderLink = (link) => {
         <span style="margin-left: 5px">${mapStatusCode(link.status)} ${mapStatusMessage(link.status)}</span>
       </div>
       <div class="broken-links-error__link__target">
+        ${path}<br>
         ${brokenLinkTarget}
       </div>
     </div>
@@ -92,7 +93,7 @@ const generateLongReport = (message) => {
                       <h4>${node.displayName}</h4>
                       <p>${node.path}</p>`;
     node.brokenLinks.forEach((link) => {
-      report += renderLink(link);
+      report += renderLink(link, node.path);
     });
     report += `</div>
                   </div>
@@ -123,7 +124,7 @@ const generateShortReport = (message) => {
   message.results.some((result) => {
     result.brokenLinks.some((link) => {
       if (countShown > MAX_BROKEN_SHOWN) return true;
-      report += renderLink(link);
+      report += renderLink(link, result.path);
       countShown++;
       return false;
     });
