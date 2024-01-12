@@ -24,7 +24,7 @@ const getDefaultContextParams = (event) => {
 };
 
 const checkInternalLink = (link, branch) => {
-  const contextParams = { branch: branch, principals: ["role:system.admin"] };
+  const contextParams = { branch: branch, principals: ["role:system.admin", "role:cms.expert", "role:cms.admin"] };
   const result = libs.context.run(contextParams, () => {
     const split = link.split("/");
     return libs.content.exists({
@@ -33,7 +33,6 @@ const checkInternalLink = (link, branch) => {
   });
   return { status: result ? 200 : 404 };
 };
-
 
 const checkExternalUrl = (externalUrl) => {
   let url = externalUrl;
@@ -73,7 +72,6 @@ const getInternalReferences = (node) => {
   const references = __.toNativeObject(bean.getOutboundReferences(node._id));
   return references;
 };
-
 
 const getExternalLinks = (text) => {
   // Do not have global regex, they must be initialized each time.
@@ -167,7 +165,6 @@ const checkNode = (event, node) => {
     currentSession.results.push(data);
   }
 };
-
 
 const next = (event, indexParam) => {
   const currentSession = CURRENTLY_RUNNING[event.session.id];
