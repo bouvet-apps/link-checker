@@ -24,7 +24,7 @@ const getDefaultContextParams = (event) => {
 };
 
 export const checkInternalLink = (link, branch) => {
-  const contextParams = { branch: branch, principals: ["role:system.admin"] };
+  const contextParams = { branch: branch, principals: ["role:system.admin", "role:cms.expert", "role:cms.admin"] };
   const result = libs.context.run(contextParams, () => {
     const split = link.split("/");
     return libs.content.exists({
@@ -167,7 +167,6 @@ const checkNode = (event, node) => {
     currentSession.results.push(data);
   }
 };
-
 
 const next = (event, indexParam) => {
   const currentSession = CURRENTLY_RUNNING[event.session.id];
