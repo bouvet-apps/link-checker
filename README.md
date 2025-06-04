@@ -8,18 +8,45 @@ Go into the Enonic XP Application admin tool and install the app from the [Enoni
 
 The **Link checker** app will then be available in the widget panel in the content studio.
 
-### Build yourself
-Build this app with gradle. In the terminal, from the root of the project, enter `./gradlew build`.
-On Windows, just enter `gradlew build` in the command line from the project root.
-Next, move the JAR file from /build/libs to your `$XP_HOME/deploy` directory.
-
-The **Link checker** app will then be available in the widget panel in the content studio.
-
-If you update package.json, make sure to run `./gradlew npm_install`.
-
 ## How to use this app
+### App Config
+These configuration options can be added to `no.bouvet.app.linkchecker.cfg`.
 
-After adding this app you should see a new LinkChecker option in detail panel to the top right in the content studio. Selecting a content and pressing the **Start** button will start the process. It will check the current content and all its children content for broken links. You can choose to only check the selected content, only the sub-content of that content or both.
+
+| Key | Description | Default
+| ------------- | ------------- | ------------- |
+| connectionTimeout | The timeout on establishing the connection to external link target, in milliseconds | 5000 |
+| readTimeout | The timeout on waiting to receive data from external link target, in milliseconds | 3000 |
+| adminUrl | URL to admin page. Used to add links to ContentStudio and LinkChecker admin panel to emails. Example: www.example.com/admin |  |
+| scheduleCron | CRON schedule for when the task to check should run |  |
+| scheduleTimeZone | TimeZone for CRON schedule | Europe/Oslo |
+
+### Site Config
+
+In the site config for the app (the configuration you do on the app on the site content) there are a couple of email configurations.
+Set a 'to' and 'from' email if you want the 'to' email to get a report for the site after a scheduled task.
+
+You can check the box for owner notifications if you want the owner of a content to recieve an email if there is found a broken link on it. This requires the 'from' field to be set. If the same owner has multiple content with broken links, reports will be sent in the same email.
+
+This requires correct configuration of `com.enonic.xp.mail.cfg`.
+
+### Scheduled task
+If `scheduleCron` is set in the config, a check for broken links will be run according to that schedule. This job will check all sites with the app added, and the underlying content. When the check is finished, it goes through each site, and if a 'to' and 'from' email is added to the site config it will email the 'to' address a report for that site. If the same 'to' email is found on multiple sites both reports will be sent in the same email.
+
+### Admin panel
+The admin panel shows the result of a complete check done by the scheduled task.
+It displays a list of content that has broken links. The list can be filtered on site and branch, and sorted after count of broken links or modified time.
+
+On each broken link there is extra details to try and help the viewer in finding out where the broken link is in the content, and why it is broken. It shows which techinal field the link was found in the content schema. It has a detailed description to help editors deduce where they need to look for the link in Content Studio when editing the content.
+
+If the link was found in a text line, text area or rich text, the surrounding text is shown to help you find the link easier.
+
+If an internal link is giving a 404, the audit logs are checked to try and find a reason. It is now shown if the content was deleted/unpublished/archived, when and by whom.
+
+The admin panel has a button to start the complete check manually.
+
+### Widget
+There is a LinkChecker option in the detail panel to the top right in the content studio. Selecting a content and pressing the **Start** button will start the process. It will check the current content and all its children content for broken links. You can choose to only check the selected content, only the sub-content of that content or both.
 
 **NB!** The internal data of the content is searched for links, not the corresponding webpage. Check [Siteimprove](https://market.enonic.com/vendors/enonic/siteimprove) app for a more complete check.
 
@@ -86,6 +113,25 @@ If you are running HTTPS and you are met with `failed: Error during WebSocket ha
 Not tested for below 6.12.0
 
 ## Changelog
+### Version 4.0.0
+* Added scheduled task to check all sites in all content projects
+    * Only sites where the application is added are checked.
+* New admin panel to display result of task
+    * Admin panel will show much more detail than widget and report did before
+    * Shows which techinal field the link was found in the content schema. It has a detailed description to help editors deduce where they need to look for the link in Content Studio when editing the content.
+    * If the link was found in a text line, text area or rich text, the surrounding text is shown to help you find the link easier.
+    * If an internal link is giving a 404, the audit logs are checked to try and find a reason. It is now shown if the content was deleted/unpublished/archived, when and by whom.
+* More email alerting
+    * Added option to send email with report for that site (configured per site)
+    * Added option to send email to owner of content if broken links are found in that content (configured per site)
+    * If URL to admin page is added in app config, a link to ContentStudio and LinkChecker admin panel is added to emails
+* Added more app configuration options: (see ##Config for all)
+    * connectionTimeout - The timeout on establishing the connection to external link target, in milliseconds
+    * readTimeout - The timeout on waiting to receive data from external link target, in milliseconds
+    * adminUrl - URL to admin page. Used to add links to ContentStudio and LinkChecker admin panel to emails. Example: www.example.com/admin
+    * scheduleCron - CRON schedule for when the task to check should run
+    * scheduleTimeZone - TimeZone for CRON schedule. Default Europe/Oslo
+
 ### Version 3.1.0
 * Possible to choose to check master brach
 * Added HTTP status messages to result (including report)

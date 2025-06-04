@@ -1,56 +1,35 @@
-const libs = {
-  repo: require("/lib/xp/repo"),
-  context: require("/lib/xp/context"),
-  content: require("/lib/xp/content"),
-  node: require("/lib/xp/node"),
-  io: require("/lib/xp/io")
-};
+import { get as getRepo, create as createRepo } from "/lib/xp/repo";
+import { run as runInContext } from "/lib/xp/context";
+import { query } from "/lib/xp/content";
+import { connect } from "/lib/xp/node";
+import { newStream } from "/lib/xp/io";
 
-
-const REPO_NAME = "link-checker";
-
+const REPO_NAME = `${app.name}.result`;
 
 /**
  * Sets up repository and structure.
  */
-const initRepository = () => {
-  let result = libs.context.run(
-    {
-      repository: "system-repo",
-      branch: "master",
-      user: {
-        login: "su",
-        userStore: "system"
-      },
-      principals: ["role:system.admin"],
-      attributes: {
-        ignorePublishTimes: true
-      }
-    },
+export function initRepository() {
+  runInContext(
+    { principals: ["role:system.admin"] },
     () => {
-      result = libs.repo.get(REPO_NAME);
+      const existing = getRepo(REPO_NAME);
+      if (existing) {
+        log.info(`Link Checker result repository exists with id ${existing.id}`);
+        return;
+      }
 
       // Create repository
-      if (!result) {
-        log.info("Link Checker storage repository does not exist, setting it up");
-        const result1 = libs.repo.create({
-          id: REPO_NAME
-        });
-        log.info(`Repository created with id ${result1.id}`);
-      }
-
-      // Set up repository
-      libs.node.connect({
-        repoId: REPO_NAME,
-        branch: "master"
+      log.info("Link Checker result repository does not exist, setting it up");
+      const newRepo = createRepo({
+        id: REPO_NAME
       });
+      log.info(`Repository created with id ${newRepo.id}`);
     }
   );
-};
+}
 
-exports.initRepository = initRepository;
-
-const generateMailReport = (results) => {
+export function generateMailReport(results) {
   let resultstring = "Name, Path, Link, Status, Type, Internal ";
   results.forEach((result) => {
     // Commas break the format, but are legal in Enonic names
@@ -63,22 +42,22 @@ const generateMailReport = (results) => {
       }
     });
   });
-  const stream = libs.io.newStream(resultstring);
+  const stream = newStream(resultstring);
   return stream;
-};
+}
 
+export function getResultRepoConnection() {
+  return connect({
+    repoId: REPO_NAME,
+    branch: "master"
+  });
+}
 
-exports.generateMailReport = generateMailReport;
+export function saveResults(result, site, repoId, branch) {
+  const siteName = site._name;
+  const repo = getResultRepoConnection();
 
-
-const getRepoConnection = () => libs.node.connect({
-  repoId: REPO_NAME,
-  branch: "master"
-});
-exports.getRepoConnection = getRepoConnection;
-
-const saveResults = (result, name) => {
-  const repo = getRepoConnection();
+  const name = `${repoId}__${siteName}__${branch}`;
   if (repo.exists(`/${name}`)) {
     repo.delete(`/${name}`);
     log.info(`Removing old log at... ${name}`);
@@ -88,17 +67,26 @@ const saveResults = (result, name) => {
   repo.create({
     _name: name,
     displayName: name,
-    brokenCount: result.length,
-    timestamp: Date.now(),
-    results: [].concat(result)
+    data: {
+      siteName,
+      site: {
+        displayName: site.displayName,
+        name: siteName,
+        id: site._id
+      },
+      repoId,
+      branch,
+      brokenCount: result.length,
+      timestamp: Date.now(),
+      results: [].concat(result)
+    }
   });
-};
+}
 
-exports.saveResults = saveResults;
-
-const getSites = () => libs.content.query({
-  query: `_path LIKE '/content/*' AND data.siteConfig.applicationKey = '${app.name}'`,
-  contentTypes: ["portal:site"]
-});
-
-exports.getSites = getSites;
+// Get all sites with app installed (in repo context)
+export function getSites() {
+  return query({
+    query: `_path LIKE '/content/*' AND data.siteConfig.applicationKey = '${app.name}'`,
+    contentTypes: ["portal:site"]
+  }).hits;
+}

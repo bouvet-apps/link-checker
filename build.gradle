@@ -102,12 +102,15 @@ dependencies {
     include "com.enonic.xp:lib-auth:${xpVersion}"
     include "com.enonic.xp:lib-content:${xpVersion}"
     include "com.enonic.xp:lib-context:${xpVersion}"
+    include "com.enonic.xp:lib-cluster:${xpVersion}"
     include "com.enonic.xp:lib-i18n:${xpVersion}"
     include "com.enonic.xp:lib-portal:${xpVersion}"
     include "com.enonic.xp:lib-websocket:${xpVersion}"
     include "com.enonic.xp:lib-node:${xpVersion}"
     include "com.enonic.xp:lib-repo:${xpVersion}"
     include "com.enonic.xp:lib-mail:${xpVersion}"
+    include "com.enonic.xp:lib-scheduler:${xpVersion}"
+    include "com.enonic.xp:lib-task:${xpVersion}"
     include "com.enonic.xp:lib-io:${xpVersion}"
     include 'com.enonic.lib:lib-cache:2.2.0'
     include 'com.enonic.lib:lib-http-client:3.2.2'

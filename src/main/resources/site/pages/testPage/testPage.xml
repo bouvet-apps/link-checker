@@ -1,0 +1,42 @@
+<page>
+    <display-name>Test sidemal</display-name>
+    <form>
+        <input name="title" type="TextLine">
+            <label i18n="about-top.override">Overskriv sidetittel</label>
+            <occurrences minimum="0" maximum="1"/>
+        </input>
+        <input name="subtitle" type="TextArea">
+            <label i18n="about-top.subtitle">Undertittel</label>
+            <occurrences minimum="0" maximum="1"/>
+        </input>
+        <input name="text" type="HtmlArea">
+            <label i18n="text">Tekst</label>
+            <occurrences minimum="0" maximum="1"/>
+            <config>
+                <include>Bold Underline Italic | Blockquote</include>
+            </config>
+        </input>
+        <input type="CheckBox" name="showChildren">
+            <label i18n="about-top.showChildren">Vis lenker til undersider</label>
+            <occurrences minimum="0" maximum="1"/>
+            <default>checked</default>
+        </input>
+        <option-set name="background">
+            <label i18n="choose-background">Velg bakgrunn</label>
+            <expanded>true</expanded>
+            <occurrences minimum="1" maximum="1"/>
+            <options minimum="1" maximum="1">
+                <option name="gray">
+                    <label i18n="image-text.background.gray">Grå bakgrunn</label>
+                    <default>true</default>
+                </option>
+                <option name="twotone">
+                    <label i18n="image-text.background.twotone">2-tone bakgrunn </label>
+                </option>
+            </options>
+        </option-set>
+    </form>
+    <regions>
+        <region name="main"/>
+    </regions>
+</page>

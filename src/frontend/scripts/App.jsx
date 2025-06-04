@@ -1,120 +1,217 @@
-import { useState } from "react";
+import React, {
+  useEffect, useMemo, useState
+} from "react";
+import { useInView } from "react-intersection-observer";
 
-const App = ({ logArray }) => {
+import SiteFilter from "./components/SiteFilter";
+import Select from "./components/Select";
+import ContentResult from "./components/ContentResult";
 
-  const [logs, setLogs] = useState(logArray.sort((a, b) => [].concat(a.brokenLinks).length - [].concat(b.brokenLinks).length))
-  const [ascending, setAscending] = useState("descending");
+import {
+  SORT_FIELDS,
+  SORT_DIRECTION,
+  BRANCHES
+} from "./constants";
+import { ArrowDownZA, ArrowUpAZ, ArrowsUpToLine } from "./components/Icons";
+import usei18nContext from "./context/i18nContext";
+import Header from "./components/Header";
+import Spinner from "./components/Spinner";
 
+const PER_BATCH = 20;
 
-  const sortLogs = (mode) => {
-    const newArray = [...logArray];
-    newArray.sort((a, b) => {
-      switch (mode) {
-        case 'site':
-          if(a.site > b.site){
-            return 1;
-          } else if(a.site < b.site) {
-            return -1;
-          } else {
-            return 0;
-          };
-        case 'numBroken':
-          return [].concat(a.brokenLinks).length - [].concat(b.brokenLinks).length;
-        case 'dateChanged':
-          return Date.parse(a.lastModified) - Date.parse(b.lastModified);
-        case 'owner':
-          if(a.owner > b.owner){
-            return 1;
-          } else if(a.owner < b.owner) {
-            return -1;
-          } else {
-            return 0;
-          };
-      } 
-    })
-    setLogs(newArray)
-  }
+const DEFAULT_LOGS_STATE = {
+  hits: [],
+  total: 0,
+  branchTotal: 0,
+  sites: []
+};
 
-  const renderLink = (link) => {
-    let brokenLinkTarget = <a href="${link.link}" target="_blank">{link.link}</a>;
-    if (link.internal) {
-      brokenLinkTarget = <p>{link.link}</p>;
+const App = ({
+  api, lastRun, appVersion, inProgress
+}) => {
+  const { t } = usei18nContext();
+
+  const sortOptions = [
+    {
+      value: SORT_FIELDS.NUM_BROKEN,
+      label: t("sort-by.count")
+    },
+    {
+      value: SORT_FIELDS.MODIFIED,
+      label: t("sort-by.modified")
     }
-    return (<div key={link.link} className="broken-links-error__link">
-      <div className="broken-links-error__link__body">
-        <div style={{ marginRight: "5px" }}>{link.type}</div>
-        <span style={{ marginRight: "5px" }}>{link.status}</span>
-      </div>
-      <div className="broken-links-error__link__target">
-        {brokenLinkTarget}
-      </div>
-    </div>)
+  ];
 
+  const [direction, setDirection] = useState(SORT_DIRECTION.DESCENDING);
+  const [sortField, setSortField] = useState(sortOptions[0]);
+  const [siteFilter, setSiteFilter] = useState([]);
+  const [activeTab, setActiveTab] = useState(BRANCHES.DRAFT);
+
+  const [state, setState] = useState("init");
+
+  const [logs, setLogs] = useState(DEFAULT_LOGS_STATE);
+  const [start, setStart] = useState();
+  useEffect(() => {
+    // Reset list
+    setLogs(DEFAULT_LOGS_STATE);
+    setStart({ value: -PER_BATCH });
+  }, [sortField, direction, siteFilter, activeTab]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!start) return;
+      setState("loading");
+
+      let params = `start=${start.value + PER_BATCH}&count=${PER_BATCH}&branch=${activeTab}`;
+      if (siteFilter.length > 0) params += `&filter=${siteFilter.map((s) => s.value).join(",")}`;
+      if (sortField?.value) params += `&sort=${sortField.value}`;
+      if (direction) params += `&sortDirection=${direction}`;
+
+      const result = await fetch(`${api.result}?${params}`);
+      const data = await result.json();
+
+      // Reset
+      if (start.value === -PER_BATCH) setLogs(data);
+      else {
+        // append
+        setLogs((prev) => ({
+          ...data,
+          hits: [...prev.hits, ...data.hits]
+        }));
+      }
+
+      // Add small delay to prevent intersection observer from firing too early
+      // we want the list of new items to be rendered before observer is activated
+      setTimeout(() => {
+        setState("idle");
+      }, 300);
+    };
+
+    fetchData();
+  }, [start]);
+
+  const [intersectionRef, inView] = useInView();
+  useEffect(() => {
+    if (inView && state === "idle") {
+      setStart((prev) => {
+        const newValue = prev.value + PER_BATCH;
+        if (newValue + PER_BATCH >= logs.total) return prev;
+
+        return { value: newValue };
+      });
+    }
+  }, [inView, state]);
+
+  const siteOptions = useMemo(() => [
+    ...Object.entries(logs.sites).map(([key, { displayName, id, icon }]) => ({
+      value: key,
+      label: displayName,
+      id,
+      icon
+    }))
+  ], [logs.sites]);
+
+  const closeAllAccordions = () => {
+    document.dispatchEvent(new Event("close-accordion"));
   };
+
+  // TODO: get total of both branches. Not done currently since didnt want to load all reports into memeory in controller
+  const totalLogs = logs.branchTotal;
+
+  const hasBeenRun = lastRun;
+
   return (
-    <>
-      <div>
-        <select  onChange={(e) => sortLogs(e.target.value)}>
-          <option value="numBroken"># broken links</option>
-          <option value="site">Site</option>
-          <option value="dateChanged">Date</option>
-          <option value="owner">Owner</option>
-        </select>
-        <select value={ascending} onChange={(e) => setAscending(e.target.value)}>
-          <option value="ascending">Ascending</option>
-          <option value="descending">Descending</option>
-        </select>
-      </div>
-      {(ascending === "ascending" ? logs : logs.reverse()).map(result => {
-        return <div key={result.path} className="widget-view active internal-widget">
-          <div className="widget-item-view properties-widget-item-view">
-            <div className="broken-links-error">
-              <h3>
-                Found {[].concat(result.brokenLinks).length} {([].concat(result.brokenLinks).length > 1 ? "invalid links" : "invalid link")}
-              </h3>
-              <div>{new Date(Date.parse(result.lastModified)).toString()}</div>
-              <h4>{result.displayName} {result.site} {result.owner}</h4>
-              <div className="broken-links-error__body">
-
-                {[].concat(result.brokenLinks).map(link => renderLink(link))}
-
-
+    <div className="w-full h-full">
+      <Header appVersion={appVersion} inProgress={inProgress} api={api} />
+      {!hasBeenRun && (
+        <div className="container text-xl">
+          {t("not-run")}
+        </div>
+      )}
+      {hasBeenRun && (
+        <>
+          <div className="container flex items-center justify-between flex-wrap">
+            <span className="text-xl">
+              {t("found")}
+              {" "}
+              <span className={`${totalLogs > 0 ? "text-red-600" : "text-green-400"} font-bold`}>{totalLogs}</span>
+              {" "}
+              {t("with-broken")}
+            </span>
+            <span className="text-base text-gray-600">
+              {t("last-run")}
+              {" "}
+              {new Date(lastRun).toLocaleString(t.locale === "en" ? "en-GB" : "no")}
+            </span>
+          </div>
+          <div className="container mt-10 flex gap-3">
+            <div className="flex flex-col flex-1">
+              {t("filter-site")}
+              <SiteFilter
+                options={siteOptions}
+                selected={siteFilter}
+                searchable
+                onChange={(v) => setSiteFilter(v)}
+              />
+            </div>
+            <div className="flex flex-col">
+              {t("sort-by")}
+              <div className="flex gap-2 items-center">
+                <Select
+                  options={sortOptions}
+                  value={sortField}
+                  onChange={(v) => setSortField(v)}
+                />
+                <button onClick={() => setDirection((_d) => (_d === SORT_DIRECTION.ASCENDING ? SORT_DIRECTION.DESCENDING : SORT_DIRECTION.ASCENDING))}>
+                  {direction === SORT_DIRECTION.DESCENDING && <ArrowDownZA className="w-6 h-6 inline-block" />}
+                  {direction === SORT_DIRECTION.ASCENDING && <ArrowUpAZ className="w-6 h-6 inline-block" />}
+                </button>
               </div>
             </div>
           </div>
-        </div>
-      })}
-    </>
+          <div className="container mt-8 flex justify-between w-full gap-4">
+            <div className={`w-2/3 rounded-md shadow-md overflow-hidden tab-buttons ${activeTab === BRANCHES.DRAFT ? "tab-left" : "tab-right"}`}>
+              <div className="flex items-center relative z-[2]">
+                <button
+                  onClick={() => setActiveTab(BRANCHES.DRAFT)}
+                  className="block w-1/2 p-4 transition-all !border-r-0"
+                >
+                  {t("draft-tab")}
+                </button>
+                <button
+                  onClick={() => setActiveTab(BRANCHES.MASTER)}
+                  className="block w-1/2 p-4 transition-all !border-l-0"
+                >
+                  {t("master-tab")}
+                </button>
+              </div>
+            </div>
+            <button onClick={closeAllAccordions} className="flex items-center p-4 rounded-md shadow-md text-white bg-slate-500">
+              <span>{t("close-accordion")}</span>
+              <ArrowsUpToLine fill="white" className="ml-2 w-6 h-6 inline-block" />
+            </button>
+          </div>
+          <div className="container mt-6 gap-6 flex flex-col">
+            {(logs.total === 0 && state === "idle") && (
+              <>
+                {logs.branchTotal.length > 0 && (
+                  <div>{t("filter.empty")}</div>
+                )}
+                {logs.branchTotal === 0 && (
+                  <div>{t("filter.empty-branch")}</div>
+                )}
+              </>
+            )}
+            {logs.hits.map((result) => <ContentResult key={result.path + result.repo} result={result} api={api} />)}
+            {state === "loading" && (
+              <Spinner />
+            )}
 
-    // <>
-    //   {originalLogs.map(log => (
-    //     <div key={log._id}>
-    //       <h1 >Log for {log._name}</h1>
-
-    //         {log.results.map((result) => 
-    //              <div key={result.path} className="widget-view active internal-widget">
-    //               <div className="widget-item-view properties-widget-item-view">
-    //                 <div className="broken-links-error">
-    //                   <h3>
-    //                     Found {[].concat(result.brokenLinks).length} {([].concat(result.brokenLinks).length > 1 ? "invalid links" : "invalid link")}
-    //                   </h3>
-    //                   <h4>{result.displayName}</h4>
-    //                   <div className="broken-links-error__body">
-
-    //                   {[].concat(result.brokenLinks).map(link => renderLink(link))}
-
-
-    //                   </div>
-    //                 </div>
-    //               </div>
-    //             </div>
-
-    //           )}
-
-
-    //     </div>
-    //   ))}
-    // </>
+            <div ref={intersectionRef} />
+          </div>
+        </>
+      )}
+    </div>
   );
 };
 

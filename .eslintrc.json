@@ -3,7 +3,8 @@
         "airbnb"
     ],
     "parserOptions": {
-        "parser": "babel-eslint"
+        "parser": "babel-eslint",
+        "ecmaVersion": 2020
     },
     "rules": {
         "import/extensions": [
@@ -49,8 +50,8 @@
         ],
         "no-console": "error",
         "global-require": "off",
-        "import/no-unresolved": "on",
-        "import/no-absolute-path": "on",
+        "import/no-unresolved": 0,
+        "import/no-absolute-path": 0,
         "no-underscore-dangle": "off",
         "object-shorthand": "error",
         "object-property-newline": [
@@ -70,7 +71,15 @@
         ],
         "func-names": "error",
         "react/react-in-jsx-scope": "off",
-        "react/prop-types": "off"
+        "react/prop-types": "off",
+        "react/function-component-definition": "off",
+        "react/button-has-type": "off",
+        "no-restricted-syntax": "off",
+        "no-use-before-define": "off",
+        "react/no-array-index-key": "off",
+        "import/prefer-default-export": "off",
+        "react/jsx-props-no-spreading": "off",
+        "jsx-a11y/label-has-associated-control": "off"
     },
     "globals": {
         "require": true,
@@ -92,6 +101,16 @@
                 "*.xml"
             ],
             "rules": {
+                "max-len": "off"
+            }
+        },
+        {
+            "files": [
+                "*.jsx"
+            ],
+            "rules": {
+                "no-param-reassign": "off",
+                "guard-for-in": "off",
                 "max-len": "off"
             }
         }
