@@ -9,7 +9,7 @@ function renderDesc(fields) {
         {fields.map(([field, desc], i) => (
           <tr key={field + i}>
             <td>
-              <div className=" max-w-44 overflow-scroll">
+              <div className="max-w-44 overflow-scroll">
                 <pre className="inline-block mr-2 pb-3 text-slate-800">{field}</pre>
               </div>
             </td>

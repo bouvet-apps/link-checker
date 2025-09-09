@@ -26,7 +26,8 @@ export function get(request) {
     props: JSON.stringify({
       api: {
         result: serviceUrl({ service: "result" }),
-        trigger: serviceUrl({ service: "trigger" })
+        trigger: serviceUrl({ service: "trigger" }),
+        checkTaskStatus: serviceUrl({ service: "check-task-status" })
       },
       lastRun,
       appVersion: app.version,

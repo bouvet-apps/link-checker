@@ -16,7 +16,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@babel/core": "^7.23.0",
-    "@babel/plugin-proposal-optional-chaining": "^7.21.0",
+    "@babel/plugin-transform-optional-chaining": "^7.27.1",
     "@babel/preset-env": "^7.22.20",
     "@babel/preset-react": "^7.22.15",
     "babel-loader": "^9.1.3",
