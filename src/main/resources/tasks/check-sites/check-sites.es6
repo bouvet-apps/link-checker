@@ -23,6 +23,7 @@ export function run() {
 
   contentRepos.forEach(runForRepo);
 
+  // TODO: Uncomment these to enable email notification
   // sendSiteEmails(emailMap);
   // sendOwnerEmails(ownerMap);
   // log.info(JSON.stringify(emailMap, null, 2));

@@ -73,7 +73,6 @@ const App = ({
         body: JSON.stringify({ taskId })
       });
       const data = await response.json();
-      console.log(data);
 
       setTaskProgressTotal(data.progress.total);
       setTaskProgressCurrent(data.progress.current);
