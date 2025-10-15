@@ -7,7 +7,7 @@ import useAccordion from "./useAccordion";
 import Content, { Site } from "./Content";
 import usei18nContext from "../context/i18nContext";
 
-const ContentResult = ({ result, api }) => {
+const ContentResult = ({ result, api, onRefresh }) => {
   const { t } = usei18nContext();
 
   const content = result.content;
@@ -41,8 +41,7 @@ const ContentResult = ({ result, api }) => {
       alert("Failed to start task");
     }
 
-    const json = await res.json();
-    console.log(json);
+    onRefresh();
 
     setIsChecking(false);
   };
@@ -117,7 +116,7 @@ const ContentResult = ({ result, api }) => {
           <ul className="flex flex-col gap-4">
             {result.brokenLinks.map((link, i) => (
               <BrokenLink
-                key={result.site._id + link.link + i}
+                key={result.site.id + link.link + i}
                 link={link}
                 content={content}
                 branch={result.branch}

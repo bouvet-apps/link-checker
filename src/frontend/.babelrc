@@ -3,16 +3,11 @@
     [
       "@babel/preset-env",
       {
-        "targets": [
-          "> 1%",
-          "not dead",
-          "not IE < 11",
-          "not op_mini all"
-        ]
+        "targets": ["> 1%", "not dead", "not IE < 11", "not op_mini all"]
       }
     ],
-    ["@babel/preset-react", { "runtime": "automatic"}]
+    ["@babel/preset-react", { "runtime": "automatic" }]
   ],
-  "plugins": ["@babel/plugin-proposal-optional-chaining"],
+  "plugins": ["@babel/plugin-transform-optional-chaining"],
   "comments": false
 }

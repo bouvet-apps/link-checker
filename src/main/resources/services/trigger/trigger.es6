@@ -2,15 +2,18 @@ import { submitTask, isRunning } from "/lib/xp/task";
 import { run as runInContext } from "/lib/xp/context";
 import { get as getContent } from "/lib/xp/content";
 import { checkNode } from "/lib/checker";
-import { getResultRepoConnection } from "/lib/utils";
-import { enrichLink } from "../result/result";
+import { getResultRepoConnection, forceArray } from "/lib/utils";
+import { enrichLink, clearCache } from "../result/result";
 
 const descriptor = `${app.name}:check-sites`;
 
 export function post(req) {
-  const body = JSON.parse(req.body);
-  const { nodePath } = body;
-  if (nodePath) return singleCheck(body);
+  clearCache();
+  if (req.body) {
+    const body = JSON.parse(req.body);
+    const { nodePath } = body;
+    if (nodePath) return singleCheck(body);
+  }
 
   if (isRunning(descriptor)) {
     return {
@@ -86,7 +89,8 @@ function removeFromReport(body) {
   const linkRepo = getResultRepoConnection();
   const report = linkRepo.get(`/${repo}__${site.name}__${branch}`);
   const { data } = report;
-  const newResults = data.results.filter((result) => result.path !== nodePath);
+  const results = forceArray(data.results);
+  const newResults = results.filter((result) => result.path !== nodePath);
   if (newResults.length === 0) {
     const deleteRes = linkRepo.delete(report._id);
     if (deleteRes.length > 0) {
@@ -103,6 +107,7 @@ function removeFromReport(body) {
   const modifyResult = linkRepo.modify({
     key: report._id,
     editor: (node) => {
+      // eslint-disable-next-line no-param-reassign
       node.data.results = newResults;
       return node;
     }

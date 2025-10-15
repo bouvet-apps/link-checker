@@ -16,6 +16,7 @@ import { ArrowDownZA, ArrowUpAZ, ArrowsUpToLine } from "./components/Icons";
 import usei18nContext from "./context/i18nContext";
 import Header from "./components/Header";
 import Spinner from "./components/Spinner";
+import ProgressBar from "./components/ProgressBar";
 
 const PER_BATCH = 20;
 
@@ -51,6 +52,45 @@ const App = ({
 
   const [logs, setLogs] = useState(DEFAULT_LOGS_STATE);
   const [start, setStart] = useState();
+
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const [taskProgressCurrent, setTaskProgressCurrent] = useState();
+  const [taskProgressTotal, setTaskProgressTotal] = useState();
+  const [taskProgressInfo, setTaskProgressInfo] = useState();
+
+  const refreshData = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
+
+  const checkTaskStatus = async (taskId) => {
+    try {
+      const response = await fetch(api.checkTaskStatus, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ taskId })
+      });
+      const data = await response.json();
+
+      setTaskProgressTotal(data.progress.total);
+      setTaskProgressCurrent(data.progress.current);
+      setTaskProgressInfo(data.progress.info);
+
+      if (data.state === "FINISHED") {
+        refreshData();
+      } else {
+        setTimeout(() => {
+          checkTaskStatus(taskId);
+        }, 100); // Retry after 100ms
+      }
+    } catch (error) {
+      console.error("Task status error:", error);
+      // TODO: Add possibility for retries
+    }
+  };
+
   useEffect(() => {
     // Reset list
     setLogs(DEFAULT_LOGS_STATE);
@@ -88,7 +128,7 @@ const App = ({
     };
 
     fetchData();
-  }, [start]);
+  }, [start, refreshKey]);
 
   const [intersectionRef, inView] = useInView();
   useEffect(() => {
@@ -122,7 +162,7 @@ const App = ({
 
   return (
     <div className="w-full h-full">
-      <Header appVersion={appVersion} inProgress={inProgress} api={api} />
+      <Header appVersion={appVersion} inProgress={inProgress} api={api} checkTaskStatus={checkTaskStatus} />
       {!hasBeenRun && (
         <div className="container text-xl">
           {t("not-run")}
@@ -130,15 +170,20 @@ const App = ({
       )}
       {hasBeenRun && (
         <>
-          <div className="container flex items-center justify-between flex-wrap">
-            <span className="text-xl">
-              {t("found")}
-              {" "}
-              <span className={`${totalLogs > 0 ? "text-red-600" : "text-green-400"} font-bold`}>{totalLogs}</span>
-              {" "}
-              {t("with-broken")}
-            </span>
-            <span className="text-base text-gray-600">
+          <div className="container flex justify-between flex-wrap flex-col gap-2">
+            <div className="flex gap-6 flex-row flex-wrap items-center">
+              <span className="text-xl">
+                {t("found")}
+                {" "}
+                <span className={`${totalLogs > 0 ? "text-red-600" : "text-green-400"} font-bold`}>{totalLogs}</span>
+                {" "}
+                {t("with-broken")}
+              </span>
+              <div className="flex-1 flex">
+                <ProgressBar styles="justify-end" current={taskProgressCurrent} total={taskProgressTotal} info={taskProgressInfo} />
+              </div>
+            </div>
+            <span className="text-base text-gray-600 flex-1">
               {t("last-run")}
               {" "}
               {new Date(lastRun).toLocaleString(t.locale === "en" ? "en-GB" : "no")}
@@ -202,7 +247,7 @@ const App = ({
                 )}
               </>
             )}
-            {logs.hits.map((result) => <ContentResult key={result.path + result.repo} result={result} api={api} />)}
+            {logs.hits.map((result) => <ContentResult key={result.path + result.repo} result={result} api={api} onRefresh={refreshData} />)}
             {state === "loading" && (
               <Spinner />
             )}

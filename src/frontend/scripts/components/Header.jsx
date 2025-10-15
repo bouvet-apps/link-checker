@@ -1,22 +1,22 @@
 import React from "react";
 import cn from "classnames";
-import usei18nContext from "../context/i18nContext";
 
-const Header = ({ appVersion, inProgress, api }) => {
-  const { t } = usei18nContext();
-
+const Header = ({
+  appVersion, inProgress, api, checkTaskStatus
+}) => {
   const triggerFullCheck = async () => {
     if (inProgress) return;
 
     const res = await fetch(api.trigger, { method: "POST" });
+    const data = await res.json();
     const status = res.status;
     if (status === 409) {
       alert("Check already running");
     } else if (status !== 200) {
       alert("Failed to start task");
     }
-    const json = await res.json();
-    console.log(json);
+
+    checkTaskStatus(data.taskId);
   };
 
   return (

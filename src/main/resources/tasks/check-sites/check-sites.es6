@@ -5,11 +5,10 @@ import { getPrincipal } from "/lib/xp/auth";
 import { progress } from "/lib/xp/task";
 
 import { saveResults, getSites } from "/lib/utils";
-import { sendSiteEmails, sendOwnerEmails } from "/lib/email";
+// import { sendSiteEmails, sendOwnerEmails } from "/lib/email";
 import { checkNode } from "/lib/checker";
-import { clearCache } from "../../services/result/result";
 
-const PAGINATION_COUNT = 200;
+const PAGINATION_COUNT = 20;
 
 let emailMap = {};
 let ownerMap = {};
@@ -24,6 +23,7 @@ export function run() {
 
   contentRepos.forEach(runForRepo);
 
+  // TODO: Uncomment these to enable email notification
   // sendSiteEmails(emailMap);
   // sendOwnerEmails(ownerMap);
   // log.info(JSON.stringify(emailMap, null, 2));
@@ -31,7 +31,6 @@ export function run() {
 
   emailMap = {};
   ownerMap = {};
-  clearCache();
 }
 
 function runForRepo(repo) {
@@ -63,6 +62,7 @@ function runForSites(repoId, branch) {
 
     let total = 9999;
     let start = 0;
+
     while (start < total) {
       // Sites within sites will produce duplicated results...
       const queryString = `_path LIKE '/content${site._path}/*'`;
@@ -72,22 +72,25 @@ function runForSites(repoId, branch) {
         query: queryString
       });
 
-      progress({
-        info: `Check Sites - ${repoId} - ${i + 1}/${sites.length} - ${site._name} ${branch}`,
-        current: start,
-        total: queryTotal
-      });
-
       total = queryTotal;
-      start += PAGINATION_COUNT;
 
       // Only PAGINATION_COUNT amount of content nodes are kept in memory at a time
-      hits.forEach((node) => {
+      // eslint-disable-next-line no-loop-func
+      hits.forEach((node, index) => {
         const checkResult = checkNode(node, true);
         if (checkResult && checkResult.result) {
           contentWithBroken.push(checkResult.result);
         }
+        if (((index + 1) % 20 === 0) || index + start + 1 === total) {
+          progress({
+            info: `Check Sites - ${repoId} - ${i + 1}/${sites.length} - ${site._name} ${branch}`,
+            current: index + start + 1,
+            total: queryTotal
+          });
+        }
       });
+
+      start += PAGINATION_COUNT;
     }
 
     saveResults(contentWithBroken, site, repoId, branch);
