@@ -6,8 +6,9 @@
   "scripts": {
     "clean": "rimraf ../../build/resources/main/assets",
     "lint": "eslint --config ../../.eslintrc.json scripts/**/*.es6",
-    "build": "npm-run-all build:*",
+    "build": "npm-run-all -s build:tailwind build:js",
     "build:js": "webpack --config webpack.config.js --node-env=production",
+    "build:tailwind": "npx tailwindcss -i ./styles/main.css -o ../../build/resources/main/assets/css/tailwind.css --minify",
     "watch": "npm-run-all --parallel watch:*",
     "watch:js": "webpack --config webpack.config.js --node-env=development --watch",
     "watch:tailwind": "npx tailwindcss -i ./styles/main.css -o ../../build/resources/main/assets/css/tailwind.css --watch"
