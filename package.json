@@ -8,7 +8,8 @@
     "watch": "webpack --config webpack.config.js --watch",
     "build": "npm-run-all build:*",
     "build:js": "babel src/main/resources --out-dir=build/resources/main --ignore \"**/*.js\"",
-    "build:webpack": "webpack --config webpack.config.js"
+    "build:webpack": "webpack --config webpack.config.js",
+    "lint": "eslint --fix --ext=js --ext=es6 ./src/main/resources"
   },
   "dependencies": {
     "xlsx": "file:vendor/xlsx-0.18.11.tgz"

@@ -41,7 +41,7 @@ exports.get = (req) => {
 
   const widgetScriptUrl = libs.portal.assetUrl({ path: "js/widget.js" });
 
-  const locale = content?.language || 'no';
+  const locale = content?.language || "no";
 
   const model = {
     serviceUrl: url,

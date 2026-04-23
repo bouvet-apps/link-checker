@@ -2,14 +2,14 @@
     "extends": [
         "airbnb"
     ],
-    "plugins": [
-        "jest"
-    ],
+    "parser": "@babel/eslint-parser",
     "parserOptions": {
-        "parser": "babel-eslint"
+        "requireConfigFile": false,
+        "ecmaVersion": 2021,
+        "sourceType": "module"
     },
     "env": {
-        "jest/globals": true
+        "node": true
     },
     "rules": {
         "import/extensions": [
@@ -80,6 +80,14 @@
         "XLSX": true
     },
     "overrides": [
+        {
+            "files": [
+                "src/main/resources/**/*.es6"
+            ],
+            "rules": {
+                "import/extensions": "off"
+            }
+        },
         {
             "files": [
                 "*.html",
