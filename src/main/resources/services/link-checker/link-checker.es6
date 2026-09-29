@@ -11,7 +11,7 @@ const libs = {
 
 const CURRENTLY_RUNNING = {};
 const PAGINATION_COUNT = 100;
-let locale = 'no';
+let locale = "no";
 
 const cache = libs.cache.newCache({
   size: 100,
@@ -144,18 +144,24 @@ const checkNode = (event, node) => {
     if (error) {
       // Local error with httpClient
       currentSession.failedCount++;
-      brokenLinks.push({ link: url, status: 0, type: localizedExternalUrl, internal: false });
+      brokenLinks.push({
+        link: url, status: 0, type: localizedExternalUrl, internal: false
+      });
     } else if (status >= 309 && status < 900) {
       // Under 900 to avoid annoying linkedIn response
       currentSession.brokenCount++;
-      brokenLinks.push({ link: url, status: status, type: localizedExternalUrl, internal: false });
+      brokenLinks.push({
+        link: url, status: status, type: localizedExternalUrl, internal: false
+      });
     }
   });
   urls.internalLinks.forEach((link) => {
     const { status } = checkInternalLink(link, event.data.branch);
     if (status >= 309 && status < 900) {
       currentSession.brokenCount++;
-      brokenLinks.push({ link: link, status, type: localizedInternalContent, internal: true });
+      brokenLinks.push({
+        link: link, status, type: localizedInternalContent, internal: true
+      });
     }
   });
   if (brokenLinks.length > 0) {
@@ -319,7 +325,7 @@ exports.webSocketEvent = (event) => {
   );
 };
 
-exports.get = req => ({
+exports.get = (req) => ({
   webSocket: {
     subProtocols: ["text"],
     data: {
