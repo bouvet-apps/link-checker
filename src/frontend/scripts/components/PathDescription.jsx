@@ -48,10 +48,11 @@ function parseComponents(fields, t) {
 
   if (t.locale !== "no") {
     suffix = "th";
-    const lastDigit = index.toString()[indexNumber - 1];
-    if (lastDigit === "1") suffix = "st";
-    if (lastDigit === "2") suffix = "nd";
-    if (lastDigit === "3") suffix = "rd";
+    const lastDigit = indexNumber % 10;
+    const isTeen = indexNumber % 100 >= 11 && indexNumber % 100 <= 13;
+    if (!isTeen && lastDigit === 1) suffix = "st";
+    if (!isTeen && lastDigit === 2) suffix = "nd";
+    if (!isTeen && lastDigit === 3) suffix = "rd";
   }
 
   const d = [

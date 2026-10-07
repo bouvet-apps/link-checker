@@ -7,6 +7,7 @@ import { progress } from "/lib/xp/task";
 import { saveResults, getSites } from "/lib/utils";
 // import { sendSiteEmails, sendOwnerEmails } from "/lib/email";
 import { checkNode } from "/lib/checker";
+import { clearCache } from "/services/result/result";
 
 const PAGINATION_COUNT = 20;
 
@@ -22,6 +23,7 @@ export function run() {
   }, () => listRepos().filter((repo) => repo.id.indexOf("com.enonic.cms") !== -1));
 
   contentRepos.forEach(runForRepo);
+  clearCache();
 
   // TODO: Uncomment these to enable email notification
   // sendSiteEmails(emailMap);

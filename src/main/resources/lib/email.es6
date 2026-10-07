@@ -57,10 +57,9 @@ export function sendSiteEmails(emailMap) {
         <p>You are recieving this email because you are listed as a recipient for broken link alerts on these sites. If this is an error, change the app config for the affected sites.</p>
       `;
 
-      // TODO: Change this to get the emails from the app's site-config
       sendMail({
-        from: "omsaggau@gmail.com", // sender,
-        to: "omsaggau@gmail.com", // recipient,
+        from: sender,
+        to: recipient,
         subject: `Enonic XP - Link checker - Report for sites: ${sites.map((site) => site.displayName).join(", ")}`,
         body,
         contentType: "text/html; charset=\"UTF-8\"",
@@ -132,8 +131,8 @@ export function sendOwnerEmails(ownerMap) {
       `;
 
       sendMail({
-        from: "vadamatsove@gmail.com", // sender,
-        to: "vadamatsove@gmail.com", // recipient,
+        from: sender,
+        to: recipient,
         subject: "Enonic XP - Link checker - Your content has broken links",
         body,
         contentType: "text/html; charset=\"UTF-8\"",

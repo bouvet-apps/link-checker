@@ -12,8 +12,11 @@ const Header = ({
     const status = res.status;
     if (status === 409) {
       alert("Check already running");
-    } else if (status !== 200) {
+      return;
+    }
+    if (status !== 200) {
       alert("Failed to start task");
+      return;
     }
 
     checkTaskStatus(data.taskId);

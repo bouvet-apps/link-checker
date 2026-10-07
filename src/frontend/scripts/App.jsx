@@ -54,12 +54,17 @@ const App = ({
   const [start, setStart] = useState();
 
   const [refreshKey, setRefreshKey] = useState(0);
+  const [lastRunTime, setLastRunTime] = useState(lastRun);
+  const [taskRunning, setTaskRunning] = useState(inProgress);
 
   const [taskProgressCurrent, setTaskProgressCurrent] = useState();
   const [taskProgressTotal, setTaskProgressTotal] = useState();
   const [taskProgressInfo, setTaskProgressInfo] = useState();
 
   const refreshData = () => {
+    // Start from the first page so already loaded pages are not appended twice
+    setLogs(DEFAULT_LOGS_STATE);
+    setStart({ value: -PER_BATCH });
     setRefreshKey((prev) => prev + 1);
   };
 
@@ -79,13 +84,19 @@ const App = ({
       setTaskProgressInfo(data.progress.info);
 
       if (data.state === "FINISHED") {
+        setTaskRunning(false);
+        setLastRunTime(new Date().toISOString());
         refreshData();
+      } else if (data.state === "FAILED") {
+        setTaskRunning(false);
       } else {
+        setTaskRunning(true);
         setTimeout(() => {
           checkTaskStatus(taskId);
         }, 100); // Retry after 100ms
       }
     } catch (error) {
+      setTaskRunning(false);
       console.error("Task status error:", error);
       // TODO: Add possibility for retries
     }
@@ -158,11 +169,11 @@ const App = ({
   // TODO: get total of both branches. Not done currently since didnt want to load all reports into memeory in controller
   const totalLogs = logs.branchTotal;
 
-  const hasBeenRun = lastRun;
+  const hasBeenRun = lastRunTime;
 
   return (
     <div className="w-full h-full">
-      <Header appVersion={appVersion} inProgress={inProgress} api={api} checkTaskStatus={checkTaskStatus} />
+      <Header appVersion={appVersion} inProgress={taskRunning} api={api} checkTaskStatus={checkTaskStatus} />
       {!hasBeenRun && (
         <div className="container text-xl">
           {t("not-run")}
@@ -186,7 +197,7 @@ const App = ({
             <span className="text-base text-gray-600 flex-1">
               {t("last-run")}
               {" "}
-              {new Date(lastRun).toLocaleString(t.locale === "en" ? "en-GB" : "no")}
+              {new Date(lastRunTime).toLocaleString(t.locale === "en" ? "en-GB" : "no")}
             </span>
           </div>
           <div className="container mt-10 flex gap-3">
@@ -239,7 +250,7 @@ const App = ({
           <div className="container mt-6 gap-6 flex flex-col">
             {(logs.total === 0 && state === "idle") && (
               <>
-                {logs.branchTotal.length > 0 && (
+                {logs.branchTotal > 0 && (
                   <div>{t("filter.empty")}</div>
                 )}
                 {logs.branchTotal === 0 && (

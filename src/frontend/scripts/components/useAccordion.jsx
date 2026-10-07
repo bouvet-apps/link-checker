@@ -7,20 +7,22 @@ const useAccordion = () => {
   const transitionRef = useRef(null);
 
   useEffect(() => {
-    const selector = document.addEventListener("selectionchange", () => {
+    const selector = () => {
       if (contentWrapperRef?.current?.contains(document.getSelection().anchorNode)) {
         setExpanded(true);
       }
-    });
+    };
+    document.addEventListener("selectionchange", selector);
     return () => {
       document.removeEventListener("selectionchange", selector);
     };
   }, []);
 
   useEffect(() => {
-    const close = document.addEventListener("close-accordion", () => {
+    const close = () => {
       setExpanded(false);
-    });
+    };
+    document.addEventListener("close-accordion", close);
     return () => {
       document.removeEventListener("close-accordion", close);
     };
@@ -45,14 +47,10 @@ const useAccordion = () => {
   };
 
   useEffect(() => {
-    let transitioner;
-    if (transitionRef?.current) {
-      transitioner = transitionRef.current?.addEventListener("transitionend", handleHeightChange);
-    }
+    const el = transitionRef?.current;
+    if (el) el.addEventListener("transitionend", handleHeightChange);
     return () => {
-      if (transitioner) {
-        document.removeEventListener("selectionchange", transitioner);
-      }
+      if (el) el.removeEventListener("transitionend", handleHeightChange);
     };
   }, [transitionRef?.current, expanded]);
 

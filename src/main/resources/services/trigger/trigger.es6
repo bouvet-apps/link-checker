@@ -71,7 +71,7 @@ function singleCheck(body) {
     if (!checkResult) {
       return removeFromReport(body);
     }
-    const { result } = checkNode(node, true);
+    const { result } = checkResult;
     result.brokenLinks = [].concat(result.brokenLinks).map((link) => enrichLink(link, node));
 
     return {

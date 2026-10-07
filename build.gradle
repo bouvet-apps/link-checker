@@ -71,6 +71,18 @@ task installWithCI(
     args = ['ci', '--ignore-scripts', '--quiet']
 }
 
+task installFrontendWithCI(
+        type: NpmTask,
+        group: 'node',
+        description: 'Install frontend node dependencies with ci, ignoring scripts'
+) {
+    dependsOn 'installWithCI'
+    workingDir = file('src/frontend')
+    inputs.files "src/frontend/package.json", "src/frontend/package-lock.json"
+    outputs.dir "src/frontend/node_modules"
+    args = ['ci', '--ignore-scripts', '--quiet']
+}
+
 task npm_install(
         type: NpmTask,
         group: 'node',
@@ -81,7 +93,7 @@ task npm_install(
 
 task npmBuild(type: NpmTask,
         group: 'node',
-        dependsOn: 'installWithCI',
+        dependsOn: ['installWithCI', 'installFrontendWithCI'],
         description: 'Transpile ES6 files'
     ) {
     args = ['run', 'build']

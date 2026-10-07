@@ -88,6 +88,23 @@ function checkContent(event, node) {
   const checkResult = runInContext(contextParams, () => checkNode(node));
   if (checkResult) {
     const { result, brokenCount, failedCount } = checkResult;
+    /**
+     * @phrases ["services.link-checker.external-url", "services.link-checker.internal-content"]
+     */
+    const typeLabels = {
+      external: localize({
+        key: "services.link-checker.external-url",
+        locale
+      }) || "External URL",
+      internal: localize({
+        key: "services.link-checker.internal-content",
+        locale
+      }) || "Internal content"
+    };
+    result.brokenLinks = result.brokenLinks.map((link) => ({
+      ...link,
+      type: typeLabels[link.type]
+    }));
     currentSession.brokenCount += brokenCount;
     currentSession.failedCount += failedCount;
     currentSession.results.push(result);

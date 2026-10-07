@@ -12,7 +12,7 @@ DOMPurify.addHook("uponSanitizeElement", (node) => {
   if (node.tagName === "A") {
     const newSpan = document.createElement("span");
     newSpan.style.color = "blue";
-    newSpan.innerHTML = node.textContent;
+    newSpan.textContent = node.textContent;
     node.parentNode.replaceChild(newSpan, node);
   }
   return node;
@@ -23,6 +23,8 @@ const BrokenLink = ({ link, branch }) => {
   const { setModalText } = useModalContext();
 
   const field = link.field || "";
+  // The checker prepends http:// to links without a protocol, so do the same for the anchor
+  const externalHref = /^(https?|ftp):\/\//i.test(link.link) ? link.link : `http://${link.link}`;
   let surroundingText = false;
   if (link.surroundingText) {
     surroundingText = DOMPurify.sanitize(link.surroundingText.replace(/\\n/g, "\n"), { ALLOWED_TAGS: ["p", "span", "strong", "ul", "li"] });
@@ -92,7 +94,7 @@ const BrokenLink = ({ link, branch }) => {
             <pre className="text-1xl">{link.link}</pre>
           )}
           {!link.internal && (
-            <a href={link.link} target="_blank" className="flex items-center w-[80%]" rel="noreferrer">
+            <a href={externalHref} target="_blank" className="flex items-center w-[80%]" rel="noreferrer">
               <pre className="text-1xl overflow-hidden text-ellipsis ">{link.link}</pre>
               <div className="min-w-4 w-4 h-4 ml-1"><UpRightFromSquare fill="white" /></div>
             </a>

@@ -12,7 +12,8 @@ const ProgressBar = ({
       <span className="opacity-60 text-xs">{percentage === 100 ? t("finished") : info}</span>
       <div className="max-w-72 w-full bg-[#eee] rounded-lg overflow-hidden">
         <div
-          className={`w-[${percentage}] ${total ? "bg-[#4caf50]" : ""} h-5 transition-all duration-300 ease-in-out`}
+          className={`${total ? "bg-[#4caf50]" : ""} h-5 transition-all duration-300 ease-in-out`}
+          style={{ width: `${percentage}%` }}
         />
       </div>
     </div>

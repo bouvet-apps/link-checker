@@ -74,7 +74,7 @@ function mapReportsToResult(branch) {
 
     if (!sites[uniqueSiteKey].icon) {
       const siteContent = contentRepo.get({ key: data.site.id });
-      const attachments = [].concat(siteContent.attachment);
+      const attachments = [].concat(siteContent?.attachment);
       if (attachments.length > 0 && attachments.filter((a) => a?.name === "_thumbnail").length > 0) {
         sites[uniqueSiteKey].icon = true;
       }
@@ -96,6 +96,8 @@ function enrichNodes(data, contentRepo) {
   const nodes = [].concat(data.results);
   const logs = nodes.map((node) => {
     const content = contentRepo.get({ key: `/content${node.path}` });
+    // Content may have been deleted since the report was saved
+    if (!content) return null;
 
     if (node.owner) {
       const owner = getPrincipal(node.owner);
@@ -120,7 +122,7 @@ function enrichNodes(data, contentRepo) {
     return node;
   });
 
-  return logs;
+  return logs.filter(Boolean);
 }
 
 export function enrichLink(link, content) {
