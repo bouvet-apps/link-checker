@@ -1,97 +1,45 @@
-/* eslint-disable no-case-declarations */
-const libs = {
-  content: require("/lib/xp/content"),
-  context: require("/lib/xp/context"),
-  httpClient: require("/lib/http-client"),
-  cache: require("/lib/cache"),
-  auth: require("/lib/xp/auth"),
-  webSocket: require("/lib/xp/websocket"),
-  i18n: require("/lib/xp/i18n")
-};
+import { checkNode } from "/lib/checker";
+import { getChildren, query, getSite, get as getContent } from "/lib/xp/content";
+import { run as runInContext } from "/lib/xp/context";
+import { newCache } from "/lib/cache";
+import { getUser } from "/lib/xp/auth";
+import { send } from "/lib/xp/websocket";
+import { localize } from "/lib/xp/i18n";
 
 const CURRENTLY_RUNNING = {};
 const PAGINATION_COUNT = 100;
 let locale = "no";
 
-const cache = libs.cache.newCache({
+const cache = newCache({
   size: 100,
   expire: 259200
 });
 
-const getDefaultContextParams = (event) => {
+function getDefaultContextParams(event) {
   const user = event.data.user.split(":");
-  return { repository: event.data.repository, branch: event.data.branch, user: { login: user[2], idProvider: user[1] } };
-};
-
-const checkInternalLink = (link, branch) => {
-  const contextParams = { branch: branch, principals: ["role:system.admin", "role:cms.expert", "role:cms.admin"] };
-  const result = libs.context.run(contextParams, () => {
-    const split = link.split("/");
-    return libs.content.exists({
-      key: split[split.length - 1]
-    });
-  });
-  return { status: result ? 200 : 404 };
-};
-
-const checkExternalUrl = (externalUrl) => {
-  let url = externalUrl;
-  try {
-    if (url.indexOf("http://") === -1 && url.indexOf("https://") === -1) {
-      url = `http://${url}`;
+  return {
+    repository: event.data.repository,
+    branch: event.data.branch,
+    user: {
+      login: user[2],
+      idProvider: user[1]
     }
-    const response = libs.httpClient.request({
-      url: url,
-      method: "GET",
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:62.0) Gecko/20100101 Firefox/62.0",
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-      },
-      connectionTimeout: 5000,
-      readTimeout: 3000
-    });
-    return { status: response.status };
-  } catch (error) {
-    const errorString = error.toString();
-    if (errorString.match(/java\.net\.UnknownHostException/)) {
-      return { status: 404 };
-    }
-    if (errorString.match(/java\.net\.SocketTimeoutException/)) {
-      return { status: 408 };
-    }
-    if (errorString.match(/javax\.net\.ssl\.SSLPeerUnverifiedException/)) {
-      return { status: 526 };
-    }
-    // Assume local error with httpClient
-    return { error: true };
-  }
-};
+  };
+}
 
-const getInternalReferences = (node) => {
-  const bean = __.newBean("no.bouvet.xp.lib.outboundreferences.OutboundReferences");
-  const references = __.toNativeObject(bean.getOutboundReferences(node._id));
-  return references;
-};
-
-const getExternalLinks = (text) => {
-  // Do not have global regex, they must be initialized each time.
-  const externalExpression = /((https?:\/\/|ftp:\/\/|www\.|[^\s:=]+@www\.).*?[a-z_/0-9\-#=&()])(?=(\.|,|;|\?|!)?(?:“|”|"|'|«|»|\[\/|\s|\r|\n|\\|<|>|\[\n))/gi; // (s:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/|www\.)[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/[^" \\><]*)?/gi;
-  return text.match(externalExpression) || [];
-};
-
-const getNodes = (content, event, start) => {
-  const results = libs.content.query({
+function getNodes(content, event, start) {
+  const results = query({
     query: `_path LIKE '/content${content._path}/*'`,
     branch: event.data.branch,
-    start: start,
+    start,
     count: PAGINATION_COUNT
   });
   results.start = start;
 
   return results;
-};
+}
 
-const buildCacheKey = (event, key, content) => {
+function buildCacheKey(event, key, content) {
   /*
     Get the last modified child of the content to use in the cache key.
     This will ensure any changes to its children will trigger a new fresh link check.
@@ -99,8 +47,11 @@ const buildCacheKey = (event, key, content) => {
   let cacheKey = key;
   const branch = event.session.params.branch;
 
-  const lastModifiedChild = libs.content.getChildren({
-    key: key, count: 1, start: 0, sort: "modifiedTime DESC"
+  const lastModifiedChild = getChildren({
+    key,
+    count: 1,
+    start: 0,
+    sort: "modifiedTime DESC"
   }).hits;
 
   if (lastModifiedChild[0] && lastModifiedChild[0].modifiedTime > content.modifiedTime) {
@@ -110,8 +61,11 @@ const buildCacheKey = (event, key, content) => {
   }
 
   if (branch === "master") {
-    const lastPublishedChild = libs.content.getChildren({
-      key: key, count: 1, start: 0, sort: "publish.from DESC"
+    const lastPublishedChild = getChildren({
+      key,
+      count: 1,
+      start: 0,
+      sort: "publish.from DESC"
     }).hits;
 
     if (lastPublishedChild[0]?.publish?.from && lastPublishedChild[0]?._id) {
@@ -122,57 +76,42 @@ const buildCacheKey = (event, key, content) => {
   cacheKey += event.session.params.selection;
   cacheKey += branch;
   return cacheKey;
-};
+}
 
-const checkNode = (event, node) => {
+function checkContent(event, node) {
   const currentSession = CURRENTLY_RUNNING[event.session.id];
-  const brokenLinks = [];
-  /**
-   * @phrases ["services.link-checker.external-url", "services.link-checker.internal-content"]
-   */
-  const localizedExternalUrl = libs.i18n.localize({ key: "services.link-checker.external-url", locale }) || "External URL";
-  const localizedInternalContent = libs.i18n.localize({ key: "services.link-checker.internal-content", locale }) || "Internal content";
 
-  const urls = {
-    externalLinks: getExternalLinks(JSON.stringify(node)),
-    internalLinks: getInternalReferences(node)
+  const contextParams = {
+    branch: currentSession.branch,
+    principals: ["role:system.admin", "role:cms.expert", "role:cms.admin"]
   };
-
-  urls.externalLinks.forEach((url) => {
-    const { status, error } = checkExternalUrl(url);
-
-    if (error) {
-      // Local error with httpClient
-      currentSession.failedCount++;
-      brokenLinks.push({
-        link: url, status: 0, type: localizedExternalUrl, internal: false
-      });
-    } else if (status >= 309 && status < 900) {
-      // Under 900 to avoid annoying linkedIn response
-      currentSession.brokenCount++;
-      brokenLinks.push({
-        link: url, status: status, type: localizedExternalUrl, internal: false
-      });
-    }
-  });
-  urls.internalLinks.forEach((link) => {
-    const { status } = checkInternalLink(link, event.data.branch);
-    if (status >= 309 && status < 900) {
-      currentSession.brokenCount++;
-      brokenLinks.push({
-        link: link, status, type: localizedInternalContent, internal: true
-      });
-    }
-  });
-  if (brokenLinks.length > 0) {
-    const data = {
-      displayName: node.displayName, path: node._path, brokenLinks
+  const checkResult = runInContext(contextParams, () => checkNode(node));
+  if (checkResult) {
+    const { result, brokenCount, failedCount } = checkResult;
+    /**
+     * @phrases ["services.link-checker.external-url", "services.link-checker.internal-content"]
+     */
+    const typeLabels = {
+      external: localize({
+        key: "services.link-checker.external-url",
+        locale
+      }) || "External URL",
+      internal: localize({
+        key: "services.link-checker.internal-content",
+        locale
+      }) || "Internal content"
     };
-    currentSession.results.push(data);
+    result.brokenLinks = result.brokenLinks.map((link) => ({
+      ...link,
+      type: typeLabels[link.type]
+    }));
+    currentSession.brokenCount += brokenCount;
+    currentSession.failedCount += failedCount;
+    currentSession.results.push(result);
   }
-};
+}
 
-const next = (event, indexParam) => {
+function next(event, indexParam) {
   const currentSession = CURRENTLY_RUNNING[event.session.id];
   let nodes = currentSession.nodes;
   const index = parseInt(indexParam);
@@ -195,7 +134,13 @@ const next = (event, indexParam) => {
       brokenCount: currentSession.brokenCount,
       failedCount: currentSession.failedCount
     });
-    libs.webSocket.send(event.session.id, str);
+    /* log.info(JSON.stringify({
+      results: currentSession.results,
+      key: currentSession.key,
+      brokenCount: currentSession.brokenCount,
+      failedCount: currentSession.failedCount
+    }, null, 2)); */
+    send(event.session.id, str);
     return;
   }
 
@@ -205,7 +150,7 @@ const next = (event, indexParam) => {
   }
 
   const node = nodes.hits[index % PAGINATION_COUNT];
-  checkNode(event, node);
+  checkContent(event, node);
 
   currentSession.index++;
   const str = JSON.stringify({
@@ -216,12 +161,15 @@ const next = (event, indexParam) => {
     brokenCount: currentSession.brokenCount,
     failedCount: currentSession.failedCount
   });
-  libs.webSocket.send(event.session.id, str);
-};
+  send(event.session.id, str);
+}
 
-const startChecker = (event) => {
+function startChecker(event) {
   const key = event.data.contentId;
-  const currentContent = libs.content.get({ key: key, branch: event.data.branch });
+  const currentContent = getContent({
+    key,
+    branch: event.data.branch
+  });
 
   if (currentContent) {
     const cacheKey = buildCacheKey(event, key, currentContent);
@@ -238,25 +186,38 @@ const startChecker = (event) => {
         results: cached.results,
         brokenCount: cached.brokenCount,
         failedCount: cached.failedCount,
-        key: key
+        key
       });
-      libs.webSocket.send(event.session.id, str);
+      send(event.session.id, str);
       return;
     }
 
-    let nodes = { count: 0, total: 0, hits: [] };
+    let nodes = {
+      count: 0,
+      total: 0,
+      hits: []
+    };
     const selection = event.session.params.selection;
     if (selection === "children" || selection === "both") {
       nodes = getNodes(currentContent, event, 0);
     }
 
+    const site = getSite({ key: currentContent._path });
+
     CURRENTLY_RUNNING[event.session.id] = {
-      key: key,
+      key,
       content: currentContent,
-      cacheKey: cacheKey,
+      cacheKey,
       index: 0,
       isRunning: true,
-      nodes: nodes,
+      nodes,
+      site: {
+        displayName: site.displayName,
+        name: site._name,
+        id: site._id
+      },
+      branch: event.data.branch,
+      repoId: event.data.repository,
       results: [],
       brokenCount: 0,
       failedCount: 0
@@ -264,28 +225,41 @@ const startChecker = (event) => {
 
     if (selection === "content" || selection === "both") {
       // Check selected content first outside the "loop" as to not mess with starts and counts.
-      libs.webSocket.send(event.session.id, JSON.stringify({ total: nodes.total, key: key, mainContent: true }));
-      checkNode(event, currentContent);
+      send(event.session.id, JSON.stringify({
+        total: nodes.total,
+        key,
+        mainContent: true
+      }));
+      checkContent(event, currentContent);
     }
-    libs.webSocket.send(event.session.id, JSON.stringify({
-      index: 0, count: nodes.count, total: nodes.total, key: key
+    send(event.session.id, JSON.stringify({
+      index: 0,
+      count: nodes.count,
+      total: nodes.total,
+      key
     }));
   } else {
     /**
      * @phrases ["services.link-checker.no-content"]
      */
-    libs.webSocket.send(event.session.id, JSON.stringify({ error: `${libs.i18n.localize({ key: "services.link-checker.no-content", locale })} :(` || "Content not found :(", key: key }));
+    send(event.session.id, JSON.stringify({
+      error: `${localize({
+        key: "services.link-checker.no-content",
+        locale
+      })} :(` || "Content not found :(",
+      key
+    }));
   }
-};
+}
 
-exports.webSocketEvent = (event) => {
+export function webSocketEvent(event) {
   const currentSession = CURRENTLY_RUNNING[event.session.id];
   const { message, type } = event;
   if (event?.data?.locale) {
     locale = event.data.locale;
   }
 
-  libs.context.run(
+  runInContext(
     getDefaultContextParams(event),
     () => {
       switch (type) {
@@ -299,6 +273,7 @@ exports.webSocketEvent = (event) => {
           break;
 
         case "message":
+          // eslint-disable-next-line no-case-declarations
           const [messageType, index] = message.split(":");
           if (messageType === "NEXT") {
             if (currentSession.isRunning === true) {
@@ -309,7 +284,7 @@ exports.webSocketEvent = (event) => {
                 key: currentSession.key,
                 brokenCount: currentSession.brokenCount
               });
-              libs.webSocket.send(event.session.id, str);
+              send(event.session.id, str);
             }
           }
           if (messageType === "STOP") {
@@ -323,17 +298,19 @@ exports.webSocketEvent = (event) => {
       }
     }
   );
-};
+}
 
-exports.get = (req) => ({
-  webSocket: {
-    subProtocols: ["text"],
-    data: {
-      contentId: req.params.contentId,
-      branch: req.params.branch,
-      repository: req.params.repository,
-      user: libs.auth.getUser().key, // Format: "user:idProvider:userLogin",
-      locale: req.params.locale
+export function get(req) {
+  return {
+    webSocket: {
+      subProtocols: ["text"],
+      data: {
+        contentId: req.params.contentId,
+        branch: req.params.branch,
+        repository: req.params.repository,
+        user: getUser().key, // Format: "user:idProvider:userLogin",
+        locale: req.params.locale
+      }
     }
-  }
-});
+  };
+}
