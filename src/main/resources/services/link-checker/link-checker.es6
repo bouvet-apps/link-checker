@@ -1,10 +1,5 @@
-import {
-  checkNode
-} from "/lib/checker";
-
-import {
-  getChildren, query, getSite, get as getContent
-} from "/lib/xp/content";
+import { checkNode } from "/lib/checker";
+import { getChildren, query, getSite, get as getContent } from "/lib/xp/content";
 import { run as runInContext } from "/lib/xp/context";
 import { newCache } from "/lib/cache";
 import { getUser } from "/lib/xp/auth";
