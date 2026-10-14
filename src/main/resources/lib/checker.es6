@@ -112,7 +112,7 @@ export function checkExternalUrl(url) {
       return { status: 526 };
     }
     // Assume local error with httpClient
-    return { error };
+    return { error: errorString };
   }
 }
 

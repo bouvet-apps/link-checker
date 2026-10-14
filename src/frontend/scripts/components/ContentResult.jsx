@@ -35,10 +35,10 @@ const ContentResult = ({ result, api, onRefresh }) => {
       })
     });
     const status = res.status;
-    if (status === 409) {
-      alert("Check already running");
+    if (status === 404) {
+      alert(t("recheck.not-found"));
     } else if (status !== 200) {
-      alert("Failed to start task");
+      alert(t("recheck.failed"));
     }
 
     onRefresh();
@@ -51,7 +51,7 @@ const ContentResult = ({ result, api, onRefresh }) => {
     if (!result.owner?.displayName) {
       text = (
         <span>
-          Owner:
+          {t("owner")}
           {" "}
           <pre className="inline">{result.owner}</pre>
         </span>
@@ -59,7 +59,7 @@ const ContentResult = ({ result, api, onRefresh }) => {
     } else {
       text = (
         <span>
-          Owner:
+          {t("owner")}
           {" "}
           {result.owner.displayName}
           {" "}
@@ -131,7 +131,7 @@ const ContentResult = ({ result, api, onRefresh }) => {
               onClick={recheckNode}
               disabled={isChecking}
             >
-              {isChecking ? "Checking..." : "Recheck now"}
+              {isChecking ? t("recheck.checking") : t("recheck")}
             </button>
           </div>
         </div>

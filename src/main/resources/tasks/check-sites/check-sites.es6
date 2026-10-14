@@ -71,7 +71,8 @@ function runForSites(repoId, branch) {
       const { hits, total: queryTotal } = query({
         start,
         count: PAGINATION_COUNT,
-        query: queryString
+        query: queryString,
+        sort: "_path ASC"
       });
 
       total = queryTotal;

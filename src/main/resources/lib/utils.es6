@@ -29,17 +29,20 @@ export function initRepository() {
   );
 }
 
+function csvField(value) {
+  const text = value === undefined || value === null ? "" : String(value);
+  return `"${text.replace(/"/g, "\"\"")}"`;
+}
+
 export function generateMailReport(results) {
-  let resultstring = "Name, Path, Link, Status, Type, Internal ";
+  let resultstring = "Name,Path,Owner,Last modified,Link,Status,Type,Internal";
   results.forEach((result) => {
-    // Commas break the format, but are legal in Enonic names
-    resultstring += `\n ${result.displayName.replace(",", "")}, ${result.path}, ${result.owner}, ${result.lastModified} `;
-    result.brokenLinks.forEach((link, index) => {
-      if (index === 0) {
-        resultstring += `${link.link}, ${link.status}, ${link.type}, ${link.internal}`;
-      } else {
-        resultstring += `\n , , , , ${link.link}, ${link.status}, ${link.type}, ${link.internal}`;
-      }
+    [].concat(result.brokenLinks).forEach((link, index) => {
+      const contentFields = index === 0
+        ? [result.displayName, result.path, result.owner, result.lastModified]
+        : ["", "", "", ""];
+      const row = contentFields.concat([link.link, link.status, link.type, link.internal]);
+      resultstring += `\n${row.map(csvField).join(",")}`;
     });
   });
   const stream = newStream(resultstring);
@@ -87,7 +90,8 @@ export function saveResults(result, site, repoId, branch) {
 export function getSites() {
   return query({
     query: `_path LIKE '/content/*' AND data.siteConfig.applicationKey = '${app.name}'`,
-    contentTypes: ["portal:site"]
+    contentTypes: ["portal:site"],
+    count: -1
   }).hits;
 }
 

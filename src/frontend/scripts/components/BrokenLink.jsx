@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import * as DOMPurify from "dompurify";
+import DOMPurify from "dompurify";
 
 import { UpRightFromSquare, ChevronDown, CircleExclamation } from "./Icons";
 import PathDescription from "./PathDescription";

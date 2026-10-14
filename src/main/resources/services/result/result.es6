@@ -56,7 +56,10 @@ export function get(req) {
 function mapReportsToResult(branch) {
   const sites = {};
   const linkRepo = getResultRepoConnection();
-  const reportNodeHits = linkRepo.findChildren({ parentKey: "/" }).hits;
+  const reportNodeHits = linkRepo.findChildren({
+    parentKey: "/",
+    count: -1
+  }).hits;
   const reports = reportNodeHits.map((reportHit) => linkRepo.get({ key: reportHit.id }));
 
   let logs = [];

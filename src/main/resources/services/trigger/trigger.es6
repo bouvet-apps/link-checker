@@ -6,6 +6,15 @@ import { getResultRepoConnection, forceArray } from "/lib/utils";
 import { enrichLink, clearCache } from "../result/result";
 
 const descriptor = `${app.name}:check-sites`;
+const BRANCHES = ["draft", "master"];
+
+function jsonResponse(status, body) {
+  return {
+    status,
+    body,
+    contentType: "application/json"
+  };
+}
 
 export function post(req) {
   clearCache();
@@ -50,7 +59,14 @@ export function post(req) {
 }
 
 function singleCheck(body) {
-  const { repo, branch, nodePath } = body;
+  const {
+    repo, branch, nodePath, site
+  } = body;
+  if (typeof repo !== "string" || repo.indexOf("com.enonic.cms.") !== 0
+    || BRANCHES.indexOf(branch) === -1 || !site?.name) {
+    return jsonResponse(400, { message: "Invalid parameters" });
+  }
+
   return runInContext({
     repository: repo,
     branch,
@@ -72,6 +88,8 @@ function singleCheck(body) {
       return removeFromReport(body);
     }
     const { result } = checkResult;
+    // Save before enrichLink, which mutates the links
+    updateInReport(body, result);
     result.brokenLinks = [].concat(result.brokenLinks).map((link) => enrichLink(link, node));
 
     return {
@@ -82,12 +100,36 @@ function singleCheck(body) {
   });
 }
 
+function getReport(body) {
+  const { repo, branch, site } = body;
+  return getResultRepoConnection().get(`/${repo}__${site.name}__${branch}`);
+}
+
+function updateInReport(body, newResult) {
+  const report = getReport(body);
+  if (!report) return;
+
+  getResultRepoConnection().modify({
+    key: report._id,
+    editor: (node) => {
+      // eslint-disable-next-line no-param-reassign
+      node.data.results = forceArray(node.data.results)
+        .map((result) => (result.path === body.nodePath ? newResult : result));
+      return node;
+    }
+  });
+}
+
 function removeFromReport(body) {
-  const {
-    repo, branch, nodePath, site
-  } = body;
+  const { nodePath } = body;
   const linkRepo = getResultRepoConnection();
-  const report = linkRepo.get(`/${repo}__${site.name}__${branch}`);
+  const report = getReport(body);
+  if (!report) {
+    return jsonResponse(404, {
+      type: "error",
+      message: "Report not found"
+    });
+  }
   const { data } = report;
   const results = forceArray(data.results);
   const newResults = results.filter((result) => result.path !== nodePath);

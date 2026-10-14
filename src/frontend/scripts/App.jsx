@@ -93,7 +93,7 @@ const App = ({
         setTaskRunning(true);
         setTimeout(() => {
           checkTaskStatus(taskId);
-        }, 100); // Retry after 100ms
+        }, 1000);
       }
     } catch (error) {
       setTaskRunning(false);
@@ -109,6 +109,7 @@ const App = ({
   }, [sortField, direction, siteFilter, activeTab]);
 
   useEffect(() => {
+    let ignore = false;
     const fetchData = async () => {
       if (!start) return;
       setState("loading");
@@ -118,8 +119,20 @@ const App = ({
       if (sortField?.value) params += `&sort=${sortField.value}`;
       if (direction) params += `&sortDirection=${direction}`;
 
-      const result = await fetch(`${api.result}?${params}`);
-      const data = await result.json();
+      let data;
+      try {
+        const result = await fetch(`${api.result}?${params}`);
+        if (!result.ok) throw new Error(`Status ${result.status}`);
+        data = await result.json();
+      } catch (error) {
+        if (ignore) return;
+        console.error("Failed to fetch results:", error);
+        // Not "idle", so the intersection observer does not retry in a loop
+        setState("error");
+        return;
+      }
+      // A newer request has replaced this one
+      if (ignore) return;
 
       // Reset
       if (start.value === -PER_BATCH) setLogs(data);
@@ -134,11 +147,14 @@ const App = ({
       // Add small delay to prevent intersection observer from firing too early
       // we want the list of new items to be rendered before observer is activated
       setTimeout(() => {
-        setState("idle");
+        if (!ignore) setState("idle");
       }, 300);
     };
 
     fetchData();
+    return () => {
+      ignore = true;
+    };
   }, [start, refreshKey]);
 
   const [intersectionRef, inView] = useInView();

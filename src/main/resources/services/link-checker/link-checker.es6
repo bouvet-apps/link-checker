@@ -211,11 +211,12 @@ function startChecker(event) {
       index: 0,
       isRunning: true,
       nodes,
-      site: {
+      // Content outside a site has no site
+      site: site ? {
         displayName: site.displayName,
         name: site._name,
         id: site._id
-      },
+      } : null,
       branch: event.data.branch,
       repoId: event.data.repository,
       results: [],
