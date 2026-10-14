@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html class="w-full h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <meta name="theme-color" content="#ffffff">
+  <link
+    rel="stylesheet"
+    href="../../assets/css/tailwind.css"
+    data-th-href="${portal.assetUrl({'_path=css/tailwind.css'})}"
+    type="text/css"
+    media="all"
+  >
+  <title>Link Checker</title>
+</head>
+<body class="w-full h-full">
+    <div id="app-root" class="w-full h-full"></div>
+    <script id="app-props" type="application/json" data-th-utext="${props}">
+    </script>
+    <script data-th-src="${portal.assetUrl({'_path=js/main.js'})}" async></script>
+</body>
+</html>
