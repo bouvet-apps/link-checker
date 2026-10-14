@@ -8,6 +8,17 @@ Go into the Enonic XP Application admin tool and install the app from the [Enoni
 
 The **Link checker** app will then be available in the widget panel in the content studio.
 
+### Access
+The widget, the admin panel and the app's services are only available to users with one of these roles:
+
+* `role:system.admin`
+* `role:cms.admin`
+* `role:cms.expert`
+
+Users without one of these roles will not see the widget in Content Studio or the Link Checker admin tool. To give users access, add them (or a group they belong to) to one of the roles above in the Users admin tool.
+
+The scheduled check runs with elevated permissions, and the admin panel shows its results for all sites and projects, regardless of the user's own permissions on each project.
+
 ## How to use this app
 ### App Config
 These configuration options can be added to `no.bouvet.app.linkchecker.cfg`.
