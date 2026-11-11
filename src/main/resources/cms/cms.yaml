@@ -1,0 +1,58 @@
+kind: "CMS"
+form:
+  - type: "FieldSet"
+    label:
+      text: "E-post varsling for site"
+      i18n: "site.field"
+    items:
+      - type: "TextLine"
+        name: "fromEmail"
+        label:
+          text: "'Fra' adresse"
+          i18n: "site.from"
+        helpText:
+          text: "Adresse som e-poster skal sendes fra. For eksempel, no-reply@eksempel.no. Det er viktig at SMTP er riktig konfigurert."
+          i18n: "site.from.help"
+        occurrences:
+          min: 0
+          max: 1
+        regexp: "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$"
+      - type: "TextLine"
+        name: "toEmail"
+        label:
+          text: "'Til' adresse for siterapport"
+          i18n: "site.to"
+        helpText:
+          text: "Denne e-post addressen vil få en e-post hver gang en skjedulert sjekk gjøres av denne siten."
+          i18n: "site.to.help"
+        occurrences:
+          min: 0
+          max: 1
+        regexp: "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$"
+      - type: "FieldSet"
+        label:
+          text: "Eier varsling"
+          i18n: "site.ownerFiled"
+        items:
+          - type: "CheckBox"
+            name: "alertOwner"
+            label:
+              text: "E-post varsel til eier av innhold ved brutte lenker"
+              i18n: "site.alert"
+            helpText:
+              text: "Send e-post til eier av innhold hvis skjedulert sjekk finner brutte lenker på det innholdet."
+              i18n: "site.alert.help"
+            occurrences:
+              min: 0
+              max: 1
+          - type: "TextArea"
+            name: "alertSuffix"
+            label:
+              text: "Ekstra tekst i e-post"
+              i18n: "site.suffix"
+            helpText:
+              text: "Hvis du vil ha site eller bedrift spesifikk tekst i den automatisk genererte e-posten. For eksempel: Vi gjør et slag for å øke kvaliteten på vårt nettsted, derfor setter vi alle eiere av innhold ansvarlig for å holde det oppdater. Les mer på slack kanal #eksempel"
+              i18n: "site.suffix.help"
+            occurrences:
+              min: 0
+              max: 1

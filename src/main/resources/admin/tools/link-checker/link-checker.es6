@@ -2,7 +2,7 @@
 import { render } from "/lib/thymeleaf";
 import { serviceUrl } from "/lib/xp/portal";
 import { getPhrases } from "/lib/xp/i18n";
-import { isRunning as isTaskRunning } from "/lib/xp/task";
+import { isRunning as isTaskRunning, list as listTasks } from "/lib/xp/task";
 
 import { getResultRepoConnection } from "/lib/utils";
 import { getBrowserSyncScript, isRunning } from "/lib/browsersync";
@@ -22,6 +22,13 @@ export function get(request) {
   }
 
   const inProgress = isTaskRunning(`${app.name}:check-sites`);
+  // Lets the panel resume showing progress after a page reload
+  const runningTask = inProgress
+    ? listTasks({
+      name: `${app.name}:check-sites`,
+      state: "RUNNING"
+    })[0]
+    : null;
   const model = {
     props: JSON.stringify({
       api: {
@@ -32,9 +39,10 @@ export function get(request) {
       lastRun,
       appVersion: app.version,
       inProgress,
+      runningTaskId: runningTask ? runningTask.id : null,
       i18n: {
-        no: getPhrases("no", ["site/i18n/phrases"]),
-        en: getPhrases("en", ["site/i18n/phrases"])
+        no: getPhrases("no", ["/i18n/phrases"]),
+        en: getPhrases("en", ["/i18n/phrases"])
       }
     })
   };

@@ -1,14 +1,11 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'com.enonic.xp.app' version '3.6.2'
+    id 'com.enonic.xp.app'
     id "com.github.node-gradle.node" version "7.1.0"
     id 'org.ajoberstar.grgit' version '5.0.0'
     id "com.github.ben-manes.versions" version '0.54.0'
 }
-
-sourceCompatibility = "1.11"
-targetCompatibility = "1.11"
 
 publishing {
     publications {
@@ -23,11 +20,6 @@ publishing {
 }
 
 app {
-    name = project.ext.appName
-    displayName = project.ext.displayName
-    vendorName = project.ext.vendorName
-    vendorUrl = project.ext.vendorUrl
-    systemVersion = "${xpVersion}"
     keepArchiveFileName = true
 }
 
@@ -99,6 +91,9 @@ task npmBuild(type: NpmTask,
     args = ['run', 'build']
 
     inputs.dir 'src/main/resources'
+    inputs.dir 'src/frontend/scripts'
+    inputs.dir 'src/frontend/styles'
+    inputs.files 'src/frontend/package.json', 'src/frontend/webpack.config.js', 'src/frontend/tailwind.config.js'
     outputs.dir "$buildDir/resources/main"
 }
 
@@ -109,24 +104,24 @@ build.finalizedBy(copyDist)
 clean.dependsOn(cleanDist)
 
 dependencies {
-    implementation "com.enonic.xp:core-api:${xpVersion}"
-    implementation "com.enonic.xp:portal-api:${xpVersion}"
-    include "com.enonic.xp:lib-auth:${xpVersion}"
-    include "com.enonic.xp:lib-content:${xpVersion}"
-    include "com.enonic.xp:lib-context:${xpVersion}"
-    include "com.enonic.xp:lib-cluster:${xpVersion}"
-    include "com.enonic.xp:lib-i18n:${xpVersion}"
-    include "com.enonic.xp:lib-portal:${xpVersion}"
-    include "com.enonic.xp:lib-websocket:${xpVersion}"
-    include "com.enonic.xp:lib-node:${xpVersion}"
-    include "com.enonic.xp:lib-repo:${xpVersion}"
-    include "com.enonic.xp:lib-mail:${xpVersion}"
-    include "com.enonic.xp:lib-scheduler:${xpVersion}"
-    include "com.enonic.xp:lib-task:${xpVersion}"
-    include "com.enonic.xp:lib-io:${xpVersion}"
-    include 'com.enonic.lib:lib-cache:2.2.1'
-    include 'com.enonic.lib:lib-http-client:3.2.2'
-    include "com.enonic.lib:lib-thymeleaf:2.1.1"
+    implementation xplibs.api.core
+    implementation xplibs.api.portal
+    include xplibs.auth
+    include xplibs.content
+    include xplibs.context
+    include xplibs.cluster
+    include xplibs.i18n
+    include xplibs.portal
+    include xplibs.websocket
+    include xplibs.node
+    include xplibs.repo
+    include xplibs.mail
+    include xplibs.scheduler
+    include xplibs.task
+    include xplibs.io
+    include libs.lib.cache
+    include libs.lib.http.client
+    include libs.lib.thymeleaf
 }
 
 repositories {
@@ -148,6 +143,6 @@ node {
 }
 
 wrapper {
-    gradleVersion = '8.14.3'
+    gradleVersion = '9.9.0'
     distributionType = Wrapper.DistributionType.BIN
 }

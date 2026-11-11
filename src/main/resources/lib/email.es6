@@ -149,7 +149,7 @@ function getContentStudioUrl(repo) {
   if (!adminUrl) return "";
 
   const project = repo.split(".").pop();
-  return `${adminUrl}tool/com.enonic.app.contentstudio/main#/${project}/browse`;
+  return `${adminUrl}com.enonic.app.contentstudio/main#/${project}/browse`;
 }
 
 function getLinkCheckerUrl(url) {
@@ -158,7 +158,7 @@ function getLinkCheckerUrl(url) {
   const adminUrl = getAdminUrl();
   if (!adminUrl) return "";
 
-  return `${adminUrl}tool/no.bouvet.app.linkchecker/link-checker`;
+  return `${adminUrl}no.bouvet.app.linkchecker/link-checker`;
 }
 
 function getAdminUrl() {

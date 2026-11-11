@@ -3,15 +3,15 @@ import { UpRightFromSquare } from "./Icons";
 
 function getAdminPrefix() {
   const pathName = window.location.pathname;
-  const prefix = pathName.slice(0, pathName.indexOf("/admin/tool/"));
-  return prefix;
+  const adminIndex = pathName.indexOf("/admin/");
+  return adminIndex === -1 ? "" : pathName.slice(0, adminIndex);
 }
 
 const Content = ({ content, repo }) => {
   const path = content._path.split("/").slice(3).join("/");
   const project = repo.split(".").pop();
-  // PREFIX/admin/tool/com.enonic.app.contentstudio/main/PROJECT/edit/ID
-  const contentStudioUrl = `${getAdminPrefix()}/admin/tool/com.enonic.app.contentstudio/main/${project}/edit/${content._id}`;
+  // PREFIX/admin/com.enonic.app.contentstudio/main/PROJECT/edit/ID
+  const contentStudioUrl = `${getAdminPrefix()}/admin/com.enonic.app.contentstudio/main/${project}/edit/${content._id}`;
 
   return (
     <a href={contentStudioUrl} target="_blank" className="flex items-center group" title="Edit in Content Studio" rel="noreferrer">

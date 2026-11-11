@@ -34,9 +34,9 @@ export function post(req) {
     };
   }
 
+  // No custom name: the task name must stay the descriptor key so isRunning/list can find it
   const newTaskId = submitTask({
-    descriptor,
-    name: "Check sites - Manuel trigger"
+    descriptor
   });
 
   if (newTaskId) {

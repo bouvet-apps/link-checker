@@ -1,0 +1,9 @@
+kind: "AdminExtension"
+title: "LinkChecker"
+description: "Check your content for broken links"
+allow:
+  - "role:system.admin"
+  - "role:cms.admin"
+  - "role:cms.expert"
+interfaces:
+  - "contentstudio.contextpanel"

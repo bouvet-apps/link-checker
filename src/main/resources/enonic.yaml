@@ -1,0 +1,5 @@
+kind: "Application"
+title: "LinkChecker"
+description: "Check your content for broken links"
+vendorName: "Bouvet Norge AS"
+vendorUrl: "https://www.bouvet.no"

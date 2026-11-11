@@ -3,6 +3,7 @@ package no.bouvet.xp.lib.outboundreferences;
 import java.util.function.Supplier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.enonic.xp.script.bean.BeanContext;
 import com.enonic.xp.script.bean.ScriptBean;
@@ -18,7 +19,7 @@ public final class OutboundReferences implements ScriptBean {
     public List<String> getOutboundReferences( String stringId ) {
         ContentId contentId = ContentId.from(stringId);
         ContentIds references = this.contentService.get().getOutboundDependencies( contentId );
-        return new ArrayList<String>( references.asStrings() );
+        return references.stream().map( ContentId::toString ).collect( Collectors.toCollection( ArrayList::new ) );
     }
 
     @Override

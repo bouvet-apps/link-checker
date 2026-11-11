@@ -114,6 +114,7 @@ If you are running HTTPS and you are met with `failed: Error during WebSocket ha
 
 | Version | XP version |
 |---------| ------------- |
+| 4.0.0   | >=8.1.2 |
 | 3.1.0   | >=7.9.0 |
 | 3.0.1   | >=7.9.0 |
 | 3.0.0   | >=7.9.0 |
@@ -125,6 +126,7 @@ Not tested for below 6.12.0
 
 ## Changelog
 ### Version 4.0.0
+* Upgraded to Enonic XP 8 (requires XP 8.1.2 or newer)
 * Added scheduled task to check all sites in all content projects
     * Only sites where the application is added are checked.
 * New admin panel to display result of task

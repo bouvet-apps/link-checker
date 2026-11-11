@@ -1,0 +1,9 @@
+kind: "AdminTool"
+title:
+  text: "Link Checker"
+description:
+  text: "Link Checker"
+allow:
+  - "role:system.admin"
+  - "role:cms.admin"
+  - "role:cms.expert"

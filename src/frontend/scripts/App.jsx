@@ -28,7 +28,7 @@ const DEFAULT_LOGS_STATE = {
 };
 
 const App = ({
-  api, lastRun, appVersion, inProgress
+  api, lastRun, appVersion, inProgress, runningTaskId
 }) => {
   const { t } = usei18nContext();
 
@@ -101,6 +101,10 @@ const App = ({
       // TODO: Add possibility for retries
     }
   };
+
+  useEffect(() => {
+    if (runningTaskId) checkTaskStatus(runningTaskId);
+  }, []);
 
   useEffect(() => {
     // Reset list
