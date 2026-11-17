@@ -1,4 +1,5 @@
-import { query, getSiteConfig } from "/lib/xp/content";
+import { get as getContent, getSiteConfig } from "/lib/xp/content";
+import { connect } from "/lib/xp/node";
 import { list as listRepos } from "/lib/xp/repo";
 import { run as runInContext } from "/lib/xp/context";
 import { getPrincipal } from "/lib/xp/auth";
@@ -9,7 +10,7 @@ import { saveResults, getSites } from "/lib/utils";
 import { checkNode } from "/lib/checker";
 import { clearCache } from "/services/result/result";
 
-const PAGINATION_COUNT = 20;
+const PROGRESS_INTERVAL = 20;
 
 let emailMap = {};
 let ownerMap = {};
@@ -62,41 +63,39 @@ function runForSites(repoId, branch) {
 
     const contentWithBroken = [];
 
-    let total = 9999;
-    let start = 0;
+    // Sites within sites will produce duplicated results...
+    // Fetch only ids with count -1 (scroll):
+    // paging with start fails past Elasticsearch's 10000 result window.
+    const { hits: idHits } = connect({
+      repoId,
+      branch
+    }).query({
+      query: `_path LIKE '/content${site._path}/*'`,
+      count: -1,
+      sort: "_path ASC"
+    });
+    const total = idHits.length;
 
-    while (start < total) {
-      // Sites within sites will produce duplicated results...
-      const queryString = `_path LIKE '/content${site._path}/*'`;
-      const { hits, total: queryTotal } = query({
-        start,
-        count: PAGINATION_COUNT,
-        query: queryString,
-        sort: "_path ASC"
-      });
-
-      total = queryTotal;
-
-      // Only PAGINATION_COUNT amount of content nodes are kept in memory at a time
-      // eslint-disable-next-line no-loop-func
-      hits.forEach((node, index) => {
+    // Only one content node is kept in memory at a time
+    idHits.forEach(({ id }, index) => {
+      const node = getContent({ key: id });
+      if (node) {
         const checkResult = checkNode(node, true);
         if (checkResult && checkResult.result) {
           contentWithBroken.push(checkResult.result);
         }
-        if (((index + 1) % 20 === 0) || index + start + 1 === total) {
-          progress({
-            info: `Check Sites - ${repoId} - ${i + 1}/${sites.length} - ${site._name} ${branch}`,
-            current: index + start + 1,
-            total: queryTotal
-          });
-        }
-      });
-
-      start += PAGINATION_COUNT;
-    }
+      }
+      if (((index + 1) % PROGRESS_INTERVAL === 0) || index + 1 === total) {
+        progress({
+          info: `Check Sites - ${repoId} - ${i + 1}/${sites.length} - ${site._name} ${branch}`,
+          current: index + 1,
+          total
+        });
+      }
+    });
 
     saveResults(contentWithBroken, site, repoId, branch);
+    clearCache();
 
     // We want recipients to recieve the least amount of emails possible,
     // so we'll create a map to optimize for that
