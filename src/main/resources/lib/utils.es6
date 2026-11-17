@@ -61,28 +61,36 @@ export function saveResults(result, site, repoId, branch) {
   const repo = getResultRepoConnection();
 
   const name = `${repoId}__${siteName}__${branch}`;
+  const data = {
+    siteName,
+    site: {
+      displayName: site.displayName,
+      name: siteName,
+      id: site._id
+    },
+    repoId,
+    branch,
+    brokenCount: result.length,
+    timestamp: Date.now(),
+    results: [].concat(result)
+  };
   if (repo.exists(`/${name}`)) {
-    repo.delete(`/${name}`);
-    log.info(`Removing old log at... ${name}`);
+    repo.modify({
+      key: `/${name}`,
+      editor: (node) => ({
+        ...node,
+        data
+      })
+    });
+    log.info(`Updating link checker results for ${name}`);
+    return;
   }
 
   log.info(`Logging link checker results for ${name}`);
   repo.create({
     _name: name,
     displayName: name,
-    data: {
-      siteName,
-      site: {
-        displayName: site.displayName,
-        name: siteName,
-        id: site._id
-      },
-      repoId,
-      branch,
-      brokenCount: result.length,
-      timestamp: Date.now(),
-      results: [].concat(result)
-    }
+    data
   });
 }
 
