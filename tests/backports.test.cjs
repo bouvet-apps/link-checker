@@ -21,6 +21,39 @@ function loadModule(path, mocks, globals = {}) {
   return exports;
 }
 
+test("URL extraction preserves non-ASCII path and query endings", () => {
+  const checker = loadModule("lib/checker.es6", {
+    "/lib/xp/content": {},
+    "/lib/xp/node": {},
+    "/lib/xp/context": {},
+    "/lib/http-client": {}
+  });
+  const urls = [
+    "https://example.com/sti/\u00e6",
+    "https://example.com/?q=\u00e6",
+    "https://example.com/\uD83D\uDE00"
+  ];
+  assert.deepEqual(Array.from(checker.getExternalLinks(JSON.stringify({ urls }))), urls);
+});
+
+test("Unicode URL extraction keeps surrounding quotes, whitespace and punctuation out", () => {
+  const checker = loadModule("lib/checker.es6", {
+    "/lib/xp/content": {},
+    "/lib/xp/node": {},
+    "/lib/xp/context": {},
+    "/lib/http-client": {}
+  });
+  const url = "https://example.com/\u00e6";
+  for (const text of [
+    `\u00ab${url}\u00bb `,
+    `\u201c${url}\u201d `,
+    `${url}\u00a0next`,
+    `${url}. `
+  ]) {
+    assert.deepEqual(Array.from(checker.getExternalLinks(text)), [url]);
+  }
+});
+
 for (const state of ["WAITING", "RUNNING"]) {
   test(`reload recovers a ${state} task and its ID`, () => {
     const controller = loadModule("admin/tools/link-checker/link-checker.es6", {
