@@ -112,6 +112,7 @@ const BrokenLink = ({ link, branch }) => {
           {link.error && (
             <div className="text-lg mb-4">
               {t("failed")}
+              <pre className="text-sm mt-2 whitespace-pre-wrap break-all">{link.error}</pre>
             </div>
           )}
           {!(surroundingText || field.length > 0) && (
