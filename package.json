@@ -5,6 +5,7 @@
   "license": "UNLICENSED",
   "author": "Bouvet",
   "scripts": {
+    "test": "node --test tests/*.test.cjs",
     "build": "npm-run-all build:*",
     "build:js": "babel src/main/resources --out-dir=build/resources/main --ignore \"**/*.js\"",
     "build:frontend": "cd src/frontend && npm run build",

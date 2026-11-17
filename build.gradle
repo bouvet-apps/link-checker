@@ -99,6 +99,9 @@ task npmBuild(type: NpmTask,
     args = ['run', 'build']
 
     inputs.dir 'src/main/resources'
+    inputs.dir 'src/frontend/scripts'
+    inputs.dir 'src/frontend/styles'
+    inputs.files 'src/frontend/package.json', 'src/frontend/webpack.config.js', 'src/frontend/tailwind.config.js'
     outputs.dir "$buildDir/resources/main"
 }
 
@@ -107,6 +110,20 @@ rootProject.tasks.getByName('build').dependsOn npmBuild
 build.finalizedBy(copyDist)
 
 clean.dependsOn(cleanDist)
+
+tasks.register('testBackports', NpmTask) {
+    dependsOn 'installWithCI'
+    args = ['test']
+}
+
+tasks.register('testAsciiUrl', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'no.bouvet.xp.lib.url.AsciiUrlTest'
+}
+
+compileTestJava.dependsOn npmBuild
+check.dependsOn testBackports, testAsciiUrl
 
 dependencies {
     implementation "com.enonic.xp:core-api:${xpVersion}"
