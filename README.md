@@ -114,6 +114,7 @@ If you are running HTTPS and you are met with `failed: Error during WebSocket ha
 
 | Version | XP version |
 |---------| ------------- |
+| 3.3.0   | >=7.16.12, <8.0.0 |
 | 3.1.0   | >=7.9.0 |
 | 3.0.1   | >=7.9.0 |
 | 3.0.0   | >=7.9.0 |
@@ -123,8 +124,24 @@ If you are running HTTPS and you are met with `failed: Error during WebSocket ha
 
 Not tested for below 6.12.0
 
+### Validating changes
+
+Run `./gradlew build -x deploy` with Java 11 to build without deploying.
+The build includes regression checks for large-site scanning, task recovery,
+duplicate task prevention, report-cache invalidation and international URLs.
+The JavaScript checks can also be run separately with `npm test`.
+
 ## Changelog
-### Version 4.0.0
+### Version 3.3.0
+* Final XP 7 release; requires XP 7.16.12 or newer within XP 7.
+* Fixed full-site checks stopping at 10,000 content items.
+* Fixed international domain names being reported as request failures.
+* Display request errors in the admin panel.
+* Restore running-check progress after reload and prevent duplicate queued/running checks.
+* Refresh cached reports when each site finishes.
+* Show reports with exactly one affected content item.
+* Update existing reports in place to avoid errors while loading scan results.
+* Rebuild frontend assets when frontend sources change.
 * Added scheduled task to check all sites in all content projects
     * Only sites where the application is added are checked.
 * New admin panel to display result of task
