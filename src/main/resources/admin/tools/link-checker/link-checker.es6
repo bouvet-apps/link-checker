@@ -2,7 +2,7 @@
 import { render } from "/lib/thymeleaf";
 import { serviceUrl } from "/lib/xp/portal";
 import { getPhrases } from "/lib/xp/i18n";
-import { isRunning as isTaskRunning } from "/lib/xp/task";
+import { list as listTasks } from "/lib/xp/task";
 
 import { getResultRepoConnection } from "/lib/utils";
 import { getBrowserSyncScript, isRunning } from "/lib/browsersync";
@@ -21,7 +21,9 @@ export function get(request) {
     lastRun = latestReport._ts;
   }
 
-  const inProgress = isTaskRunning(`${app.name}:check-sites`);
+  const runningTask = listTasks({ name: `${app.name}:check-sites` })
+    .filter((task) => task.state === "RUNNING" || task.state === "WAITING")[0];
+  const inProgress = Boolean(runningTask);
   const model = {
     props: JSON.stringify({
       api: {
@@ -32,6 +34,7 @@ export function get(request) {
       lastRun,
       appVersion: app.version,
       inProgress,
+      runningTaskId: runningTask ? runningTask.id : null,
       i18n: {
         no: getPhrases("no", ["site/i18n/phrases"]),
         en: getPhrases("en", ["site/i18n/phrases"])

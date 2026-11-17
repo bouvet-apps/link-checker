@@ -1,4 +1,4 @@
-import { submitTask, isRunning } from "/lib/xp/task";
+import { submitTask, list as listTasks } from "/lib/xp/task";
 import { run as runInContext } from "/lib/xp/context";
 import { get as getContent } from "/lib/xp/content";
 import { checkNode } from "/lib/checker";
@@ -24,7 +24,9 @@ export function post(req) {
     if (nodePath) return singleCheck(body);
   }
 
-  if (isRunning(descriptor)) {
+  const activeTask = listTasks({ name: descriptor })
+    .some((task) => task.state === "RUNNING" || task.state === "WAITING");
+  if (activeTask) {
     return {
       status: 409,
       body: {
@@ -34,9 +36,9 @@ export function post(req) {
     };
   }
 
+  // No custom name: the task name must stay the descriptor key so isRunning/list can find it
   const newTaskId = submitTask({
-    descriptor,
-    name: "Check sites - Manuel trigger"
+    descriptor
   });
 
   if (newTaskId) {
