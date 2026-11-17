@@ -85,8 +85,9 @@ export function checkExternalUrl(url) {
     if (url.indexOf("http://") === -1 && url.indexOf("https://") === -1) {
       completeUrl = `http://${url}`;
     }
+    const asciiUrl = __.newBean("no.bouvet.xp.lib.url.AsciiUrl").toAscii(completeUrl);
     const response = request({
-      url: completeUrl,
+      url: asciiUrl,
       method: "GET",
       headers: {
         // Random user agent to simulate real user
