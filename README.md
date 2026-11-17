@@ -28,21 +28,21 @@ These configuration options can be added to `no.bouvet.app.linkchecker.cfg`.
 | ------------- | ------------- | ------------- |
 | connectionTimeout | The timeout on establishing the connection to external link target, in milliseconds | 5000 |
 | readTimeout | The timeout on waiting to receive data from external link target, in milliseconds | 3000 |
-| adminUrl | URL to admin page. Used to add links to ContentStudio and LinkChecker admin panel to emails. Example: www.example.com/admin |  |
+| adminUrl | Retained email setting; email delivery is disabled in 3.3.0. |  |
 | scheduleCron | CRON schedule for when the task to check should run |  |
 | scheduleTimeZone | TimeZone for CRON schedule | Europe/Oslo |
 
 ### Site Config
 
-In the site config for the app (the configuration you do on the app on the site content) there are a couple of email configurations.
-Set a 'to' and 'from' email if you want the 'to' email to get a report for the site after a scheduled task.
-
-You can check the box for owner notifications if you want the owner of a content to recieve an email if there is found a broken link on it. This requires the 'from' field to be set. If the same owner has multiple content with broken links, reports will be sent in the same email.
-
-This requires correct configuration of `com.enonic.xp.mail.cfg`.
+Email delivery is disabled in 3.3.0, for both scheduled and manually triggered full-site checks.
+The existing sender, recipient and owner-notification fields remain in the site configuration
+for compatibility, but do not send email, even when XP mail is configured.
+Use the admin panel to view the check results.
 
 ### Scheduled task
-If `scheduleCron` is set in the config, a check for broken links will be run according to that schedule. This job will check all sites with the app added, and the underlying content. When the check is finished, it goes through each site, and if a 'to' and 'from' email is added to the site config it will email the 'to' address a report for that site. If the same 'to' email is found on multiple sites both reports will be sent in the same email.
+If `scheduleCron` is set in the config, a check for broken links will be run according to that schedule.
+This job checks all sites with the app added, and their underlying content.
+Results are saved for the admin panel; no email notifications are sent.
 
 ### Admin panel
 The admin panel shows the result of a complete check done by the scheduled task.
@@ -136,6 +136,7 @@ The JavaScript checks can also be run separately with `npm test`.
 * Final XP 7 release; requires XP 7.16.12 or newer within XP 7.
 * Fixed full-site checks stopping at 10,000 content items.
 * Fixed international domain names being reported as request failures.
+* Include URLs ending in non-ASCII path or query characters.
 * Display request errors in the admin panel.
 * Restore running-check progress after reload and prevent duplicate queued/running checks.
 * Refresh cached reports when each site finishes.
@@ -149,14 +150,11 @@ The JavaScript checks can also be run separately with `npm test`.
     * Shows which techinal field the link was found in the content schema. It has a detailed description to help editors deduce where they need to look for the link in Content Studio when editing the content.
     * If the link was found in a text line, text area or rich text, the surrounding text is shown to help you find the link easier.
     * If an internal link is giving a 404, the audit logs are checked to try and find a reason. It is now shown if the content was deleted/unpublished/archived, when and by whom.
-* More email alerting
-    * Added option to send email with report for that site (configured per site)
-    * Added option to send email to owner of content if broken links are found in that content (configured per site)
-    * If URL to admin page is added in app config, a link to ContentStudio and LinkChecker admin panel is added to emails
+* Email configuration fields are retained for compatibility, but email delivery is disabled.
 * Added more app configuration options: (see ##Config for all)
     * connectionTimeout - The timeout on establishing the connection to external link target, in milliseconds
     * readTimeout - The timeout on waiting to receive data from external link target, in milliseconds
-    * adminUrl - URL to admin page. Used to add links to ContentStudio and LinkChecker admin panel to emails. Example: www.example.com/admin
+    * adminUrl - Retained email setting; email delivery is disabled in this release.
     * scheduleCron - CRON schedule for when the task to check should run
     * scheduleTimeZone - TimeZone for CRON schedule. Default Europe/Oslo
 
