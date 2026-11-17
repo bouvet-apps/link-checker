@@ -1,3 +1,16 @@
 {
-    "extends": "../../.eslintrc.json"
+    "extends": "../../.eslintrc.json",
+    "env": {
+        "browser": true
+    },
+    "parserOptions": {
+        "babelOptions": {
+            "babelrc": false,
+            "configFile": false,
+            "presets": ["@babel/preset-react"]
+        }
+    },
+    "rules": {
+        "no-console": ["error", { "allow": ["error"] }]
+    }
 }

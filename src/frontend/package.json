@@ -5,7 +5,7 @@
   "main": "./scripts/main.jsx",
   "scripts": {
     "clean": "rimraf ../../build/resources/main/assets",
-    "lint": "eslint --config ../../.eslintrc.json scripts/**/*.es6",
+    "lint": "eslint --ext .js,.jsx scripts",
     "build": "npm-run-all -s build:tailwind build:js",
     "build:js": "webpack --config webpack.config.js --node-env=production",
     "build:tailwind": "npx tailwindcss -i ./styles/main.css -o ../../build/resources/main/assets/css/tailwind.css --minify",
