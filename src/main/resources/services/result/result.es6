@@ -83,7 +83,7 @@ function mapReportsToResult(branch) {
       }
     }
 
-    if (data.branch === branch && data.results && data.results.length > 0) {
+    if (data.branch === branch && data.results && [].concat(data.results).length > 0) {
       logs = logs.concat(enrichNodes(data, contentRepo));
     }
   });
