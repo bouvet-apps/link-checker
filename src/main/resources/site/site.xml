@@ -1,4 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-    <form/>
+    <form>
+        <field-set>
+            <label i18n="site.field">E-post varsling for site</label>
+            <items>
+                <input type="TextLine" name="fromEmail">
+                    <label i18n="site.from">'Fra' adresse</label>
+                    <help-text i18n="site.from.help">Adresse som e-poster skal sendes fra. For eksempel, no-reply@eksempel.no. Det er viktig at SMTP er riktig konfigurert.</help-text>
+                    <occurrences minimum="0" maximum="1"/>
+                    <config>
+                        <regexp>^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$</regexp>
+                    </config>
+                </input>
+                <input type="TextLine" name="toEmail">
+                    <label i18n="site.to">'Til' adresse for siterapport</label>
+                    <help-text i18n="site.to.help">Denne e-post addressen vil få en e-post hver gang en skjedulert sjekk gjøres av denne siten.</help-text>
+                    <occurrences minimum="0" maximum="1"/>
+                    <config>
+                        <regexp>^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$</regexp>
+                    </config>
+                </input>
+                <field-set>
+                    <label i18n="site.ownerFiled">Eier varsling</label>
+                    <items>
+                        <input type="CheckBox" name="alertOwner">
+                            <label i18n="site.alert">E-post varsel til eier av innhold ved brutte lenker</label>
+                            <help-text i18n="site.alert.help">Send e-post til eier av innhold hvis skjedulert sjekk finner brutte lenker på det innholdet.</help-text>
+                        </input>
+                        <input type="TextArea" name="alertSuffix">
+                            <label i18n="site.suffix">Ekstra tekst i e-post</label>
+                            <help-text i18n="site.suffix.help">Hvis du vil ha site eller bedrift spesifikk tekst i den automatisk genererte e-posten. For eksempel: Vi gjør et slag for å øke kvaliteten på vårt nettsted, derfor setter vi alle eiere av innhold ansvarlig for å holde det oppdater. Les mer på slack kanal #eksempel</help-text>
+                            <occurrences minimum="0" maximum="1"/>
+                        </input>
+                    </items>
+                </field-set>
+            </items>
+        </field-set>
+    </form>
 </site>
