@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.container {
+   @apply max-w-container mx-auto px-4
+}
+
+.truncate-2-lines {
+   overflow: hidden;
+   display: -webkit-box;
+   -webkit-line-clamp: 2; /* number of lines to show */
+   -webkit-box-orient: vertical;
+}
+
+.tab-buttons {
+   position: relative;
+}
+.tab-buttons button {
+   border: 1px solid #fbfbfb;
+}
+.tab-buttons button:focus, .tab-buttons button:active {
+   @apply bg-gray-100;
+}
+.tab-buttons::after {
+   content: "";
+   position: absolute;
+   width: 50%;
+   height: 5px;
+   z-index: 2;
+   left: 0%;
+   bottom: 0px;
+   transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+   @apply bg-blue-900;
+}
+
+.tab-buttons.tab-left::after {
+   left: 0%;
+}
+
+.tab-buttons.tab-right::after {
+   left: 50%;
+}
+
+
+/* Override third-party styles */
+.rmsc {
+   --rmsc-h: 46px !important;
+}
+
+.rmsc .dropdown-heading-value > span {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 10px;
+}
+
+.rmsc .dropdown-heading {
+   height: auto !important;
+   min-height: var(--rmsc-h) !important;
+}
+
+.rmsc .dropdown-content {
+   z-index: 3 !important;
+}
+
+.dropdown-single .clear-selected-button {
+   display: none !important;
+}
+
+.ReactModal__Overlay--after-open {
+   z-index: 2;
+}
