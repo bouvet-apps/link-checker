@@ -41,7 +41,7 @@ exports.get = (req) => {
 
   const widgetScriptUrl = libs.portal.assetUrl({ path: "js/widget.js" });
 
-  const locale = content?.language || 'no';
+  const locale = content?.language || "no";
 
   const model = {
     serviceUrl: url,
@@ -50,57 +50,165 @@ exports.get = (req) => {
     publishedContent,
     locale,
     /**
-     * @phrases ["widgets.link-checker.info", "widgets.link-checker.start", "widgets.link-checker.radio-legend", "widgets.link-checker.radio-this-content",
-     * "widgets.link-checker.radio-child-content", "widgets.link-checker.radio-both", "widgets.link-checker.stop", "widgets.link-checker.download-report",
-     * "widgets.link-checker.loading","widgets.link-checker.from", "widgets.link-checker.draft-explanation", "widgets.link-checker.master-explanation",
-     * "widgets.link-checker.explanation-title",
+     * @phrases ["info", "start", "radio-legend", "radio-this-content",
+     * "radio-child-content", "radio-both", "stop", "download-report",
+     * "loading","from", "draft-explanation", "master-explanation",
+     * "explanation-title",
      *
-     * "widgets.link-checker.manual-review", "widgets.link-checker.broken-link", "widgets.link-checker.broken-links", "widgets.link-checker.report",
-     * "widgets.link-checker.found", "widgets.link-checker.invalid-link", "widgets.link-checker.invalid-links",
-     * "widgets.link-checker.download-more", "widgets.link-checker.no-broken-links", "widgets.link-checker.tips-and-info",
-     * "widgets.link-checker.internal-content-links-tip", "widgets.link-checker.common-cause-internal-tip", "widgets.link-checker.target-content-deleted-tip",
-     * "widgets.link-checker.content-imported-tip", "widgets.link-checker.content-not-found-tip", "widgets.link-checker.cache-tip",
+     * "manual-review", "broken-link", "broken-links", "report",
+     * "found", "invalid-link", "invalid-links",
+     * "download-more", "no-broken-links", "tips-and-info",
+     * "internal-content-links-tip", "common-cause-internal-tip", "target-content-deleted-tip",
+     * "content-imported-tip", "content-not-found-tip", "cache-tip",
      * "http403", "http404", "http408", "http500", "http503", "status-code", "status-message"]
      */
     localized: {
-      info: libs.i18n.localize({ key: "widgets.link-checker.info", locale }),
-      start: libs.i18n.localize({ key: "widgets.link-checker.start", locale }),
-      radioLegend: libs.i18n.localize({ key: "widgets.link-checker.radio-legend", locale }),
-      radioThisContent: libs.i18n.localize({ key: "widgets.link-checker.radio-this-content", locale }),
-      radioChildContent: libs.i18n.localize({ key: "widgets.link-checker.radio-child-content", locale }),
-      radioBoth: libs.i18n.localize({ key: "widgets.link-checker.radio-both", locale }),
-      stop: libs.i18n.localize({ key: "widgets.link-checker.stop", locale }),
-      downloadReport: libs.i18n.localize({ key: "widgets.link-checker.download-report", locale }),
-      loading: libs.i18n.localize({ key: "widgets.link-checker.loading", locale }),
-      from: libs.i18n.localize({ key: "widgets.link-checker.from", locale }),
-      draftExplanation: libs.i18n.localize({ key: "widgets.link-checker.draft-explanation", locale }),
-      masterExplanation: libs.i18n.localize({ key: "widgets.link-checker.master-explanation", locale }),
-      explanationTitle: libs.i18n.localize({ key: "widgets.link-checker.explanation-title", locale })
+      info: libs.i18n.localize({
+        key: "info",
+        locale
+      }),
+      start: libs.i18n.localize({
+        key: "start",
+        locale
+      }),
+      radioLegend: libs.i18n.localize({
+        key: "radio-legend",
+        locale
+      }),
+      radioThisContent: libs.i18n.localize({
+        key: "radio-this-content",
+        locale
+      }),
+      radioChildContent: libs.i18n.localize({
+        key: "radio-child-content",
+        locale
+      }),
+      radioBoth: libs.i18n.localize({
+        key: "radio-both",
+        locale
+      }),
+      stop: libs.i18n.localize({
+        key: "stop",
+        locale
+      }),
+      downloadReport: libs.i18n.localize({
+        key: "download-report",
+        locale
+      }),
+      loading: libs.i18n.localize({
+        key: "loading",
+        locale
+      }),
+      from: libs.i18n.localize({
+        key: "from",
+        locale
+      }),
+      draftExplanation: libs.i18n.localize({
+        key: "draft-explanation",
+        locale
+      }),
+      masterExplanation: libs.i18n.localize({
+        key: "master-explanation",
+        locale
+      }),
+      explanationTitle: libs.i18n.localize({
+        key: "explanation-title",
+        locale
+      })
     },
     localizedString: JSON.stringify({
-      manualReview: libs.i18n.localize({ key: "widgets.link-checker.manual-review", locale }),
-      brokenLink: libs.i18n.localize({ key: "widgets.link-checker.broken-link", locale }),
-      brokenLinks: libs.i18n.localize({ key: "widgets.link-checker.broken-links", locale }),
-      report: libs.i18n.localize({ key: "widgets.link-checker.report", locale }),
-      found: libs.i18n.localize({ key: "widgets.link-checker.found", locale }),
-      invalidLink: libs.i18n.localize({ key: "widgets.link-checker.invalid-link", locale }),
-      invalidLinks: libs.i18n.localize({ key: "widgets.link-checker.invalid-links", locale }),
-      downloadMore: libs.i18n.localize({ key: "widgets.link-checker.download-more", locale }),
-      noBrokenLinks: libs.i18n.localize({ key: "widgets.link-checker.no-broken-links", locale }),
-      tipsAndInfo: libs.i18n.localize({ key: "widgets.link-checker.tips-and-info", locale }),
-      internalContentLinksTip: libs.i18n.localize({ key: "widgets.link-checker.internal-content-links-tip", locale }),
-      commonCauseInternalTip: libs.i18n.localize({ key: "widgets.link-checker.common-cause-internal-tip", locale }),
-      targetContentDeletedTip: libs.i18n.localize({ key: "widgets.link-checker.target-content-deleted-tip", locale }),
-      contentImportedTip: libs.i18n.localize({ key: "widgets.link-checker.content-imported-tip", locale }),
-      contentNotFoundTip: libs.i18n.localize({ key: "widgets.link-checker.content-not-found-tip", locale }),
-      cacheTip: libs.i18n.localize({ key: "widgets.link-checker.cache-tip", locale }),
-      http403: libs.i18n.localize({ key: "http403", locale }),
-      http404: libs.i18n.localize({ key: "http404", locale }),
-      http408: libs.i18n.localize({ key: "http408", locale }),
-      http500: libs.i18n.localize({ key: "http500", locale }),
-      http503: libs.i18n.localize({ key: "http503", locale }),
-      statusCode: libs.i18n.localize({ key: "status-code", locale }),
-      statusMessage: libs.i18n.localize({ key: "status-message", locale })
+      manualReview: libs.i18n.localize({
+        key: "manual-review",
+        locale
+      }),
+      brokenLink: libs.i18n.localize({
+        key: "broken-link",
+        locale
+      }),
+      brokenLinks: libs.i18n.localize({
+        key: "broken-links",
+        locale
+      }),
+      report: libs.i18n.localize({
+        key: "report",
+        locale
+      }),
+      found: libs.i18n.localize({
+        key: "found",
+        locale
+      }),
+      invalidLink: libs.i18n.localize({
+        key: "invalid-link",
+        locale
+      }),
+      invalidLinks: libs.i18n.localize({
+        key: "invalid-links",
+        locale
+      }),
+      downloadMore: libs.i18n.localize({
+        key: "download-more",
+        locale
+      }),
+      noBrokenLinks: libs.i18n.localize({
+        key: "no-broken-links",
+        locale
+      }),
+      tipsAndInfo: libs.i18n.localize({
+        key: "tips-and-info",
+        locale
+      }),
+      internalContentLinksTip: libs.i18n.localize({
+        key: "internal-content-links-tip",
+        locale
+      }),
+      commonCauseInternalTip: libs.i18n.localize({
+        key: "common-cause-internal-tip",
+        locale
+      }),
+      targetContentDeletedTip: libs.i18n.localize({
+        key: "target-content-deleted-tip",
+        locale
+      }),
+      contentImportedTip: libs.i18n.localize({
+        key: "content-imported-tip",
+        locale
+      }),
+      contentNotFoundTip: libs.i18n.localize({
+        key: "content-not-found-tip",
+        locale
+      }),
+      cacheTip: libs.i18n.localize({
+        key: "cache-tip",
+        locale
+      }),
+      http403: libs.i18n.localize({
+        key: "http403",
+        locale
+      }),
+      http404: libs.i18n.localize({
+        key: "http404",
+        locale
+      }),
+      http408: libs.i18n.localize({
+        key: "http408",
+        locale
+      }),
+      http500: libs.i18n.localize({
+        key: "http500",
+        locale
+      }),
+      http503: libs.i18n.localize({
+        key: "http503",
+        locale
+      }),
+      statusCode: libs.i18n.localize({
+        key: "status-code",
+        locale
+      }),
+      statusMessage: libs.i18n.localize({
+        key: "status-message",
+        locale
+      })
     })
   };
 

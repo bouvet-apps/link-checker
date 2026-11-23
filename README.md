@@ -8,18 +8,56 @@ Go into the Enonic XP Application admin tool and install the app from the [Enoni
 
 The **Link checker** app will then be available in the widget panel in the content studio.
 
-### Build yourself
-Build this app with gradle. In the terminal, from the root of the project, enter `./gradlew build`.
-On Windows, just enter `gradlew build` in the command line from the project root.
-Next, move the JAR file from /build/libs to your `$XP_HOME/deploy` directory.
+### Access
+The widget, the admin panel and the app's services are only available to users with one of these roles:
 
-The **Link checker** app will then be available in the widget panel in the content studio.
+* `role:system.admin`
+* `role:cms.admin`
+* `role:cms.expert`
 
-If you update package.json, make sure to run `./gradlew npm_install`.
+Users without one of these roles will not see the widget in Content Studio or the Link Checker admin tool. To give users access, add them (or a group they belong to) to one of the roles above in the Users admin tool.
+
+The scheduled check runs with elevated permissions, and the admin panel shows its results for all sites and projects, regardless of the user's own permissions on each project.
 
 ## How to use this app
+### App Config
+These configuration options can be added to `no.bouvet.app.linkchecker.cfg`.
 
-After adding this app you should see a new LinkChecker option in detail panel to the top right in the content studio. Selecting a content and pressing the **Start** button will start the process. It will check the current content and all its children content for broken links. You can choose to only check the selected content, only the sub-content of that content or both.
+
+| Key | Description | Default
+| ------------- | ------------- | ------------- |
+| connectionTimeout | The timeout on establishing the connection to external link target, in milliseconds | 5000 |
+| readTimeout | The timeout on waiting to receive data from external link target, in milliseconds | 3000 |
+| adminUrl | Retained email setting; email delivery is disabled in 3.3.0. |  |
+| scheduleCron | CRON schedule for when the task to check should run |  |
+| scheduleTimeZone | TimeZone for CRON schedule | Europe/Oslo |
+
+### Site Config
+
+Email delivery is disabled in 3.3.0, for both scheduled and manually triggered full-site checks.
+The existing sender, recipient and owner-notification fields remain in the site configuration
+for compatibility, but do not send email, even when XP mail is configured.
+Use the admin panel to view the check results.
+
+### Scheduled task
+If `scheduleCron` is set in the config, a check for broken links will be run according to that schedule.
+This job checks all sites with the app added, and their underlying content.
+Results are saved for the admin panel; no email notifications are sent.
+
+### Admin panel
+The admin panel shows the result of a complete check done by the scheduled task.
+It displays a list of content that has broken links. The list can be filtered on site and branch, and sorted after count of broken links or modified time.
+
+On each broken link there is extra details to try and help the viewer in finding out where the broken link is in the content, and why it is broken. It shows which techinal field the link was found in the content schema. It has a detailed description to help editors deduce where they need to look for the link in Content Studio when editing the content.
+
+If the link was found in a text line, text area or rich text, the surrounding text is shown to help you find the link easier.
+
+If an internal link is giving a 404, the audit logs are checked to try and find a reason. It is now shown if the content was deleted/unpublished/archived, when and by whom.
+
+The admin panel has a button to start the complete check manually.
+
+### Widget
+There is a LinkChecker option in the detail panel to the top right in the content studio. Selecting a content and pressing the **Start** button will start the process. It will check the current content and all its children content for broken links. You can choose to only check the selected content, only the sub-content of that content or both.
 
 **NB!** The internal data of the content is searched for links, not the corresponding webpage. Check [Siteimprove](https://market.enonic.com/vendors/enonic/siteimprove) app for a more complete check.
 
@@ -76,6 +114,7 @@ If you are running HTTPS and you are met with `failed: Error during WebSocket ha
 
 | Version | XP version |
 |---------| ------------- |
+| 3.3.0   | >=7.16.12, <8.0.0 |
 | 3.1.0   | >=7.9.0 |
 | 3.0.1   | >=7.9.0 |
 | 3.0.0   | >=7.9.0 |
@@ -85,7 +124,40 @@ If you are running HTTPS and you are met with `failed: Error during WebSocket ha
 
 Not tested for below 6.12.0
 
+### Validating changes
+
+Run `./gradlew build -x deploy` with Java 11 to build without deploying.
+The build includes regression checks for large-site scanning, task recovery,
+duplicate task prevention, report-cache invalidation and international URLs.
+The JavaScript checks can also be run separately with `npm test`.
+
 ## Changelog
+### Version 3.3.0
+* Final XP 7 release; requires XP 7.16.12 or newer within XP 7.
+* Fixed full-site checks stopping at 10,000 content items.
+* Fixed international domain names being reported as request failures.
+* Include URLs ending in non-ASCII path or query characters.
+* Display request errors in the admin panel.
+* Restore running-check progress after reload and prevent duplicate queued/running checks.
+* Refresh cached reports when each site finishes.
+* Show reports with exactly one affected content item.
+* Update existing reports in place to avoid errors while loading scan results.
+* Rebuild frontend assets when frontend sources change.
+* Added scheduled task to check all sites in all content projects
+    * Only sites where the application is added are checked.
+* New admin panel to display result of task
+    * Admin panel will show much more detail than widget and report did before
+    * Shows which techinal field the link was found in the content schema. It has a detailed description to help editors deduce where they need to look for the link in Content Studio when editing the content.
+    * If the link was found in a text line, text area or rich text, the surrounding text is shown to help you find the link easier.
+    * If an internal link is giving a 404, the audit logs are checked to try and find a reason. It is now shown if the content was deleted/unpublished/archived, when and by whom.
+* Email configuration fields are retained for compatibility, but email delivery is disabled.
+* Added more app configuration options: (see ##Config for all)
+    * connectionTimeout - The timeout on establishing the connection to external link target, in milliseconds
+    * readTimeout - The timeout on waiting to receive data from external link target, in milliseconds
+    * adminUrl - Retained email setting; email delivery is disabled in this release.
+    * scheduleCron - CRON schedule for when the task to check should run
+    * scheduleTimeZone - TimeZone for CRON schedule. Default Europe/Oslo
+
 ### Version 3.1.0
 * Possible to choose to check master brach
 * Added HTTP status messages to result (including report)

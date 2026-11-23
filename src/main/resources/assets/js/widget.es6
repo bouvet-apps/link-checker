@@ -43,11 +43,15 @@ const mapStatusMessage = (status) => {
 };
 
 const generateSpreadsheet = (results) => {
-  const ws = XLSX.utils.json_to_sheet([],
-    { header: ["displayName", "path", "type", (localized?.brokenLink || "broken link"), (localized?.statusCode || "status code"), (localized?.statusMessage ||"status message")], skipHeader: false });
+  const ws = XLSX.utils.json_to_sheet([], {
+    header: ["displayName", "path", "type", (localized?.brokenLink || "broken link"), (localized?.statusCode || "status code"), (localized?.statusMessage || "status message")],
+    skipHeader: false
+  });
   /* Write data starting at A2 */
   results.forEach((result, index) => {
-    const links = result.brokenLinks.map(link => ({ C: link.type, D: link.link, E: mapStatusCode(link.status), F: mapStatusMessage(link.status) }));
+    const links = result.brokenLinks.map((link) => ({
+      C: link.type, D: link.link, E: mapStatusCode(link.status), F: mapStatusMessage(link.status)
+    }));
     const data = [{
       A: result.displayName, B: result.path, C: links[0].C, D: links[0].D, E: links[0].E, F: links[0].F
     }].concat(links.slice(1));
@@ -57,7 +61,7 @@ const generateSpreadsheet = (results) => {
   const date = new Date();
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "WorksheetName");
-  XLSX.writeFile(wb, `${localized?.report || 'report'}-linkchecker-${date.toLocaleDateString()}-${date.toLocaleTimeString()}.xlsx`, {});
+  XLSX.writeFile(wb, `${localized?.report || "report"}-linkchecker-${date.toLocaleDateString()}-${date.toLocaleTimeString()}.xlsx`, {});
 };
 
 const renderLink = (link, path) => {
@@ -145,42 +149,36 @@ const generateShortReport = (message) => {
 const generateTipsSection = () => (`
   <div class="widget-view active internal-widget link-checker__tips">
     <div class="widget-item-view properties-widget-item-view">
-      <h3>${localized?.tipsAndInfo || 'Tips and information'}</h3>
+      <h3>${localized?.tipsAndInfo || "Tips and information"}</h3>
       <div class="link-checker__tips__body">
         <ul>
           <li>
             <p>
               ${localized?.internalContentLinksTip
-              ||
-              '<em>Internal content</em> links referes to connections to other content in Enonic XP. The text which looks something like <span class="pre">1397f305-c7ef-43e6-a563-4980883b6396</span> is the unique ID of the targeted content. <em>NB:</em> An ID may be found more than one place in the content'}
+  || "<em>Internal content</em> links referes to connections to other content in Enonic XP. The text which looks something like <span class=\"pre\">1397f305-c7ef-43e6-a563-4980883b6396</span> is the unique ID of the targeted content. <em>NB:</em> An ID may be found more than one place in the content"}
             </p>
             <p>
               ${localized?.commonCauseInternalTip
-              ||
-              'The most common cause for these errors are:'}
+  || "The most common cause for these errors are:"}
               <ul>
                 <li>
                   ${localized?.targetContentDeletedTip
-                  ||
-                  'The targeted content has been deleted.'}
+  || "The targeted content has been deleted."}
                 </li>
                 <li>
                   ${localized?.contentImportedTip
-                  ||
-                  'This content was imported from another site or server, but the targeted content was not.'}
+  || "This content was imported from another site or server, but the targeted content was not."}
                 </li>
               </ul>
             </p>
           </li>
           <li>
             ${localized?.cacheTip
-            ||
-            'LinkChecker will cache the result for each content and branch you run it on. The cache will only check for changes in the current content and in its immediate children. So, if you check the root content, then apply changes to a child of a child, the root content cache will not be updated.'}
+  || "LinkChecker will cache the result for each content and branch you run it on. The cache will only check for changes in the current content and in its immediate children. So, if you check the root content, then apply changes to a child of a child, the root content cache will not be updated."}
           </li>
           <li>
             ${localized?.contentNotFoundTip
-            ||
-            '<em>Content not found</em> might occur if you from <em>Master</em> try to check links for a content which only exists in Draft branch. Try to publish the content, and try again.'}
+  || "<em>Content not found</em> might occur if you from <em>Master</em> try to check links for a content which only exists in Draft branch. Try to publish the content, and try again."}
           </li>
         </ul>
       </div>
@@ -203,7 +201,7 @@ const createReport = (message) => {
     report = (`
       <div class="widget-view internal-widget success active">
         <h5 class="success-text">
-          &#10004; ${localized?.noBrokenLinks || 'No broken links found!'}
+          &#10004; ${localized?.noBrokenLinks || "No broken links found!"}
         </h5>
       </div>
     `);
@@ -241,7 +239,7 @@ const updateProgress = (message) => {
 
     if (message.brokenCount) {
       elements[".link-checker__status"].innerHTML = (`
-        ${localized?.found || 'Found'}
+        ${localized?.found || "Found"}
         <span class="broken-count">${message.brokenCount}</span>
         ${(message.brokenCount > 1 ? (localized?.brokenLinks || "broken links") : (localized?.brokenLink || "broken link"))}
       `);
@@ -252,7 +250,7 @@ const updateProgress = (message) => {
       total++;
     }
     elements[".progress-indicator__counter"].innerHTML = `${count} / ${total}`;
-    const percent = parseInt(count / total * 100);
+    const percent = parseInt((count / total) * 100);
     updateIndicator(percent);
     elements["#btn-start"].style.display = "none";
     elements[".selection-radios"].style.display = "none";
@@ -305,55 +303,7 @@ const setError = (message) => {
   }, 400);
 };
 
-const draftBtn = document.getElementById("draft-btn");
-if (draftBtn) {
-  draftBtn.addEventListener("click", (event) => {
-    event.preventDefault();
-    const draftExplanation = document.getElementById("draft-explanation");
-    if (draftExplanation.style.display === "none") {
-      draftExplanation.style.display = "block";
-    } else {
-      draftExplanation.style.display = "none";
-    }
-  })
-}
-
-const masterBtn = document.getElementById("master-btn");
-if (masterBtn) {
-  masterBtn.addEventListener("click", (event) => {
-    event.preventDefault();
-    const masterExplanation = document.getElementById("master-explanation");
-    if (masterExplanation.style.display === "none") {
-      masterExplanation.style.display = "block";
-    } else {
-      masterExplanation.style.display = "none";
-    }
-  })
-}
-
-const startBtn = document.getElementById("btn-start");
-if (startBtn) {
-  startBtn.addEventListener("click", (event) => {
-    startCheck(event);
-  })
-}
-
-const stopBtn = document.getElementById("btn-stop");
-if (stopBtn) {
-  stopBtn.addEventListener("click", () => {
-    window.stopCheck();
-  })
-}
-
-const downloadBtn = document.getElementById("btn-download");
-if (downloadBtn) {
-  downloadBtn.addEventListener("click", () => {
-    window.downloadCSV();
-  })
-}
-
 // Triggered by onclick
-// eslint-disable-next-line no-unused-vars
 const startCheck = (event) => {
   event.preventDefault();
   const form = document.getElementById("link-checker__form");
@@ -382,8 +332,8 @@ const startCheck = (event) => {
       ws.send("STOP");
     };
   };
-  ws.onmessage = (event) => {
-    const message = JSON.parse(event.data);
+  ws.onmessage = (wsEvent) => {
+    const message = JSON.parse(wsEvent.data);
     if ("index" in message) {
       updateProgress(message);
       if (message.index <= message.total) {
@@ -402,3 +352,50 @@ const startCheck = (event) => {
     console.error("ERROR in LinkChecker websocket");
   };
 };
+
+const draftBtn = document.getElementById("draft-btn");
+if (draftBtn) {
+  draftBtn.addEventListener("click", (event) => {
+    event.preventDefault();
+    const draftExplanation = document.getElementById("draft-explanation");
+    if (draftExplanation.style.display === "none") {
+      draftExplanation.style.display = "block";
+    } else {
+      draftExplanation.style.display = "none";
+    }
+  });
+}
+
+const masterBtn = document.getElementById("master-btn");
+if (masterBtn) {
+  masterBtn.addEventListener("click", (event) => {
+    event.preventDefault();
+    const masterExplanation = document.getElementById("master-explanation");
+    if (masterExplanation.style.display === "none") {
+      masterExplanation.style.display = "block";
+    } else {
+      masterExplanation.style.display = "none";
+    }
+  });
+}
+
+const startBtn = document.getElementById("btn-start");
+if (startBtn) {
+  startBtn.addEventListener("click", (event) => {
+    startCheck(event);
+  });
+}
+
+const stopBtn = document.getElementById("btn-stop");
+if (stopBtn) {
+  stopBtn.addEventListener("click", () => {
+    window.stopCheck();
+  });
+}
+
+const downloadBtn = document.getElementById("btn-download");
+if (downloadBtn) {
+  downloadBtn.addEventListener("click", () => {
+    window.downloadCSV();
+  });
+}

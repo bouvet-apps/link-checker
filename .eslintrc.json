@@ -2,20 +2,21 @@
     "extends": [
         "airbnb"
     ],
-    "plugins": [
-        "jest"
-    ],
+    "parser": "@babel/eslint-parser",
     "parserOptions": {
-        "parser": "babel-eslint"
+        "requireConfigFile": false,
+        "ecmaVersion": 2021,
+        "sourceType": "module"
     },
     "env": {
-        "jest/globals": true
+        "node": true
     },
     "rules": {
         "import/extensions": [
             "error",
             "ignorePackages",
             {
+                "": "never",
                 "js": "never",
                 "mjs": "never",
                 "jsx": "never",
@@ -52,20 +53,38 @@
             "error",
             "always"
         ],
-        "no-console": "off",
+        "no-console": "error",
         "global-require": "off",
-        "import/no-unresolved": "off",
-        "import/no-absolute-path": "off",
+        "import/no-unresolved": 0,
+        "import/no-absolute-path": 0,
         "no-underscore-dangle": "off",
-        "object-shorthand": "off",
+        "object-shorthand": "error",
+        "object-property-newline": [
+            "error",
+            {
+                "allowAllPropertiesOnSameLine": false
+            }
+        ],
         "prefer-destructuring": "off",
         "radix": [
             "error",
             "as-needed"
         ],
         "no-plusplus": "off",
-        "max-len": "off",
-        "func-names": "off"
+        "max-len": [
+            "error"
+        ],
+        "func-names": "error",
+        "react/react-in-jsx-scope": "off",
+        "react/prop-types": "off",
+        "react/function-component-definition": "off",
+        "react/button-has-type": "off",
+        "no-restricted-syntax": "off",
+        "no-use-before-define": "off",
+        "react/no-array-index-key": "off",
+        "import/prefer-default-export": "off",
+        "react/jsx-props-no-spreading": "off",
+        "jsx-a11y/label-has-associated-control": "off"
     },
     "globals": {
         "require": true,
@@ -82,11 +101,29 @@
     "overrides": [
         {
             "files": [
+                "src/main/resources/**/*.es6"
+            ],
+            "rules": {
+                "import/extensions": "off"
+            }
+        },
+        {
+            "files": [
                 "*.html",
                 "*.ftl",
                 "*.xml"
             ],
             "rules": {
+                "max-len": "off"
+            }
+        },
+        {
+            "files": [
+                "*.jsx"
+            ],
+            "rules": {
+                "no-param-reassign": "off",
+                "guard-for-in": "off",
                 "max-len": "off"
             }
         }
